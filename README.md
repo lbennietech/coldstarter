@@ -64,4 +64,4 @@ It was then generalised so it can launch any project at any scale.
 
 ## Status
 
-Version 1.0.3 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.0.4 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.

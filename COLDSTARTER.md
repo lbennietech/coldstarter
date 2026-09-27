@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.3 (2026-09-28) |
+| **Version** | 1.0.4 (2026-09-28) |
 | **Origin** | Designed by Luke Bennie while building [Pocket Universe](https://github.com/lbennietech/pocket-universe) from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.4 | 2026-09-28 | Corrections from a code review of the reference implementation: memory growth is also a median (the worst run measures warm-up, not steady growth). `--baseline` checks the method recorded in the result it's saving, and refuses partial runs. Mismatch messages say whether to re-run or re-baseline. A cheap single-run mode for agents. Medians fix noise within a session, not drift between sessions, so the robust gate compares against the committed code in the same session. Gate hooks need generous timeouts, because a timed-out hook doesn't block. |
 | 1.0.3 | 2026-09-28 | Benchmarks: interleave repeated runs across scenarios, take the worst run for memory growth, stamp the measuring method into results and baselines, and refuse mismatched comparisons. Lesson 5 updated with the measured result (±3% against 10-30% swings). |
 | 1.0.2 | 2026-09-28 | Fix: the push-gate hook only gates pushes of its own repository (it follows `cd`/`Set-Location` and `git -C`, and fails safe when unsure). The old template gated every push made from the session, including other repos. Lesson 15 added. |
 | 1.0.1 | 2026-09-28 | Renamed from Launchframe to Coldstarter (file `COLDSTARTER.md`, repo `lbennietech/coldstarter`). No changes to the method. |
@@ -283,9 +284,11 @@ Mixed cases are normal. For example, a solo developer building something that ha
    - `--baseline` records a new baseline
 4. **Budget report:** each budget prints as `ok`, `miss` (logged to the backlog, doesn't block) or `FAIL` (blocks).
 5. **Fight noise from day one.** In the reference project, identical code swung 10–30% between runs as the laptop heated up over a long session, and the baseline was re-recorded four times in two days. So:
-   - Take the **median of at least 3 runs** (5 is better for short scenarios) for every timing metric, and record the baseline the same way. For memory growth, take the worst run, so the budget stays conservative.
+   - Take the **median of at least 3 runs** (5 is better for short scenarios) for every metric, memory growth included, and record the baseline the same way. Don't take the worst run for memory: the first run pays one-time warm-up costs (caches, JIT), so the worst run measures warm-up rather than steady growth. The one exception is a correctness failure such as NaN: a failure in any run counts.
    - **Interleave the runs:** run each scenario once per round, round-robin, rather than all of one scenario's runs back to back. A machine that slows down mid-run then affects every scenario alike.
-   - **Stamp the method** (for example "median of 5 interleaved runs") into the results and the baseline. `--compare` should refuse a baseline measured a different way, and say whether to re-run or re-baseline.
+   - **Stamp the method** (for example "median of 5 interleaved runs") into the results and the baseline. `--compare` should refuse a baseline measured a different way, and say which to do: re-run, if *this run* used a non-default method, or re-baseline, if the *baseline* is outdated. `--baseline` must check the method recorded in the result it's about to save, not just the command-line flags (a `--no-run --baseline` could otherwise save a quick run), and must refuse partial runs.
+   - **Give readers a cheap mode.** Agents that only need one number (such as memory growth) should use a single-run option like `--repeats 1`, instead of paying for a full median.
+   - **Medians fix noise within a session, not drift between sessions.** A baseline recorded while the machine was running fast will fail later on unchanged code. The robust gate benchmarks the committed code and the working copy in the same session, interleaved, and compares the two. Keep the stored baseline for budgets and history.
    - Ignore metrics near the noise floor.
    - Prefer a dedicated, stable runner in CI (Team and Enterprise).
    - When `--compare` fails, stash the change and re-measure the untouched code (a stash/pop A/B test) before blaming the change.
@@ -493,7 +496,7 @@ Commit `CLAUDE.md` and the agent frontmatter.
 | `protect_baseline.py` | PreToolUse on Edit/Write/MultiEdit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
 | `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
 
-**CI** (Team and Enterprise) runs the same commands, so what's verified locally and what's verified in CI can't drift. Enterprise adds the security scans and required checks. Never bypass a gate (no `--no-verify`). When a gate blocks, find the root cause.
+**CI** (Team and Enterprise) runs the same commands, so what's verified locally and what's verified in CI can't drift. Enterprise adds the security scans and required checks. Never bypass a gate (no `--no-verify`). When a gate blocks, find the root cause. Give gate hooks a generous timeout (at least 2× the time the tests and benchmarks take together): a PreToolUse hook that times out is a non-blocking error, so the push would go through unchecked.
 
 Commit.
 
