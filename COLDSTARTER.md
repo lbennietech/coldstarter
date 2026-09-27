@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.1 (2026-09-28) |
+| **Version** | 1.0.2 (2026-09-28) |
 | **Origin** | Designed by Luke Bennie while building [Pocket Universe](https://github.com/lbennietech/pocket-universe) from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.2 | 2026-09-28 | Fix: the push-gate hook only gates pushes of its own repository (it follows `cd`/`Set-Location` and `git -C`, and fails safe when unsure). The old template gated every push made from the session, including other repos. Lesson 15 added. |
 | 1.0.1 | 2026-09-28 | Renamed from Launchframe to Coldstarter (file `COLDSTARTER.md`, repo `lbennietech/coldstarter`). No changes to the method. |
 | 1.0 | 2026-09-28 | First release, as Launchframe: scale profiles (Solo/Team/Enterprise), project types, 17 launch phases, core agent roster with a dedicated security reviewer, triage and batching engine, hooks and CI, model routing, lessons from the reference build. |
 
@@ -485,7 +486,7 @@ Commit `CLAUDE.md` and the agent frontmatter.
 | Hook | Event | What it does |
 |---|---|---|
 | `after_edit.py` | PostToolUse on Edit/Write/MultiEdit | If a watched file changed (source, test harness, bench scenarios), runs the **quick** check. Exits 2 with the output on failure. |
-| `before_push.py` | PreToolUse on Bash/PowerShell | On a real `git push` (matching `git [global options] push`, not `git stash push` or "push" inside a message), runs the full tests and `bench --compare`. Exits 2 to block. |
+| `before_push.py` | PreToolUse on Bash/PowerShell | On a real `git push` (matching `git [global options] push`, not `git stash push` or "push" inside a message) **of this repository**, runs the full tests and `bench --compare`. Exits 2 to block. It works out the push's target from any `cd`/`Set-Location` earlier in the command and from `git -C <dir>`, then asks git which repo that is. Pushes of other repos made from the same session pass through, and an undeterminable target is gated (fail safe). |
 | `protect_baseline.py` | PreToolUse on Edit/Write/MultiEdit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
 | `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
 
@@ -876,11 +877,36 @@ The bodies follow Phase 12 step by step, including the reviews-by-category table
 `before_push.py` (the core; adapt the test and bench commands to the stack):
 
 ```python
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 # A real `git push`, allowing global options (git -C dir push), but not `git stash push` or "push" in a message
 PUSH = re.compile(r"\bgit(?:\s+(?:-C\s+\S+|-c\s+\S+|--?[\w-]+(?:=\S+)?))*\s+push\b")
+GIT_C = re.compile(r"\bgit\s+(?:-c\s+\S+\s+)*-C\s+(\"[^\"]+\"|'[^']+'|\S+)")
+CD = re.compile(r"^\s*(?:cd|pushd|Set-Location|sl)(?:\s+-(?:Path|LiteralPath))?\s+(\"[^\"]+\"|'[^']+'|\S+)\s*$", re.I)
+
+def to_native(path):  # Git Bash /e/dir -> E:/dir on Windows
+    path = path.strip("\"'")
+    m = re.match(r"^/([a-zA-Z])(/.*)?$", path)
+    if os.name == "nt" and m: path = m.group(1).upper() + ":" + (m.group(2) or "/")
+    return os.path.expanduser(path)
+
+def repo_root(d):
+    try: out = subprocess.run(["git", "-C", d, "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError): return None
+    return Path(out.stdout.strip()).resolve() if out.returncode == 0 and out.stdout.strip() else None
+
+def pushes_this_repo(command, cwd):
+    """True if any push targets this repo, or its target can't be determined (fail safe)."""
+    here = cwd
+    for seg in re.split(r"&&|\|\||;|\n", command):
+        if (cd := CD.match(seg)): here = str(Path(here, to_native(cd.group(1)))); continue
+        if PUSH.search(seg):
+            c = GIT_C.search(seg)
+            target = str(Path(here, to_native(c.group(1)))) if c else here
+            root = repo_root(target) if Path(target).is_dir() else None
+            if root is None or root == ROOT.resolve(): return True
+    return False
 
 def run(args):
     p = subprocess.run([sys.executable, *args], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -889,7 +915,8 @@ def run(args):
 def main():
     try: data = json.load(sys.stdin)
     except ValueError: return 0
-    if not PUSH.search(str((data.get("tool_input") or {}).get("command", ""))): return 0
+    command = str((data.get("tool_input") or {}).get("command", ""))
+    if not PUSH.search(command) or not pushes_this_repo(command, data.get("cwd") or os.getcwd()): return 0
     code, out = run([str(ROOT / "tests" / "run_tests.py")])
     if code: sys.stderr.write("Push blocked: tests failed.\n" + out[-2000:]); return 2
     code, out = run([str(ROOT / "bench" / "run_bench.py"), "--compare"])
@@ -898,6 +925,8 @@ def main():
 
 sys.exit(main())
 ```
+
+Test the targeting logic from a file, not from a command line that contains the push text itself (that would fire the gate). Cover: a plain push, `cd <this repo> &&`, `git -C <this repo>`, `cd <other repo> &&`, Windows and Git Bash paths, and an unknown directory, which must be gated.
 
 `protect_baseline.py` denies with:
 
@@ -928,3 +957,4 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 12. **Tools fail, so plan the fallback.** The browser MCP failed to connect several times. The agents fell back to scripted Playwright and screenshots, and said so.
 13. **Docs move together.** Every workflow change updates `CLAUDE.md`, `DEV_CYCLE.md`, the skills, the agents and CI in one change, or they drift apart.
 14. **Report the way the user reads.** The reference user wanted every iteration reported as a table (ID, Tier, Est. time, change), followed by actual against estimated time. Ask early how reports should look, and build that into the skills.
+15. **Scope the gates to their repository.** The reference project's push gate fired on every push the session ran, so publishing a separate repo (this spec) was blocked by the game's benchmark noise. A gate must check which repo a command targets, and still fail safe when it can't tell.
