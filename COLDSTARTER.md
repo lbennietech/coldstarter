@@ -1,4 +1,4 @@
-# Launchframe
+# Coldstarter
 
 *From idea to a self-improving project: the project-launch uber-prompt for Claude Code.*
 
@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0 (2026-09-28) |
+| **Version** | 1.0.1 (2026-09-28) |
 | **Origin** | Designed by Luke Bennie while building [Pocket Universe](https://github.com/lbennietech/pocket-universe) from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.1 | 2026-09-28 | Renamed from Launchframe to Coldstarter (file `COLDSTARTER.md`, repo `lbennietech/coldstarter`). No changes to the method. |
 | 1.0 | 2026-09-28 | First release, as Launchframe: scale profiles (Solo/Team/Enterprise), project types, 17 launch phases, core agent roster with a dedicated security reviewer, triage and batching engine, hooks and CI, model routing, lessons from the reference build. |
 
 > **What this is.** A general launch pad for any serious project, for business or pleasure, solo or enterprise. You give it an idea, a business problem, a question to answer, a product or tool to build, or an integration to set up. It turns that into a working first version and a self-improving development framework. The framework includes:
@@ -30,9 +31,9 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
 >
 > **How to use it.** Open Claude Code in an empty folder (or an existing codebase) and say:
 >
-> *"Read LAUNCHFRAME.md and launch a project for: <your idea, problem or question>."*
+> *"Read COLDSTARTER.md and launch a project for: <your idea, problem or question>."*
 >
-> Copy `LAUNCHFRAME.md` into the new folder first, or give Claude its full path.
+> Copy `COLDSTARTER.md` into the new folder first, or give Claude its full path.
 >
 > Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the whole framework, stopping at key decision points. When it's done, you run `/iterate`.
 >
@@ -58,7 +59,7 @@ You are launching a project for the user: from problem to working first version 
 1. **Interview before building.** Phase 1 is a conversation. Don't write project code until the user confirms the problem statement, the scale profile and the solution direction.
 2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch the full framework if the user still wants it.
 3. **Stop at the gates** marked 🚦. Between gates, make the reasonable call, say what you chose, and keep moving.
-4. **Keep a progress file.** `docs/PROJECT_PROGRESS.md` holds the phase checklist and a **Decisions** log (date, decision, who made it, why). Its first line records where the framework came from: *"Launched with Launchframe v<version> by Luke Bennie."* The project itself belongs to whoever the user names as its owner. A fresh session must be able to resume when the user says "continue the project launch".
+4. **Keep a progress file.** `docs/PROJECT_PROGRESS.md` holds the phase checklist and a **Decisions** log (date, decision, who made it, why). Its first line records where the framework came from: *"Launched with Coldstarter v<version> by Luke Bennie."* The project itself belongs to whoever the user names as its owner. A fresh session must be able to resume when the user says "continue the project launch".
 5. **Commit at the end of every phase** (`Phase N: …`), following the git flow of the chosen scale profile. Never force-push to shared branches. Ask before creating remote repositories, making anything public, deploying, or touching cloud accounts, billing or production.
 6. **Check the current docs** before writing config: Claude Code (agents, skills, hooks, settings, MCP) at code.claude.com/docs, and the chosen platforms' CI and hosting. The templates here reflect formats as of 2026-09. Verify them rather than assume.
 7. **Adapt, don't transplant.** Every role has a domain equivalent (Appendix A). Rename and reshape it, but keep its *function*.
