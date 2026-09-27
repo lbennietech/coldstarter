@@ -1,0 +1,14 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Secrets, just in case
+.env
+.env.*
+
+# Scratch
+*.tmp
+scratch/
