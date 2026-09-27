@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.2 (2026-09-28) |
+| **Version** | 1.0.3 (2026-09-28) |
 | **Origin** | Designed by Luke Bennie while building [Pocket Universe](https://github.com/lbennietech/pocket-universe) from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.3 | 2026-09-28 | Benchmarks: interleave repeated runs across scenarios, take the worst run for memory growth, stamp the measuring method into results and baselines, and refuse mismatched comparisons. Lesson 5 updated with the measured result (±3% against 10-30% swings). |
 | 1.0.2 | 2026-09-28 | Fix: the push-gate hook only gates pushes of its own repository (it follows `cd`/`Set-Location` and `git -C`, and fails safe when unsure). The old template gated every push made from the session, including other repos. Lesson 15 added. |
 | 1.0.1 | 2026-09-28 | Renamed from Launchframe to Coldstarter (file `COLDSTARTER.md`, repo `lbennietech/coldstarter`). No changes to the method. |
 | 1.0 | 2026-09-28 | First release, as Launchframe: scale profiles (Solo/Team/Enterprise), project types, 17 launch phases, core agent roster with a dedicated security reviewer, triage and batching engine, hooks and CI, model routing, lessons from the reference build. |
@@ -282,7 +283,9 @@ Mixed cases are normal. For example, a solo developer building something that ha
    - `--baseline` records a new baseline
 4. **Budget report:** each budget prints as `ok`, `miss` (logged to the backlog, doesn't block) or `FAIL` (blocks).
 5. **Fight noise from day one.** In the reference project, identical code swung 10–30% between runs as the laptop heated up over a long session, and the baseline was re-recorded four times in two days. So:
-   - Take the **median of at least 3 runs** for every metric, and record the baseline the same way.
+   - Take the **median of at least 3 runs** (5 is better for short scenarios) for every timing metric, and record the baseline the same way. For memory growth, take the worst run, so the budget stays conservative.
+   - **Interleave the runs:** run each scenario once per round, round-robin, rather than all of one scenario's runs back to back. A machine that slows down mid-run then affects every scenario alike.
+   - **Stamp the method** (for example "median of 5 interleaved runs") into the results and the baseline. `--compare` should refuse a baseline measured a different way, and say whether to re-run or re-baseline.
    - Ignore metrics near the noise floor.
    - Prefer a dedicated, stable runner in CI (Team and Enterprise).
    - When `--compare` fails, stash the change and re-measure the untouched code (a stash/pop A/B test) before blaming the change.
@@ -947,7 +950,7 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 2. **Design for determinism and inspection first.** Seeded randomness, fixed steps and a test hook are what make invariant tests, benchmarks and reproducible bug reports possible.
 3. **Evidence or it didn't happen.** Requiring a metric, a screenshot or a `file:line` for every finding kept a first audit of 49 findings actionable.
 4. **Reviews catch what tests miss.** The code review caught a scope-creep regression, and a fragile check that only worked by coincidence at startup. Make implementers list behaviour changes beyond an item's scope.
-5. **Benchmarks drift on laptops.** Use medians, stash/pop A/B tests and stable CI runners. Re-baseline only on a real improvement, and ask before re-baselining for machine drift.
+5. **Benchmarks drift on laptops.** Use medians of interleaved runs, stash/pop A/B tests and stable CI runners. Re-baseline only on a real improvement or a change of measuring method, and ask before re-baselining for machine drift. In the reference project, the fastest of 3 back-to-back runs swung 10-30% between identical runs. The median of 5 interleaved runs agreed within ±3%.
 6. **Re-measure backlog claims.** A claimed 64 → 37 ms speed-up didn't reproduce. Record "benefit unverified" rather than repeating the claim.
 7. **Cheap models for checklists, strong models for hard reasoning.** Tiered implementers and reviewers pinned explicitly to Opus kept quality where it mattered and cut cost everywhere else.
 8. **Low effort isn't free when judgment matters.** Triage at low effort broke its own batching rules. Medium effort, a self-check and a mechanical verification script fixed it.
