@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.6 (2026-09-28) |
+| **Version** | 1.0.7 (2026-09-28) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.7 | 2026-09-28 | The reference project's single-file layout is no longer presented as the default or as a lesson to copy: it was a starting choice that hardened into a rule the owner never set, and it has been dropped. Lesson 1 records what that cost. Phase 2 now asks for the stack to be recorded as a decision with a revisit trigger. The web-app and game stack suggestions no longer lead with "single file". |
 | 1.0.6 | 2026-09-28 | Licence clarified: an additional permission makes clear that products built with Coldstarter, including commercial ones, belong to whoever builds them. The non-commercial condition covers only selling, sublicensing or repackaging the spec. No changes to the method. |
 | 1.0.5 | 2026-09-28 | Public release under CC BY-NC 4.0 (previously all rights reserved). Removed the link to the reference project's repository. No changes to the method. |
 | 1.0.4 | 2026-09-28 | Corrections from a code review of the reference implementation: memory growth is also a median (the worst run measures warm-up, not steady growth). `--baseline` checks the method recorded in the result it's saving, and refuses partial runs. Mismatch messages say whether to re-run or re-baseline. A cheap single-run mode for agents. Medians fix noise within a session, not drift between sessions, so the robust gate compares against the committed code in the same session. Gate hooks need generous timeouts, because a timed-out hook doesn't block. |
@@ -145,7 +146,7 @@ Mixed cases are normal. For example, a solo developer building something that ha
 
 1. Propose **2 or 3 solution shapes**, each with its main trade-off, and recommend one. Cover the stack, hosting, data storage, and how it integrates with existing systems.
 2. Choose by these principles, in order:
-   - **Fewest moving parts that meet the requirements, including the non-functional ones** (security, availability, compliance, scale). The reference project was one HTML file with no build and no dependencies, and that paid off everywhere. At enterprise scale, "fewest moving parts" still applies within the organisation's mandated platforms.
+   - **Fewest moving parts that meet the requirements, including the non-functional ones** (security, availability, compliance, scale). The reference project started as one HTML file with no build and no dependencies, which made its first version quick to test and ship, and later dropped the single-file rule as the simulation grew. Record the chosen stack as a decision with its reason and the signal that would make you revisit it, not as a rule that agents enforce forever (Appendix H, lesson 1). At enterprise scale, "fewest moving parts" still applies within the organisation's mandated platforms.
    - **The organisation's existing standards,** if there are any (cloud, language, CI, identity provider). These beat personal preference.
    - **Running cost that fits the budget.** Give a rough monthly cost for anything hosted.
    - **Testability:** can it be driven headlessly and deterministically (Phase 5)?
@@ -571,7 +572,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 
 | Project type | Suggested stack (lightest first) | Deploy | Test tooling | Domain-correctness reviewer checks | Invariants | Benchmarks |
 |---|---|---|---|---|---|---|
-| **Consumer web app / site** | Static site or single file; SvelteKit/Next.js + SQLite/Postgres | GitHub Pages, Vercel, Netlify | Playwright E2E (3 engines + devices), unit tests | business rules, state handling | no data loss; forms validate; auth enforced | Core Web Vitals, bundle size, p95 latency |
+| **Consumer web app / site** | Static site (plain HTML, CSS and JS); SvelteKit/Next.js + SQLite/Postgres | GitHub Pages, Vercel, Netlify | Playwright E2E (3 engines + devices), unit tests | business rules, state handling | no data loss; forms validate; auth enforced | Core Web Vitals, bundle size, p95 latency |
 | **Business SaaS / internal tool** | The organisation's standard web stack + Postgres; SSO | Organisation cloud, Fly.io, Render | Unit, API contract, E2E, axe-core | business rules, authorisation, money maths, audit trail | ledgers balance; permissions enforced; idempotent writes; audit log complete | p95 latency at target load, queries per request, cost per user |
 | **Enterprise integration / middleware** | The organisation's integration platform or a small service + a queue | Organisation cloud, infrastructure-as-code | Contract tests against system fakes, replayed messages | mappings, retries, ordering, failure handling | exactly-once or at-least-once holds; nothing lost or duplicated; reconciliations match | throughput, end-to-end latency, backlog drain time |
 | **Microservices / platform** | Only if a monolith truly won't do; containers + infrastructure-as-code | Kubernetes, ECS, Cloud Run | Contract, integration and chaos tests | API compatibility, consistency, resilience | backward compatibility; consistency rules; graceful degradation | p95/p99 per service, error rate, cost |
@@ -580,7 +581,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 | **AI / LLM application** | Claude API (latest model) + a thin backend | Vercel, Fly.io, organisation cloud | **An evaluation harness** as the invariant suite | prompt quality, grounding, tool use, refusals, safety | eval pass rate ≥ target; structured output validates; no leaked secrets or personal data | cost per task, p95 latency, cache hit rate |
 | **Mobile app** | PWA first; then React Native/Flutter | Web, app stores | Device emulation, then device farms | offline behaviour, state restore, permissions | no data loss across restarts or offline | startup time, frame time, battery and network |
 | **CLI / library / SDK** | Python, Go, Rust, TypeScript | PyPI, npm, crates, releases | Unit and golden-file tests on each OS | API contract, backward compatibility | documented behaviour holds; round-trips; no crash on bad input | throughput, startup, size |
-| **Game / simulation** (the reference project) | Single file with Canvas/WebGL; or an engine | itch.io, Pages, stores | Playwright or engine test runner, invariant tests | numerical stability, conservation, determinism | same seed gives the same state; drift within tolerance; no NaN or tunnelling | fps per scenario, slow-device profile, memory |
+| **Game / simulation** (the reference project) | Plain JS with Canvas/WebGL (one file or a few modules); or an engine | itch.io, Pages, stores | Playwright or engine test runner, invariant tests | numerical stability, conservation, determinism | same seed gives the same state; drift within tolerance; no NaN or tunnelling | fps per scenario, slow-device profile, memory |
 | **Automation / spreadsheet** | Apps Script, Python + openpyxl, workflow tools | The user's workspace | Fixture-based tests | formula logic, dates, currencies | totals reconcile; reruns idempotent | runtime on large inputs |
 
 Rename the categories and agents to fit the project. For example, the reference project's `sim` category is `core` here, and its physics reviewer is the domain-correctness reviewer.
@@ -951,7 +952,7 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 
 ## Appendix H: Lessons from the reference build
 
-1. **Simple stacks compound.** One file, no build step, no dependencies made testing, deploying, reviewing and publishing trivial. Add complexity only when a requirement forces it, at any scale.
+1. **Simple stacks compound, but a starting choice isn't a rule.** No build step and no dependencies made testing, deploying, reviewing and publishing trivial. But "everything in one HTML file" was written into the project's docs and agent instructions as a rule, and one reviewer was told to reject any proposal to split the file. The owner had never asked for it. By the time the simulation grew, it cost real time: a 2,800-line file every agent had to page through, `file:line` evidence going stale after every batch, and two implementers unable to share one working tree. It was dropped. The only real requirement was that the game stays playable at its hosted URL. Record stack choices as decisions with a reason and a revisit trigger, and add complexity only when a requirement forces it, at any scale.
 2. **Design for determinism and inspection first.** Seeded randomness, fixed steps and a test hook are what make invariant tests, benchmarks and reproducible bug reports possible.
 3. **Evidence or it didn't happen.** Requiring a metric, a screenshot or a `file:line` for every finding kept a first audit of 49 findings actionable.
 4. **Reviews catch what tests miss.** The code review caught a scope-creep regression, and a fragile check that only worked by coincidence at startup. Make implementers list behaviour changes beyond an item's scope.
