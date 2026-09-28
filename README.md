@@ -117,8 +117,10 @@ It was then generalised so it can launch other kinds of project at other scales.
 
 ## Licence
 
-Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](LICENSE) (CC BY-NC 4.0). You may use, share and adapt it for non-commercial purposes, as long as you credit Luke Bennie, link to the licence and say what you changed. For commercial use, contact Luke Bennie at lukebennie@gmail.com.
+Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](LICENSE) (CC BY-NC 4.0). You may use, share and adapt it for non-commercial purposes, as long as you credit Luke Bennie, link to the licence and say what you changed.
+
+**Products you build with Coldstarter are yours, including commercial ones.** The licence grants that as an extra permission. The non-commercial condition covers only the spec itself: you can't sell, sublicense or repackage `COLDSTARTER.md`, or adaptations of it, without permission. To ask, contact Luke Bennie at lukebennie@gmail.com.
 
 ## Status
 
-Version 1.0.5 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.0.6 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
