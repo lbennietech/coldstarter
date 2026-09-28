@@ -2,18 +2,19 @@
 
 *From idea to a self-improving project: the project-launch uber-prompt for Claude Code.*
 
-Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
+Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4.0 (see `LICENSE`).
 
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.4 (2026-09-28) |
-| **Origin** | Designed by Luke Bennie while building [Pocket Universe](https://github.com/lbennietech/pocket-universe) from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
+| **Version** | 1.0.5 (2026-09-28) |
+| **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.0.5 | 2026-09-28 | Public release under CC BY-NC 4.0 (previously all rights reserved). Removed the link to the reference project's repository. No changes to the method. |
 | 1.0.4 | 2026-09-28 | Corrections from a code review of the reference implementation: memory growth is also a median (the worst run measures warm-up, not steady growth). `--baseline` checks the method recorded in the result it's saving, and refuses partial runs. Mismatch messages say whether to re-run or re-baseline. A cheap single-run mode for agents. Medians fix noise within a session, not drift between sessions, so the robust gate compares against the committed code in the same session. Gate hooks need generous timeouts, because a timed-out hook doesn't block. |
 | 1.0.3 | 2026-09-28 | Benchmarks: interleave repeated runs across scenarios, take the worst run for memory growth, stamp the measuring method into results and baselines, and refuse mismatched comparisons. Lesson 5 updated with the measured result (±3% against 10-30% swings). |
 | 1.0.2 | 2026-09-28 | Fix: the push-gate hook only gates pushes of its own repository (it follows `cd`/`Set-Location` and `git -C`, and fails safe when unsure). The old template gated every push made from the session, including other repos. Lesson 15 added. |

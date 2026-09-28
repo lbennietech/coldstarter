@@ -1,6 +1,6 @@
 # Coldstarter
 
-Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
+Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4.0 (see `LICENSE`).
 
 This repository holds **Coldstarter**, Luke Bennie's specification for Claude Code that launches any project, of any scale and in any domain: problem analysis, a first working version, and a full self-improving development framework. There's no code here. The product is the document, `COLDSTARTER.md`.
 
@@ -8,7 +8,7 @@ This repository holds **Coldstarter**, Luke Bennie's specification for Claude Co
 
 - `COLDSTARTER.md`: the specification. This is the product.
 - `README.md`: what Coldstarter is and how to use it.
-- `LICENSE`: all rights reserved.
+- `LICENSE`: CC BY-NC 4.0 (summary plus the full legal code).
 
 ## Editing the spec
 
@@ -26,5 +26,5 @@ This repository holds **Coldstarter**, Luke Bennie's specification for Claude Co
 
 ## Git
 
-- Branch `main`. The repo is private on GitHub (`lbennietech/coldstarter`) until Luke decides to publish it.
+- Branch `main`. The repo is public on GitHub (`lbennietech/coldstarter`). Each version bump gets a matching GitHub release tagged `v<version>`.
 - Ask before changing the repo's visibility, the licence, or pushing anywhere new.

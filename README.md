@@ -2,7 +2,7 @@
 
 **From idea to a self-improving project, without writing the code yourself.**
 
-Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. All rights reserved.
+Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under [CC BY-NC 4.0](LICENSE).
 
 ## Why it exists
 
@@ -41,14 +41,14 @@ Coldstarter is a specification you give to [Claude Code](https://claude.com/clau
    - token-efficient model routing
    - all the supporting docs
 
-It works for solo hobby projects and for enterprise work. A **Solo / Team / Enterprise** scale profile sets:
+It's designed to scale from solo hobby projects to enterprise work. A **Solo / Team / Enterprise** scale profile sets:
 
 - the git flow and quality gates
 - environments and secrets handling
 - the reviewer roster and how much autonomy the agents get
 - compliance and operations work
 
-It covers every kind of project: web apps, internal tools, integrations, data pipelines and analyses, AI applications, CLIs and libraries, mobile apps, games and automation.
+It includes adaptations for web apps, internal tools, integrations, data pipelines and analyses, AI applications, CLIs and libraries, mobile apps, games and automation.
 
 ## How to use it
 
@@ -96,12 +96,12 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 | File | What it is |
 |---|---|
 | `COLDSTARTER.md` | The specification itself: 17 launch phases, scale profiles, project-type adaptations, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
-| `LICENSE` | Terms of use (all rights reserved). |
+| `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
 | `CLAUDE.md` | Instructions for Claude Code when maintaining the spec itself. |
 
 ## Where it came from
 
-Luke Bennie designed Coldstarter while building [Pocket Universe](https://github.com/lbennietech/pocket-universe), a browser gravity sandbox, from a first idea to a self-improving development loop over two days in September 2026, with Claude Code as the implementing collaborator.
+Luke Bennie designed Coldstarter while building Pocket Universe, a browser gravity sandbox, from a first idea to a self-improving development loop over two days in September 2026, with Claude Code as the implementing collaborator.
 
 Along the way, the method gained:
 
@@ -111,8 +111,14 @@ Along the way, the method gained:
 - time-tracked reporting
 - a dedicated security reviewer
 
-It was then generalised so it can launch any project at any scale.
+It was then generalised so it can launch other kinds of project at other scales.
+
+**How proven is it?** So far, the full method has run end to end on one project: that reference build, a solo browser game. The Team and Enterprise profiles and the other project-type adaptations follow the same method, but they haven't yet been tested on real projects. If you launch something with Coldstarter, what worked and what didn't is exactly the evidence that improves it. Lessons from real use go into the spec's Appendix H.
+
+## Licence
+
+Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](LICENSE) (CC BY-NC 4.0). You may use, share and adapt it for non-commercial purposes, as long as you credit Luke Bennie, link to the licence and say what you changed. For commercial use, contact Luke Bennie at lukebennie@gmail.com.
 
 ## Status
 
-Version 1.0.4 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.0.5 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
