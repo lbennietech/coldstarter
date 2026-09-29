@@ -70,7 +70,7 @@ Coldstarter sets up a fixed team of Claude Code agents in `.claude/agents/`, spl
 - **Reviewers and auditors** are read-only — they never get Edit or Write tools, so they can only report findings, not change code. The core roster (every profile gets these) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
 - **Implementers** are the only agents that edit, and they never commit, push, merge or deploy themselves. There are three tiers: a **Light** implementer for effort-1 work outside the core logic, an **Opus** implementer for core-logic, performance or security items, and a **Deep** implementer (Opus at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
-Every agent's model and effort are set deliberately, not left on defaults, because reasoning tokens are the main cost driver once a project has an active backlog:
+Every agent's model and effort are set deliberately, not left on defaults, because agent work is the main cost once a project has an active backlog:
 
 | Setting | Used for |
 |---|---|
@@ -81,6 +81,8 @@ Every agent's model and effort are set deliberately, not left on defaults, becau
 | Haiku | Only for mechanical, proven-safe work, adopted after a trial |
 
 The rule behind the table: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* Settings change one level at a time, with the date and reason recorded in `CLAUDE.md`, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
+
+Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's Claude Code sessions and agent runs from their local transcripts, without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
 
 ## The development cycle: batching for speed
 
@@ -125,4 +127,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.2.1 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.3.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.

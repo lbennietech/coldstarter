@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.2.1 (2026-09-29) |
+| **Version** | 1.3.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.3.0 | 2026-09-29 | **Usage review and token-efficiency defaults**, from the reference build's first measurement of where its Claude usage went. A **usage report** (`tools/usage_report.py`, specified in Phase 13) prices the project's Claude Code usage from the local session transcripts, per main session and agent type, and prints findings in the audit format without spending model tokens. Every `/audit` runs it, and `/audit usage` runs it alone. New defaults: the main session pins its effort and compacts at 200K tokens; implementers keep a one-hour prompt cache; every agent gets a `maxTurns` guard; `/iterate` runs the tests once and briefs reviewers with the results, always names the `/code-review` level, and calls `triage` once per batch; forks are avoided in large sessions; on a usage-limited plan `/autoiterate` asks before Deep or A/B batches; changes to the safety gates' logic go to the Opus tier; shipped items move to `BACKLOG_DONE.md`. Lessons 19 and 20 added. |
 | 1.2.1 | 2026-09-29 | `/autoiterate` gets an explicit off switch as an argument rather than a second command: `/autoiterate stop` finishes the batch in flight and stops; `/autoiterate stop now` stops at the next safe point without leaving half-finished edits; under `/loop`, both cancel the scheduled wake-up. |
 | 1.2.0 | 2026-09-29 | Documentation for every profile, not just developer docs: a **user guide** (`docs/USER_GUIDE.md`), a **domain-logic reference** (the rules the system follows, reviewed by the domain-correctness reviewer) and **operations notes** (`docs/OPERATIONS.md`: build, deploy, verify, roll back) join README, ARCHITECTURE, DEV_CYCLE and the threat model. A new core agent, the **docs writer** (Sonnet, medium; edits docs only), writes them and checks every doc against the code in each `/audit`. `CLAUDE.md` gains a Documentation rule: every behaviour change updates its doc in the same change. Lesson 18 added. |
 | 1.1.0 | 2026-09-29 | New `/autoiterate` skill: it loops the `/iterate` cycle batch after batch without waiting for the user, stops only when the backlog is done, a decision needs the user, or something is broken, and pauses and resumes on its own around session limits (run as `/loop /autoiterate` for unattended runs). `/iterate` stays a single cycle and gains step 0, Intake: requests the user sends mid-run are consolidated with queued items, then triage regroups and refreshes priorities, keeping the user's pins. A limit rule for both: on a usage or rate-limit error, check the real clock before pausing; if the reset has passed, resume. Lessons 16 and 17 added. |
@@ -73,7 +74,7 @@ You are launching a project for the user: from problem to working first version 
 6. **Check the current docs** before writing config: Claude Code (agents, skills, hooks, settings, MCP) at code.claude.com/docs, and the chosen platforms' CI and hosting. The templates here reflect formats as of 2026-09. Verify them rather than assume.
 7. **Adapt, don't transplant.** Every role has a domain equivalent (Appendix A). Rename and reshape it, but keep its *function*.
 8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby project up. Only the depth of its checks scales with the profile.
-9. **Respect the token budget.** Ask about it in Phase 1, and default to the cheapest setup that does the job well (Phase 13).
+9. **Respect the token budget.** Ask about it in Phase 1, including the user's plan (a usage-limited subscription changes the defaults), default to the cheapest setup that does the job well (Phase 13), and measure where the usage actually goes (the usage report) rather than guess.
 10. **Write docs for a person who starts cold.** Plain, direct sentences, tables for reference material, no filler.
 
 ---
@@ -336,7 +337,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 | **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage. Respects the stack decision. | Sonnet / medium |
 | **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Opus / medium |
 | **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Sonnet / medium |
-| **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. | Sonnet / low |
+| **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. In `/iterate` it plays the batch's changes, starting from the test run it's given; the full three-persona sweep is for audits. | Sonnet / low |
 
 **Added by scale or domain:**
 
@@ -352,7 +353,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 
 ```
 ### [AREA-###] Short title
-- **Area:** perf | core | ux | design | efficiency | code | security | infra | data | <domain>
+- **Area:** perf | core | ux | design | efficiency | code | security | infra | data | docs | usage | <domain>
 - **Evidence:** <metric / screenshot path / file:line>
 - **Impact:** 1–5   **Dev effort:** 1–5
 - **Proposal:** what to change, why, and the expected gain
@@ -367,7 +368,7 @@ There are three tiers with the same instructions. They implement, test and repor
 | Agent | Model / effort | Takes |
 |---|---|---|
 | `implementer` | Sonnet / medium | **Light tier:** effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
-| `implementer-opus` | Opus / medium | **Opus tier:** core-logic, perf or security items, or anything at effort 2+ |
+| `implementer-opus` | Opus / medium | **Opus tier:** core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
 | `implementer-deep` | Opus / high | **Deep tier:** the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
 
 Every implementer report includes:
@@ -387,7 +388,7 @@ Commit the roster.
 
 ## Phase 11: Backlog, triage and batching
 
-1. Create `BACKLOG.md` (template in Appendix E) with these sections: **Batches, Ready, In progress, Done, Rejected**.
+1. Create `BACKLOG.md` (template in Appendix E) with these sections: **Batches, Ready, In progress, Rejected**, and `BACKLOG_DONE.md` for **Done**. Shipped items live in their own file because everything that reads the backlog (the orchestrating session, triage) would otherwise pay for the whole history on every read.
    - **Ready** columns: ID, Area, Title, Impact, Effort, Priority, Batch, Tier, Est. time, Evidence.
    - **Done** columns: ID, Title, Tier, Actual time, Result (metric delta or notes), Commit or PR.
 2. **Triage rules:**
@@ -395,7 +396,7 @@ Commit the roster.
    - priority = impact ÷ effort
    - a finding that breaks a pillar goes to Rejected
    - never reorder In progress, Done or Rejected
-   - a finding that matches a Done item is a regression
+   - a finding that matches a Done item (search `BACKLOG_DONE.md`) is a regression
    - IDs follow the pattern `AREA-###`
    - every Ready row gets a Tier and an Est. time
    - regroup every Ready item into batches on every run, and self-check the result
@@ -432,10 +433,10 @@ Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.
 
 **`/audit`**: rare and expensive; the backlog's source of truth.
 1. Check the build is current and the tools work.
-2. Collect evidence: the tests with `--screens`, `bench --compare`, and the security scans (Team and Enterprise).
-3. Dispatch every relevant reviewer **in parallel, in the background**, always including the security reviewer and the docs writer (in audit mode). Brief each with the key numbers and the evidence paths. They're read-only and cite their evidence. If the project's agents aren't available as agent types, run general-purpose agents told to follow the matching agent file.
+2. Collect evidence: the tests with `--screens`, `bench --compare`, the security scans (Team and Enterprise), and the usage report (`tools/usage_report.py --since last --save`, Phase 13), whose findings go straight to triage with no agent reading them.
+3. Dispatch every relevant reviewer **in parallel, in the background**, always including the security reviewer and the docs writer (in audit mode). Brief each with the key numbers and the evidence paths. They're read-only and cite their evidence. Give them step 2's results so none re-runs the suite, and have reviewers that drive a UI start from the screenshots. When the UX reviewer and the user tester would both drive the same UI, fold the user tester's three personas into the UX reviewer's live pass: live UI use is the most token-hungry thing an agent does. If the project's agents aren't available as agent types, run general-purpose agents told to follow the matching agent file. A focused audit (`/audit perf`, `/audit security`) sends only the agents that cover the focus; `/audit usage` runs only the usage report and triage.
 4. `triage` merges the findings and scores them, assigns Tier and Est. time, and regroups the batches.
-5. Report: the headline numbers, the top 5 Ready items, the batches, and the decisions the user needs to make. Commit `BACKLOG.md` (in a PR, for Team and Enterprise).
+5. Report: the headline numbers (including the usage report's top line), any usage finding that would change an agent's model or effort as a decision for the user (it trades quality for usage), the top 5 Ready items, the batches, and the decisions the user needs to make. Commit `BACKLOG.md` (in a PR, for Team and Enterprise).
 
 **`/iterate`**: everyday, and batch-first.
 
@@ -451,27 +452,30 @@ Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.
 0. **Intake.** Users send new requests mid-run. Before picking a batch (and whenever new requests arrive), write each one as a goal, with the user's own solution ideas recorded as context rather than requirements. Merge any request that overlaps a queued item into that item instead of adding a near-duplicate; move superseded items to Rejected. Then `triage` regroups the batches and refreshes priorities across the whole Ready list, keeping anything the user explicitly pinned. Tell the user in a line or two what was merged, added or re-ordered.
 1. **Pick.** State the batch, its category, tier, items, reviews and Est. time. Move the items to In progress. Regroup first if the batches are stale. Team and Enterprise: create a branch named `batch/<id>-<slug>`.
 2. **Implement.** Brief **one** implementer of the batch's tier with every item's row and proposal. It works through them as separate, isolated edits and runs the tests once at the end. **Never run two implementers on the same working tree**: they overwrite each other's uncommitted edits. Parallel work needs separate git worktrees. An item that turns out riskier than its category goes back to Ready.
-3. **Test.** The full tests pass. If `bench --compare` fails, run the stash/pop A/B test to tell a real regression from machine noise.
-4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list.
+3. **Test.** The full tests pass, run once with screenshots so the user tester reads them rather than running the suite again. Put the test and bench results in every reviewer's brief. If `bench --compare` fails, run the stash/pop A/B test to tell a real regression from machine noise.
+4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list. Always name the `/code-review` level, since it otherwise reuses the last one typed: `low` for `ui` and `tooling`, `medium` for the other categories, `high` only for Deep items or when the user asks (it fans out to several sub-agents).
 5. **Triage.**
    - Blockers go back to **the same implementer via SendMessage**, so it keeps its context. If that agent has already finished, start a fresh one and give it the full context.
    - Re-run steps 3–4 after the fix.
    - Drop an item from the batch rather than hold up the rest.
-   - Everything else goes to the backlog.
+   - Everything else waits for the single `triage` call in step 7.
 6. **Ratchet the baseline** only after a genuine improvement.
 7. **Finish.**
-   - Give each item its own Done row. Record the batch's actual time once, on its first item.
+   - Give each item its own Done row in `BACKLOG_DONE.md`. Record the batch's actual time once, on its first item.
    - Commit per item when the diffs separate cleanly. Otherwise, make one commit that lists every ID.
    - **Solo:** push (the hook gates the push), then deploy or republish if the product changed.
    - **Team and Enterprise:** open a PR with the batch table and test and bench results, let CI run, and hand it to the reviewers. Merge only if the profile allows it; Enterprise never self-merges.
-   - Have `triage` regroup the remaining items.
+   - Call `triage` **once**: it files the reviews' non-blocking findings and regroups the remaining items. Skip it if there's nothing to add and nothing was dropped.
    - **Report** to the user as a table (ID, Tier, Est. time, short description of the change), then actual against estimated time, the test and bench numbers, the PR link if any, and the next batch.
 
 **When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent with SendMessage. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
 
+**Keep the orchestrating session lean** (in any skill). It re-reads its whole context on every turn, which makes it the biggest single cost in a long run: read parts of large files (`Grep`, or a read with an offset and limit) rather than whole ones, open images only when you need to see them, point agents at files rather than pasting them, and ask for short reports. Use typed agents rather than forks, since a fork starts with a copy of the whole session. After a compaction, rebuild state from the backlog's In progress rows, `git status` and the list of running agents. When the user runs `/iterate` by hand, suggest `/clear` between batches: the backlog and git hold the state. If an agent stops at its `maxTurns` cap, resume it with SendMessage rather than starting over.
+
 **`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
 - **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and push or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or stashing the rest, never leaving half-finished edits. Under `/loop`, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
 - **Stop only when** the Ready list is empty or wholly blocked on the user; a decision only the user can make blocks the next useful work (ask once, and keep working on batches that don't depend on it); something is broken that one fix round couldn't repair; the user says stop; or an argument limit is reached (`/autoiterate 3` for three batches, `/autoiterate until ID`). On stopping, report every batch shipped in the run.
+- **On a usage-limited plan,** treat a Deep `solo` batch or an A/B experiment as needing the user's go-ahead unless they've already given it for that item (in the reference build, one A/B experiment used about a fifth of all usage to that point). Ask once, and carry on with other batches meanwhile.
 - **Never end a turn idle:** either an agent or command is in flight (its notification resumes the session), a wake-up is scheduled, or the loop has stopped for one of the reasons above.
 - **Session limits:** apply the limit rule above. Run as `/loop /autoiterate` for unattended work: when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups past the one-hour cap), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
 - **Team and Enterprise:** each batch ends in its PR per the git flow, and the loop carries on with batches that don't depend on an unmerged PR (branching from the main branch). It stops when the next useful batch depends on a PR still waiting for human review.
@@ -486,21 +490,26 @@ Apply this policy unless the user says otherwise: *use the strongest model only 
 
 | Setting | Default |
 |---|---|
-| Session default | Sonnet at **medium**, pinned in `.claude/settings.json` (`"model": "sonnet"`) |
+| Session default | Sonnet at **medium**, pinned in `.claude/settings.json` (`"model": "sonnet"`, `"effortLevel": "medium"`), compacting at 200K tokens (`"autoCompactWindow": "200k"`) so a long run doesn't grow its context without limit |
 | `/effort high` | In the main session, only for hard reasoning, then back to medium. Avoid xhigh and max. |
 | Opus, medium | domain-correctness, perf, security and evaluation reviewers, and `implementer-opus`. Name `model: opus` explicitly (not `inherit`) so they stay on Opus in a Sonnet session. |
 | Opus, high | `implementer-deep` only |
 | Sonnet, medium | UX, product, code-quality, compliance, infra and data reviewers, `implementer`, `triage` |
 | Sonnet, low | efficiency auditor, user tester, accessibility reviewer |
 | Haiku | Only where it's proven good enough (for example mechanical formatting or lookups), after a trial |
+| Agent guards | `maxTurns` on every agent, set well above a normal run, as a runaway guard. `experimental: cacheTtl: 1h` on the implementers and on any agent that waits more than five minutes between turns (benchmarks, reviews before a fix round): each expiry of the default five-minute cache re-caches the agent's whole context. |
+| `/code-review` | Always with a level: `low` for `ui` and `tooling`, `medium` otherwise, `high` for Deep items or on request |
 
+- **Judge cost per finished task, not per token.** In an agentic session most of the cost is re-reading cached context, which at 2026-09 prices costs the same per token on Sonnet and Opus (Opus is dearer only for new input and output; check current prices). A stronger model that finishes in fewer turns and fix rounds can cost less. The big levers are context size, cache expiry, duplicated work and agent fan-out, before the model.
 - Change agent settings **one level at a time**, with a reason, and record the date and reason in `CLAUDE.md`.
 - Switch models at the **start** of a session, because prompt caching is per model.
 - Let batching save the cost: one cycle per batch, not per item. Run `/audit` rarely.
 - Don't spawn agents for work that takes a couple of direct tool calls.
 - Durable project preferences go in the checked-in docs. Personal preferences go in memory.
 
-Commit `CLAUDE.md` and the agent frontmatter.
+**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline.
+
+Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 
 ---
 
@@ -540,7 +549,7 @@ Commit.
    - scope creep in the implementer's diff
    - noise in the benchmark gate
    - findings that repeat known quirks (add these to the agents' quirk lists)
-4. **Retrospective with the user.** Look at actual against estimated time, token spend, which agents found real problems and which produced noise, and whether the scale profile still fits. Tune the model and effort settings and the batch caps **one level at a time**, and record every change and its reason in `CLAUDE.md`.
+4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report), which agents found real problems and which produced noise, and whether the scale profile still fits. Tune the model and effort settings and the batch caps **one level at a time**, and record every change and its reason in `CLAUDE.md`.
 5. Commit.
 
 ---
@@ -578,6 +587,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
 - [ ] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
 - [ ] Hooks (quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
+- [ ] The usage report, run by `/audit`, with a first snapshot saved; the session's effort and compaction window pinned; agent turn caps and cache lifetimes set
 - [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
 - [ ] First audit, first batch shipped, retrospective done, settings tuned
 - [ ] `docs/USER_GUIDE.md`, the domain-logic reference and `docs/OPERATIONS.md` written and reviewed; `docs/DEV_CYCLE.md` written; all docs consistent; summary given to the user
@@ -641,7 +651,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Audit (rare) · Iterate by batch (see DEV_CYCLE.md) · Bench run / --compare / --baseline (only on genuine improvement)
 - Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
 ### Model & effort
-- <Phase 13 routing table, with dates and reasons>
+- <Phase 13 routing table, with dates and reasons; the session's effort and compaction window; the /code-review levels; the latest usage report's headline>
 ### Documentation
 - Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
@@ -661,6 +671,7 @@ name: <role>
 description: <what it reviews and when to use it (in /audit, after X changes)>. Read-only.
 model: sonnet            # opus for deep-reasoning roles; name it explicitly
 effort: medium           # low for observe-and-report roles
+maxTurns: 60             # runaway guard, well above a normal run
 tools: Bash, Read, Glob, Grep   # + mcp__playwright for UI roles; never Edit/Write
 ---
 
@@ -669,6 +680,7 @@ You never edit, commit, push or deploy, and you never use production credentials
 
 ## Measure first
 <commands that produce evidence: tests --screens, bench scenarios, scans, test hooks>
+If your brief already has the test and benchmark results, use them rather than re-running the suite; spend your effort on targeted experiments.
 
 ## Look for
 <domain checklist>
@@ -710,7 +722,10 @@ name: implementer
 description: Implements a <Project> BACKLOG.md batch (or a single item) as the smallest reasonable changes, one isolated edit per item. <Tier scope>. Use from /iterate.
 model: sonnet
 effort: medium
+maxTurns: 100            # 150 for implementer-opus, 200 for implementer-deep
 tools: Bash, Read, Edit, Write, Glob, Grep
+experimental:
+  cacheTtl: 1h           # it waits through test runs and reviews before a fix round
 ---
 
 You implement backlog items for <Project>. Read `CLAUDE.md` first.
@@ -719,7 +734,7 @@ You implement and test. You never commit, push, merge or deploy.
 ## What to do
 1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules.
 2. Add or extend a test for new behaviour.
-3. Run the full tests once at the end. If something fails, fix it or report exactly what's blocking. Don't work around it.
+3. Run the full tests once at the end. If something fails, fix it or report exactly what's blocking. Don't work around it. Don't run the full benchmark comparison: /iterate runs it right after you (the exception is one arm of an A/B experiment, which benchmarks itself once, near the end).
 4. Update README.md or the docs if behaviour or usage changed.
 
 ## Batches
@@ -815,6 +830,7 @@ name: triage
 description: Turns audit and review findings into BACKLOG.md. Discards findings without evidence, merges duplicates, scores priority, assigns Tier and Est. time, and groups Ready items into batches. Use at the end of /audit and /iterate.
 model: sonnet
 effort: medium
+maxTurns: 30
 tools: Read, Edit, Write, Grep, Glob
 ---
 
@@ -823,12 +839,13 @@ Rules:
 2. Merge duplicates: keep the clearest title, combine the evidence.
 3. Priority = impact ÷ effort (two decimals). Break ties with broken or risky behaviour first, then smaller changes. **Critical and high security findings go to the top of Ready regardless of score, as a `security` batch (or `solo`), and are flagged to the user.**
 4. Check the pillars and the security rules in CLAUDE.md. A finding that breaks either goes to Rejected, with the reason.
-5. Preserve status. Never delete or reorder In progress, Done or Rejected. A finding that matches a Ready item updates its evidence. A finding that matches a Done item is a regression: add it as new, with a note.
+5. Preserve status. Never delete or reorder In progress, Done or Rejected. A finding that matches a Ready item updates its evidence. A finding that matches a Done item is a regression: add it as new, with a note. Done items are in BACKLOG_DONE.md: search it, don't read it whole.
 6. IDs are AREA-###, numbered after the highest existing number for that area.
-7. Sort Ready by priority. One line per row, with evidence as short pointers.
+7. Sort Ready by priority. One line per row, with evidence as short pointers. Work in one pass: read BACKLOG.md once, then a few Edits or a single Write, without re-reading it to check.
+7a. Usage findings (USAGE-###, from the usage report) go in the tooling category. One that would change an agent's model or effort trades quality for usage: mark it as needing the user's decision and keep it out of every batch until they decide.
 8. Tier:
    - Deep: <the project's hardest class of work>, A/B experiments, irreversible changes
-   - Opus: core, perf or security area, or effort 2 or more
+   - Opus: core, perf or security area, the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or effort 2 or more
    - Light: everything else at effort 1
    Est. time: Light effort 1, 10–20 min; Opus effort 1, 15–25; effort 2, 20–35; effort 3 or Deep, 35–90+.
 9. Batches. Regroup ALL Ready items on every run. B1 is the batch that holds the top item.
@@ -869,12 +886,21 @@ _Last audit: YYYY-MM-DD_
 |----|------|-------|--------|--------|----------|-------|------|-----------|----------|---------|
 
 ## Done
-| ID | Title | Tier | Actual time | Result (metric delta / notes) | Commit / PR |
-|----|-------|------|-------------|-------------------------------|-------------|
+Shipped items live in BACKLOG_DONE.md.
 
 ## Rejected / won't do
 | ID | Title | Reason |
 |----|-------|--------|
+```
+
+`BACKLOG_DONE.md`:
+
+```markdown
+# Backlog: Done
+
+## Done
+| ID | Title | Tier | Actual time | Result (metric delta / notes) | Commit / PR |
+|----|-------|------|-------------|-------------------------------|-------------|
 ```
 
 ---
@@ -900,7 +926,7 @@ argument-hint: "[optional: 'stop', 'stop now', N batches, or 'until <ID>']"
 ```markdown
 ---
 name: audit
-description: Audit the whole of <Project>: run the tests, benchmarks and scans, dispatch the specialist reviewers in parallel, triage their findings into BACKLOG.md, and summarise the top five items and the batches. Use when the user asks for an audit, a backlog refresh or "what should we improve next".
+description: Audit the whole of <Project>: run the tests, benchmarks, scans and usage report, dispatch the specialist reviewers in parallel, triage their findings into BACKLOG.md, and summarise the top five items and the batches. Use when the user asks for an audit, a backlog refresh or "what should we improve next".
 ---
 ```
 
@@ -1017,3 +1043,5 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 16. **Consolidate requests as they arrive.** The reference user sent ideas in bursts while agents were working: a bug, a progression system, a save system, a font theme, scene ideas. Taken one by one they would have produced near-duplicate items (a save system, a snapshot link, an undo and a share link all needed the same serializer). An intake step merged them into existing items, retired two as superseded, and had triage re-order the queue while keeping the user's pins. Run it at the start of every cycle, not just at audits.
 17. **Separate one cycle from the loop, and check the clock on limits.** "Keep iterating while I'm away" and "do the next batch" are different commands: `/iterate` for one cycle, `/autoiterate` for the loop. During the reference build an agent failed with "session limit, resets 2pm"; the orchestrator treated it as live and rerouted work, but it was already 4:45pm and the limit had long reset. Late notifications are normal, so read the real clock before pausing.
 18. **Documentation is more than developer docs.** The reference build had a strong README, architecture guide and dev-cycle guide, but no user guide and no reference for the rules the simulation follows. Those rules were scattered across code comments and backlog entries, so every reviewer re-derived them. The owner noticed only after dozens of batches. Plan the user guide, the domain-logic reference and the operations notes from launch, give one agent the job of keeping them true, and audit docs like code.
+19. **Measure where the usage goes, and fix the shape before the model.** The reference user, on a usage-limited plan, was hitting the session limit a couple of hours into each session. Pricing every transcript by model showed where it went: the orchestrating main session was 47% of all usage (one session ran for a day and a half without compacting and reached about 740K tokens, all of it re-read on every turn); the one A/B experiment was 21%, most of it spent re-caching the implementers' whole context after idle gaps longer than the five-minute cache; two `/code-review high` runs were 7%; and reviewers re-ran the test suite the orchestrator had just run. The model mix wasn't the problem: cached re-reads cost the same on Opus and Sonnet, and the Opus reviews took 6-15 turns where the Sonnet ones took 24-71. The fixes were a compaction window, a one-hour cache for implementers, named review levels, briefing reviewers with the results, one triage call per batch, and a script that repeats the analysis in every audit without spending model tokens.
+20. **A weaker first pass can cost more than it saves.** A Sonnet-tier fix to the reference project's push gate needed two review rounds, which found 5 and then 10 real bugs, each round meaning more implementation and another review. Output tokens, which effort mostly changes, were under a tenth of usage; the cost is in turns and context. Judge settings by cost per finished task, and send the logic of safety gates to the stronger tier.
