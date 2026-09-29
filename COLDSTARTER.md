@@ -16,7 +16,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 
 | Version | Date | Changes |
 |---|---|---|
-| 2.1.0 | 2026-09-30 | **Process has to earn its place, and a cheaper reviewer roster.** A new ground rule (12): the product comes first, and every document, agent, skill, hook and gate exists only if it pays for itself on this project. Template sections with nothing project-specific to say are left out, and the user can cut anything from the dev plan (for example *"We're building a $100 internal utility. Don't write architecture documentation unless the complexity warrants it."*); the cut is logged with the trigger that would bring it back. A **process budget** (section 1): intake asks what the project is worth, and the dev plan compares the framework work after v1 with v1's own. For None and Light it must come in well under, and for Standard and Full the plan says what the framework costs and buys. **Light is now a minimum set plus triggers:** README (with the user and developers' guides as sections), readable code, an instructions file of about 50 lines with only the targets the project has, core and end-to-end tests with a secret scan and dependency audit, the security reviewer and the change review, the three Light hooks, `docs/TODO.md`, and one review of v1. Everything else waits for a trigger written into the dev plan: ARCHITECTURE, the domain-logic reference (a data view keeps its metric dictionary), OPERATIONS, the threat model, the design guide, a separate user guide or DEV_CYCLE, invariant and accessibility tests, benchmarks, Phase 9's tools, an implementer agent (the session implements until then), `/devmanual`, a project skill and Phase 13's routing work. For Light, Phase 13's gate folds into Phase 2's, and Phase 6's runs only when there are targets or invariants to confirm. Every retrospective now **prunes** process that isn't used: docs nobody reads, agents whose findings were all noise, skills nobody runs. Existing Light projects can keep what they have; their next retrospective decides what stays. **A cheaper reviewer roster.** Only three reviewers are always on: domain correctness, code quality and security. The rest are conditional, each created only if the project needs the role and dispatched by `/audit` only when its trigger fires: the perf profiler when a budget is missed or a hot path changed; the UX reviewer, user tester and accessibility reviewer when the UI or user-facing behaviour changed; the infra/SRE, data, compliance and evaluation reviewers when their areas changed; the docs writer when a new mechanical **docs drift check** flags a doc; and the efficiency auditor and product designer only in a milestone audit. `/audit` is now the **core audit**, and `/audit full` the **milestone audit** with every reviewer. Step 2 lists what changed since the last audit (recorded on `BACKLOG.md`'s "Last audit" line) so the triggers are checked mechanically, and the report says which reviewers ran and why. The usage profile decides borderline triggers and how often `/audit full` runs, and the retrospective tunes the triggers. |
+| 2.1.0 | 2026-09-30 | **Process has to earn its place, a cheaper reviewer roster, and lexicographic priority.** A new ground rule (12): the product comes first, and every document, agent, skill, hook and gate exists only if it pays for itself on this project. Template sections with nothing project-specific to say are left out, and the user can cut anything from the dev plan (for example *"We're building a $100 internal utility. Don't write architecture documentation unless the complexity warrants it."*); the cut is logged with the trigger that would bring it back. A **process budget** (section 1): intake asks what the project is worth, and the dev plan compares the framework work after v1 with v1's own. For None and Light it must come in well under, and for Standard and Full the plan says what the framework costs and buys. **Light is now a minimum set plus triggers:** README (with the user and developers' guides as sections), readable code, an instructions file of about 50 lines with only the targets the project has, core and end-to-end tests with a secret scan and dependency audit, the security reviewer and the change review, the three Light hooks, `docs/TODO.md`, and one review of v1. Everything else waits for a trigger written into the dev plan: ARCHITECTURE, the domain-logic reference (a data view keeps its metric dictionary), OPERATIONS, the threat model, the design guide, a separate user guide or DEV_CYCLE, invariant and accessibility tests, benchmarks, Phase 9's tools, an implementer agent (the session implements until then), `/devmanual`, a project skill and Phase 13's routing work. For Light, Phase 13's gate folds into Phase 2's, and Phase 6's runs only when there are targets or invariants to confirm. Every retrospective now **prunes** process that isn't used: docs nobody reads, agents whose findings were all noise, skills nobody runs. Existing Light projects can keep what they have; their next retrospective decides what stays. **A cheaper reviewer roster.** Only three reviewers are always on: domain correctness, code quality and security. The rest are conditional, each created only if the project needs the role and dispatched by `/audit` only when its trigger fires: the perf profiler when a budget is missed or a hot path changed; the UX reviewer, user tester and accessibility reviewer when the UI or user-facing behaviour changed; the infra/SRE, data, compliance and evaluation reviewers when their areas changed; the docs writer when a new mechanical **docs drift check** flags a doc; and the efficiency auditor and product designer only in a milestone audit. `/audit` is now the **core audit**, and `/audit full` the **milestone audit** with every reviewer. Step 2 lists what changed since the last audit (recorded on `BACKLOG.md`'s "Last audit" line) so the triggers are checked mechanically, and the report says which reviewers ran and why. The usage profile decides borderline triggers and how often `/audit full` runs, and the retrospective tunes the triggers. **Lexicographic priority.** Impact ÷ effort alone let a cosmetic fix (2 ÷ 1 = 2.0) outrank a security hole (5 ÷ 3 = 1.67). Every backlog item now gets a **priority class** first: P1 safety and security blockers, P2 correctness and data-loss blockers, P3 user-visible regressions, P4 high-impact improvements (including medium and low security findings and conformance gaps), P5 efficiency and polish. Impact ÷ effort orders items only within a class, and the Priority column reads `P1 1.67`. The class comes from the kind of problem and the evidence that class requires (an exploit path, a failing invariant, a before and after), not from the impact score, so an inflated impact can't jump a class; only a user's pin can. Batches are numbered by their highest-priority item, the backlog check verifies the sort, and Light's `docs/TODO.md` follows the same order. |
 | 2.0.0 | 2026-09-29 | **Platform-neutral throughout, and version control as a choice.** Every Claude Code specific that was written inline in the phases and templates has moved to **Appendix I**, which is now the full Claude Code binding: a term table (I.1), the project settings with the reference routing and hook wiring (I.2), agent and skill frontmatter (I.3, I.4), hook input and output (I.5) and the usage report's transcript format (I.6). The phases use neutral terms: *the agent*, *the project instructions file* (was `CLAUDE.md`), *project settings*, the *change review* (was `/code-review`), the *browser tool*, *turn caps*, *cache lifetimes*, resuming an agent, and a loop or scheduler. Agent and skill templates (Appendices C, C2, D, F) give their settings as neutral tables (model tier, effort, turn cap, tools as read, search, shell, edit and the browser tool) for each platform to write in its own format. Appendix G's hook scripts mark their two platform bindings (how they read their input and how they block), and the publish-gate script finds its repository through the version-control tool instead of assuming its folder depth. Usage-profile suggestions name plan levels rather than Claude plans. **Breaking:** the backlog's work tiers are renamed **Routine, Hard and Deep** (were Light, Opus and Deep), and `implementer-opus` becomes `implementer-hard`, so work tiers no longer share names with model tiers or framework sizes. Existing projects rename the Tier values in `BACKLOG.md` and the agent file, and the publish-gate script and its hook wiring (below). The reference binding also wires the secrets guard to `MultiEdit`. **Version control is now chosen in Phase 1:** Git (the default), another tool such as Subversion, snapshots, or none at all. The phases speak of committing, publishing, the main line, branches, PRs, setting a change aside and isolated working copies, and a new **Appendix K** binds them for Git, Subversion, snapshots and none, with install commands (the launch checks the tool is installed and asks before installing it). Standard and Full need version control; a None deliverable can use snapshots or nothing at all, and a Light project can with a logged reason. **Breaking:** the push gate is now the publish gate, `before_publish.py` (it gates `git push`, or `svn commit` in Subversion). |
 | 1.8.1 | 2026-09-29 | Fixes from a full review of the spec. Framework sizing now reaches everywhere it should: a Light launch runs Phases 10 and 12 for its implementer, security reviewer and `/devmanual`, and has a tests-only push gate (the sizing table, Phase 14 and the definition of done now agree); a None deliverable gets its security pass in the handoff and follows its visual direction without a separate design guide; Phase 6, the `CLAUDE.md` skeleton and the docs rule describe the Light routine; Full means Standard-type projects at Team or Enterprise scale. The readable-code layout rules follow the usage profile, as section 1 says. Settings reasons go in the Decisions log at the retrospective too. The Deep and A/B go-ahead and the `/code-review` levels follow the usage profiles. Appendix G wires and describes the secrets guard and pins effort and compaction; the docs-writer and security-reviewer templates get `maxTurns`. The implementer tier names are explained against model tiers and sizes; the docs writer is noted as the one other agent that edits (documentation only). The DEV_CYCLE list in Phase 17 renders nested. The tagline, README and `AGENTS.md` describe Coldstarter as a spec for AI coding agents, with Claude Code as the reference platform. |
 | 1.8.0 | 2026-09-29 | **Framework sizing, data views and grill mode.** Phase 2 ends by **sizing the framework**, None, Light, Standard or Full, from the project type, scale, risk and lifespan, and writes a short **dev plan**: the phases, agents, skills and gates the project gets, each with a reason, and a trigger for each thing left out. Sizing decides whether machinery exists; the usage profile still decides how it runs. Each size has its own **life cycle** and **upgrade trigger** (section 1); the handoff teaches only that life cycle (None and Light projects get no `/audit`, `/iterate` or `/autoiterate`), and the **definition of done** is marked by size. A new **`/devmanual`** skill prints a short developers' guide sized to the project (the level, its life cycle, the commands that apply, the current state and the upgrade trigger), and `/devmanual full` the whole `DEV_CYCLE.md`. **Data views and dashboards** (for example single-page HTML views for marketing teams) get an Appendix A row, intake questions (source, a refresh the audience can run, a metric dictionary, audience, sharing, sensitivity), invariants, a privacy rule, a chart-quality check and delivery rules. Phase 1 gains **grill mode**, one question at a time with a recommended answer, suggested for high-stakes or vague projects, drawing on Matt Pocock's `grill-me` skill. The security reviewer applies from Light up; a None deliverable gets a one-off security pass. |
@@ -146,7 +146,7 @@ The scale profile sets how heavy each piece of process is, and the usage profile
 | Phases | 1 (quick), 2 (short), 3's first step if it uses version control or snapshots, 4, and a short 17 (with the one-off security pass) | 1 (quick), 2 (short), 3, 4, then the **Light minimum set** below; everything else waits for its trigger | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
 | Agents | None beyond the session | The security reviewer. The session implements; an implementer agent only on its trigger | The three always-on reviewers and the conditional ones the project needs (Phase 10), three implementers (one per work tier), triage | Standard's, plus the scale profile's extra reviewers |
 | Skills | None | None by default. `/devmanual` and at most one small project skill (for example `/refresh` for a data view), each on its trigger | `/audit`, `/iterate`, `/autoiterate`, `/devmanual` | As Standard |
-| Backlog | None | `docs/TODO.md`: a short list of known issues and ideas, no triage | `BACKLOG.md` with triage and batches | As Standard |
+| Backlog | None | `docs/TODO.md`: a short list of known issues and ideas, no triage, kept in priority-class order (P1 to P5, Phase 11) | `BACKLOG.md` with triage and batches | As Standard |
 | Version control | Optional: snapshots, or none at all | Recommended; snapshots or none need a reason in the Decisions log | Required | Required, with the scale profile's review flow |
 | Before a change ships | Run it and look at it; a one-off security pass | The tests, the change review, and the security reviewer on sensitive changes | The full ship routine (Phase 6) | The full ship routine, gated by CI and people |
 | Developers' guide | A "Working on this" section in README | A "Working on this" section in README; `docs/DEV_CYCLE.md` (about half a page) only when that outgrows the README | `docs/DEV_CYCLE.md` in full (Phase 17) | As Standard, plus the scale profile's docs |
@@ -500,7 +500,7 @@ Reviewers are the framework's biggest source of fan-out: every one dispatched re
 ### [AREA-###] Short title
 - **Area:** perf | core | ux | design | efficiency | code | security | infra | data | docs | usage | <domain>
 - **Evidence:** <metric / screenshot path / file:line>
-- **Impact:** 1–5   **Dev effort:** 1–5
+- **Impact:** 1–5   **Dev effort:** 1–5   **Class:** P1–P5 (proposed; triage decides, Phase 11)
 - **Proposal:** what to change, why, and the expected gain
 ```
 
@@ -538,16 +538,27 @@ Commit the roster.
 1. Create `BACKLOG.md` (template in Appendix E) with these sections: **Batches, Ready, In progress, Rejected**, and `BACKLOG_DONE.md` for **Done**. Shipped items live in their own file because everything that reads the backlog (the orchestrating session, triage) would otherwise pay for the whole history on every read.
    - **Ready** columns: ID, Area, Title, Impact, Effort, Priority, Batch, Tier, Est. time, Evidence.
    - **Done** columns: ID, Title, Tier, Actual time, Result (metric delta or notes), Commit or PR.
-2. **Triage rules:**
+2. **Priority is lexicographic: class first, then score.** A plain impact ÷ effort ratio lets a cosmetic fix (impact 2, effort 1: 2.0) outrank a security hole (impact 5, effort 3: 1.67). So every item gets a **priority class**, and impact ÷ effort only orders items *within* a class:
+
+   | Class | Holds | Evidence it needs |
+   |---|---|---|
+   | **P1** Safety and security blockers | Critical or high security findings, exposed secrets, a safety gate (a hook, the publish gate, the test runner's pass/fail logic) that lets bad changes through, anything that could harm users or others | An exploit path, a scan result or a failing check |
+   | **P2** Correctness and data-loss blockers | Wrong results, lost or corrupted data, a broken invariant, crashes or hangs in normal use | A failing test or invariant, or a reproduction |
+   | **P3** User-visible regressions | Something that worked and no longer does, or got measurably worse: a finding that matches a Done item, a benchmark regression, a budget that was met and now isn't | The before and after, or the Done item it matches |
+   | **P4** High-impact improvements | Improvements at impact 4 or 5, and any medium or low security finding or conformance gap (accessibility, compliance), whatever its impact | As any finding |
+   | **P5** Efficiency and polish | Everything else | As any finding |
+
+   The class comes from the *kind* of problem and its evidence, not from the impact score, so inflating an impact can't move an item past a class. A finding claimed for P1 to P3 without that class's evidence drops to P4 or P5. Only the user can move an item across classes (a pin), and triage says so in its report. The Priority column shows both, class first (for example `P1 1.67`).
+3. **Triage rules:**
    - discard findings without evidence, and merge duplicates
-   - priority = impact ÷ effort
+   - priority: class, then impact ÷ effort within the class, then ties broken by risky behaviour first, then smaller changes
    - a finding that breaks a pillar goes to Rejected
    - never reorder In progress, Done or Rejected
    - a finding that matches a Done item (search `BACKLOG_DONE.md`) is a regression
    - IDs follow the pattern `AREA-###`
    - every Ready row gets a Tier and an Est. time
    - regroup every Ready item into batches on every run, and self-check the result
-3. **Batching.** Each batch has **one category and one work tier**. Its reviews run once, for the whole batch.
+4. **Batching.** Each batch has **one category and one work tier**. Its reviews run once, for the whole batch. Batches are numbered in the order of their highest-priority item, so B1 always holds the top Ready item; lower-class items can ride along in a batch of the same category and tier, but never move a batch ahead.
 
 | Category | Contents | Reviews | Max size |
 |---|---|---|---|
@@ -561,7 +572,7 @@ Commit the roster.
 | `solo` | Deep work, A/B experiments, effort 3, irreversible changes, or anything that would conflict | That item's own full pipeline | 1 |
 
    The size caps limit the damage: bigger batches make it harder to tell which change broke something, spread reviewers' attention thinner, and make pulling out one bad item riskier. Core, security, infra and data changes interact. Polish rarely does. In the reference project, 14 small `ui` and `tooling` fixes shipped in about 35 minutes, against an estimated 175–245 minutes done one at a time.
-4. **Estimates** (planning figures, not measurements):
+5. **Estimates** (planning figures, not measurements):
    - Routine, effort 1: 10–20 min
    - Hard, effort 1: 15–25 min
    - effort 2: 20–35 min
@@ -569,8 +580,8 @@ Commit the roster.
    - a batch: its largest item's estimate, plus 2–3 min per extra `ui` or `tooling` item and about 5 min per extra item in the other categories
 
    Record the **actual time** in Done, and recalibrate from real runs.
-5. **Check bulk edits mechanically.** After any bulk change to the backlog, run a short script: every Ready item is in exactly one batch, work tiers match, effort-3 items are `solo`, and no batch is over its cap. In the reference project, a single hand edit silently dropped 12 rows.
-6. Commit.
+6. **Check bulk edits mechanically.** After any bulk change to the backlog, run a short script: every Ready item is in exactly one batch, work tiers match, effort-3 items are `solo`, no batch is over its cap, and Ready is sorted by class, then score. In the reference project, a single hand edit silently dropped 12 rows.
+7. Commit.
 
 ---
 
@@ -739,7 +750,7 @@ Standard and Full. **Light:** run the change review and the security reviewer on
    - **Light:** a "Working on this" section in README: the life cycle, the commands that exist, where things live, the recurring chores, and the upgrade trigger. It moves to a `docs/DEV_CYCLE.md` of about half a page only when it outgrows the README.
    - **Standard and Full:** `docs/DEV_CYCLE.md` in full. It covers:
      - a table of the commands
-     - the backlog columns (Tier, estimated and actual time)
+     - the backlog columns (Priority with its class, Tier, estimated and actual time), and why class comes before score
      - the batch categories and why the caps exist
      - the steps of `/iterate`, `/autoiterate` and `/audit`, including intake and the limit rule
      - the version control and its PR flow for this profile
@@ -774,7 +785,7 @@ Each item is marked with the smallest framework size it applies to: **[Light+]**
 - [ ] [Standard+] Environment helper; browser tool with a fallback; allowed-tool list (E)
 - [ ] [Standard+] Read-only reviewers with evidence rules and quirk lists: the three always-on reviewers (domain correctness, code quality and **the security reviewer**), and only the conditional ones the project needs, each with its audit trigger; the three implementers (Routine, Hard, Deep); triage
 - [ ] [Standard+] The first audit includes a security baseline; secret and dependency scans pass
-- [ ] [Standard+] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
+- [ ] [Standard+] `BACKLOG.md` with the Batches, priority class and score, Tier, estimated and actual time columns, plus a mechanical consistency check
 - [ ] [Standard+] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's version-control flow
 - [ ] [Standard+] The usage report, run by `/audit`, with a first usage snapshot saved; agent turn caps and cache lifetimes set
 - [ ] [Full] The scale profile's extra reviewers; CI as the authority for the gates
@@ -1027,7 +1038,7 @@ Findings only, most severe first:
 - **Area:** security
 - **Severity:** critical | high | medium | low (roughly CVSS-style: exploitability × impact)
 - **Evidence:** <file:line with the data flow, or a failing test, scan output, or request and response against the local app>
-- **Impact:** 1–5 (critical = 5, high = 4, medium = 3, low = 1–2)   **Dev effort:** 1–5
+- **Impact:** 1–5 (critical = 5, high = 4, medium = 3, low = 1–2)   **Dev effort:** 1–5   **Class:** P1 for critical and high, P4 for medium and low (Phase 11)
 - **Proposal:** the fix, plus a regression test that would catch it
 
 End with:
@@ -1054,18 +1065,24 @@ For a change review rather than an audit, the same agent reviews only the diff a
 Rules:
 1. Discard findings with no concrete evidence. List them at the end of your reply, not in the backlog.
 2. Merge duplicates: keep the clearest title, combine the evidence.
-3. Priority = impact ÷ effort (two decimals). Break ties with broken or risky behaviour first, then smaller changes. **Critical and high security findings go to the top of Ready regardless of score, as a `security` batch (or `solo`), and are flagged to the user.**
+3. Priority is lexicographic: the class first, then the score (impact ÷ effort, two decimals) within the class, written as `P<class> <score>`. Break ties with broken or risky behaviour first, then smaller changes. Classes:
+   - P1 safety and security blockers: critical or high security findings, exposed secrets, a safety gate that lets bad changes through, anything that could harm users or others. Needs an exploit path, a scan result or a failing check.
+   - P2 correctness and data-loss blockers: wrong results, lost or corrupted data, a broken invariant, crashes or hangs in normal use. Needs a failing test or invariant, or a reproduction.
+   - P3 user-visible regressions: worked before and no longer does, or got measurably worse (matches a Done item, a benchmark regression, a budget no longer met). Needs the before and after, or the Done item.
+   - P4 high-impact improvements: impact 4 or 5, and any medium or low security finding or conformance gap, whatever its impact.
+   - P5 efficiency and polish: everything else.
+   Set the class from the kind of problem and its evidence, never from the impact score. A finding claimed for P1 to P3 without that evidence drops to P4 or P5; say so in your report. Keep a user's pin, and report it. **P1 items go to the top of Ready as a `security` batch (or `solo`), and are flagged to the user.**
 4. Check the pillars and the security rules in the project instructions file. A finding that breaks either goes to Rejected, with the reason.
 5. Preserve status. Never delete or reorder In progress, Done or Rejected. A finding that matches a Ready item updates its evidence. A finding that matches a Done item is a regression: add it as new, with a note. Done items are in BACKLOG_DONE.md: search it, don't read it whole.
 6. IDs are AREA-###, numbered after the highest existing number for that area.
-7. Sort Ready by priority. One line per row, with evidence as short pointers. Work in one pass: read BACKLOG.md once, then a few edits or a single rewrite, without re-reading it to check.
+7. Sort Ready by class, then score. One line per row, with evidence as short pointers. Work in one pass: read BACKLOG.md once, then a few edits or a single rewrite, without re-reading it to check.
 7a. Usage findings (USAGE-###, from the usage report) go in the tooling category. One that would change an agent's model or effort trades quality for usage: mark it as needing the user's decision and keep it out of every batch until they decide.
 8. Tier (the work tier):
    - Deep: <the project's hardest class of work>, A/B experiments, irreversible changes
    - Hard: core, perf or security area, the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or effort 2 or more
    - Routine: everything else at effort 1
    Est. time: Routine effort 1, 10–20 min; Hard effort 1, 15–25; effort 2, 20–35; effort 3 or Deep, 35–90+.
-9. Batches. Regroup ALL Ready items on every run. B1 is the batch that holds the top item.
+9. Batches. Regroup ALL Ready items on every run. Number batches in the order of their highest-priority item, so B1 holds the top item. Lower-class items may ride along in a batch of the same category and tier, but never move a batch ahead.
    - One category (ui / tooling / core / perf / security / infra / data / solo) and one tier per batch.
    - Items that edit the same function stay apart. Respect dependencies.
    - Caps: ui and tooling 15 (about 5 for effort-2 features); core, perf, security and infra 5; data 3; solo 1.
@@ -1076,7 +1093,8 @@ Rules:
      - every batch is within its cap
      - nothing in ui or tooling touches core, security or data (watch for refactors or renames of identifiers they use)
      - any item left on its own has been checked against the other batches of its category and tier
-Finish with: findings received, kept, merged and discarded; the top 5 Ready items; and the batches (ID, category, item count, Est. time).
+     - Ready is sorted by class, then score, and no P1 to P3 item lacks its class's evidence
+Finish with: findings received, kept, merged and discarded; any class changes (dropped for missing evidence, or pinned by the user); the count of Ready items per class; the top 5 Ready items; and the batches (ID, category, item count, Est. time).
 ```
 
 ---
@@ -1094,7 +1112,7 @@ _Last audit: YYYY-MM-DD, at <commit>, <core | full | focus>_
 | Batch | Category | Tier | Items | Reviews | Est. time | Why grouped |
 |-------|----------|------|-------|---------|-----------|-------------|
 
-## Ready (sorted by priority)
+## Ready (sorted by priority: class P1–P5 first, then impact ÷ effort; for example `P1 1.67`)
 | ID | Area | Title | Impact | Effort | Priority | Batch | Tier | Est. time | Evidence |
 |----|------|-------|--------|--------|----------|-------|------|-----------|----------|
 
