@@ -35,7 +35,7 @@ Coldstarter is a specification you give to an AI coding agent; the reference pla
    - a short project instructions file that works as an index, so each session loads only what it needs
    - for anything with a user interface, a visual direction and a design guide that steer it away from generic, machine-made defaults
    - tests and correctness invariants
-   - benchmarks with a regression gate
+   - benchmarks with a regression gate, but only when a performance target exists whose measurement could change a decision (otherwise nothing, or a timed check or two in the tests)
    - read-only specialist reviewer agents, including a dedicated security reviewer
    - tiered implementer agents
    - an evidence-based backlog with a triage and batching engine
