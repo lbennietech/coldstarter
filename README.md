@@ -36,7 +36,7 @@ Coldstarter is a specification you give to [Claude Code](https://claude.com/clau
    - read-only specialist reviewer agents, including a dedicated security reviewer
    - tiered implementer agents
    - an evidence-based backlog with a triage and batching engine
-   - `/audit` and `/iterate` loops
+   - `/audit`, `/iterate` and `/autoiterate` loops
    - enforcement hooks
    - token-efficient model routing
    - all the supporting docs
@@ -58,7 +58,7 @@ It includes adaptations for web apps, internal tools, integrations, data pipelin
    > Read COLDSTARTER.md and launch a project for: *your idea, problem or question*
 
 3. Answer the intake questions. Most have sensible defaults. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
-4. When the launch finishes, run `/iterate` to ship the first batch of improvements. Run `/audit` occasionally to refill the backlog.
+4. When the launch finishes, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (as `/loop /autoiterate`, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
 
 If a session ends partway through, open Claude Code in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
@@ -87,7 +87,8 @@ Once the first version ships, work doesn't flow item-by-item — it flows throug
 
 1. **`/audit`** (rare, expensive) runs every relevant reviewer in parallel in the background against the current build, always including the security reviewer. Their findings — each with evidence — go to `triage`, which discards anything unsupported, merges duplicates, scores everything by impact ÷ effort, and assigns a tier and a time estimate.
 2. **Triage groups the backlog into batches.** Every batch has exactly one category and one tier, so its reviews only need to run once for the whole batch instead of once per item. Categories are capped by size and by how much they can interact with each other: `ui` and `tooling` batches can hold up to 15 items because polish rarely conflicts; `core`, `perf`, `security`, `infra` cap at 5 because those changes do interact; `data` caps at 3; anything Deep-tier, an A/B experiment, or an irreversible change runs `solo`, one item at a time through its own full pipeline.
-3. **`/iterate`** runs one batch: pick it, brief a single implementer with every item in it (never two implementers on one working tree — they'd overwrite each other), run the tests once at the end, run that category's reviews once, triage any blockers back to the same implementer, then commit, push (or open a PR, depending on scale profile) and report actual time against the estimate.
+3. **`/iterate`** runs one batch: pick it, brief a single implementer with every item in it (never two implementers on one working tree — they'd overwrite each other), run the tests once at the end, run that category's reviews once, triage any blockers back to the same implementer, then commit, push (or open a PR, depending on scale profile) and report actual time against the estimate. New requests you send mid-run are consolidated into the queue first.
+4. **`/autoiterate`** loops step 3 batch after batch without waiting for you, stopping only when the backlog is done, something needs your decision, or something is broken.
 
 The payoff is measured, not assumed: in the reference build, 14 small `ui` and `tooling` fixes shipped in about 35 minutes as batches, against an estimated 175–245 minutes if they'd been done one at a time. Every batch's actual time gets recorded next to its estimate, so the estimates get more accurate the more the project runs `/iterate`.
 
@@ -123,4 +124,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.0.7 (2026-09-28). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.1.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.

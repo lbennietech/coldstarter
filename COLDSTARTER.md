@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.0.7 (2026-09-28) |
+| **Version** | 1.1.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.1.0 | 2026-09-29 | New `/autoiterate` skill: it loops the `/iterate` cycle batch after batch without waiting for the user, stops only when the backlog is done, a decision needs the user, or something is broken, and pauses and resumes on its own around session limits (run as `/loop /autoiterate` for unattended runs). `/iterate` stays a single cycle and gains step 0, Intake: requests the user sends mid-run are consolidated with queued items, then triage regroups and refreshes priorities, keeping the user's pins. A limit rule for both: on a usage or rate-limit error, check the real clock before pausing; if the reset has passed, resume. Lessons 16 and 17 added. |
 | 1.0.7 | 2026-09-28 | The reference project's single-file layout is no longer presented as the default or as a lesson to copy: it was a starting choice that hardened into a rule the owner never set, and it has been dropped. Lesson 1 records what that cost. Phase 2 now asks for the stack to be recorded as a decision with a revisit trigger. The web-app and game stack suggestions no longer lead with "single file". |
 | 1.0.6 | 2026-09-28 | Licence clarified: an additional permission makes clear that products built with Coldstarter, including commercial ones, belong to whoever builds them. The non-commercial condition covers only selling, sublicensing or repackaging the spec. No changes to the method. |
 | 1.0.5 | 2026-09-28 | Public release under CC BY-NC 4.0 (previously all rights reserved). Removed the link to the reference project's repository. No changes to the method. |
@@ -30,7 +31,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 > - performance and correctness measurement
 > - specialist reviewer agents
 > - an evidence-based backlog with a triage and batching engine
-> - `/audit` and `/iterate` loops
+> - `/audit`, `/iterate` and `/autoiterate` loops
 > - deterministic hooks
 > - token-efficient model routing
 > - all the supporting docs
@@ -41,7 +42,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 >
 > Copy `COLDSTARTER.md` into the new folder first, or give Claude its full path.
 >
-> Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the whole framework, stopping at key decision points. When it's done, you run `/iterate`.
+> Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the whole framework, stopping at key decision points. When it's done, you run `/iterate` for one development cycle, or `/autoiterate` to let it keep working through the backlog on its own.
 >
 > **Where it came from.** The method was distilled from building a real project end to end (Pocket Universe, a browser simulation) and its development loop, including the mistakes. Nothing here is game-specific. Every role and rule is stated generically, and Appendix A maps it to each kind of project.
 
@@ -420,9 +421,9 @@ Commit the roster.
 
 ---
 
-## Phase 12: Skills: `/audit` and `/iterate`
+## Phase 12: Skills: `/audit`, `/iterate` and `/autoiterate`
 
-Create `.claude/skills/audit/SKILL.md` and `.claude/skills/iterate/SKILL.md` (skeletons in Appendix F). Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
+Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.claude/skills/autoiterate/SKILL.md` (skeletons in Appendix F). Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
 
 **`/audit`**: rare and expensive; the backlog's source of truth.
 1. Check the build is current and the tools work.
@@ -442,6 +443,7 @@ Create `.claude/skills/audit/SKILL.md` and `.claude/skills/iterate/SKILL.md` (sk
 | `/iterate B2 without ID` | Run a batch minus some items |
 | `/iterate B3 on Opus` | Raise a batch's tier |
 
+0. **Intake.** Users send new requests mid-run. Before picking a batch (and whenever new requests arrive), write each one as a goal, with the user's own solution ideas recorded as context rather than requirements. Merge any request that overlaps a queued item into that item instead of adding a near-duplicate; move superseded items to Rejected. Then `triage` regroups the batches and refreshes priorities across the whole Ready list, keeping anything the user explicitly pinned. Tell the user in a line or two what was merged, added or re-ordered.
 1. **Pick.** State the batch, its category, tier, items, reviews and Est. time. Move the items to In progress. Regroup first if the batches are stale. Team and Enterprise: create a branch named `batch/<id>-<slug>`.
 2. **Implement.** Brief **one** implementer of the batch's tier with every item's row and proposal. It works through them as separate, isolated edits and runs the tests once at the end. **Never run two implementers on the same working tree**: they overwrite each other's uncommitted edits. Parallel work needs separate git worktrees. An item that turns out riskier than its category goes back to Ready.
 3. **Test.** The full tests pass. If `bench --compare` fails, run the stash/pop A/B test to tell a real regression from machine noise.
@@ -459,6 +461,14 @@ Create `.claude/skills/audit/SKILL.md` and `.claude/skills/iterate/SKILL.md` (sk
    - **Team and Enterprise:** open a PR with the batch table and test and bench results, let CI run, and hand it to the reviewers. Merge only if the profile allows it; Enterprise never self-merges.
    - Have `triage` regroup the remaining items.
    - **Report** to the user as a table (ID, Tier, Est. time, short description of the change), then actual against estimated time, the test and bench numbers, the PR link if any, and the next batch.
+
+**When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent with SendMessage. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
+
+**`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
+- **Stop only when** the Ready list is empty or wholly blocked on the user; a decision only the user can make blocks the next useful work (ask once, and keep working on batches that don't depend on it); something is broken that one fix round couldn't repair; the user says stop; or an argument limit is reached (`/autoiterate 3` for three batches, `/autoiterate until ID`). On stopping, report every batch shipped in the run.
+- **Never end a turn idle:** either an agent or command is in flight (its notification resumes the session), a wake-up is scheduled, or the loop has stopped for one of the reasons above.
+- **Session limits:** apply the limit rule above. Run as `/loop /autoiterate` for unattended work: when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups past the one-hour cap), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
+- **Team and Enterprise:** each batch ends in its PR per the git flow, and the loop carries on with batches that don't depend on an unmerged PR (branching from the main branch). It stops when the next useful batch depends on a PR still waiting for human review.
 
 Commit.
 
@@ -535,7 +545,7 @@ Commit.
    - a table of the commands
    - the backlog columns (Tier, estimated and actual time)
    - the batch categories and why the caps exist
-   - the steps of `/iterate` and `/audit`
+   - the steps of `/iterate`, `/autoiterate` and `/audit`, including intake and the limit rule
    - the git and PR flow for this profile
    - how to choose what to iterate on (by theme, cost, dependencies, fixes before features)
    - the A/B experiment convention
@@ -560,7 +570,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] Read-only reviewers with evidence rules and quirk lists, **including the security reviewer**; the three implementer tiers; triage
 - [ ] The first audit includes a security baseline; secret and dependency scans pass
 - [ ] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
-- [ ] `/audit` and `/iterate` working end to end, batch-first, following the profile's git flow
+- [ ] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
 - [ ] Hooks (quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
 - [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
 - [ ] First audit, first batch shipped, retrospective done, settings tuned
@@ -852,12 +862,20 @@ argument-hint: "[batch ID, item ID, 'ID solo', or nothing]"
 
 ```markdown
 ---
+name: autoiterate
+description: Keep running <Project>'s /iterate cycle batch after batch without waiting for the user - intake new requests between batches, ship each batch through the full pipeline, and pause and resume on its own around session limits - until the backlog is done or something needs the user's decision. Use when the user says autoiterate, "keep iterating" or "work through the backlog". For a single cycle, use /iterate.
+argument-hint: "[optional: stop after N batches, or 'until <ID>']"
+---
+```
+
+```markdown
+---
 name: audit
 description: Audit the whole of <Project>: run the tests, benchmarks and scans, dispatch the specialist reviewers in parallel, triage their findings into BACKLOG.md, and summarise the top five items and the batches. Use when the user asks for an audit, a backlog refresh or "what should we improve next".
 ---
 ```
 
-The bodies follow Phase 12 step by step, including the reviews-by-category table, the git flow for the profile, and the report format. Don't set `effort` in either skill.
+The bodies follow Phase 12 step by step, including intake, the reviews-by-category table, the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
 
 ---
 
@@ -967,3 +985,5 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 13. **Docs move together.** Every workflow change updates `CLAUDE.md`, `DEV_CYCLE.md`, the skills, the agents and CI in one change, or they drift apart.
 14. **Report the way the user reads.** The reference user wanted every iteration reported as a table (ID, Tier, Est. time, change), followed by actual against estimated time. Ask early how reports should look, and build that into the skills.
 15. **Scope the gates to their repository.** The reference project's push gate fired on every push the session ran, so publishing a separate repo (this spec) was blocked by the game's benchmark noise. A gate must check which repo a command targets, and still fail safe when it can't tell.
+16. **Consolidate requests as they arrive.** The reference user sent ideas in bursts while agents were working: a bug, a progression system, a save system, a font theme, scene ideas. Taken one by one they would have produced near-duplicate items (a save system, a snapshot link, an undo and a share link all needed the same serializer). An intake step merged them into existing items, retired two as superseded, and had triage re-order the queue while keeping the user's pins. Run it at the start of every cycle, not just at audits.
+17. **Separate one cycle from the loop, and check the clock on limits.** "Keep iterating while I'm away" and "do the next batch" are different commands: `/iterate` for one cycle, `/autoiterate` for the loop. During the reference build an agent failed with "session limit, resets 2pm"; the orchestrator treated it as live and rerouted work, but it was already 4:45pm and the limit had long reset. Late notifications are normal, so read the real clock before pausing.
