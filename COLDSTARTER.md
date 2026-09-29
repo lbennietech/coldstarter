@@ -7,13 +7,16 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.5.0 (2026-09-29) |
+| **Version** | 1.6.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
+
+> **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases describe the method in neutral terms: the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, and *strong, standard and light model tiers*. **Appendix I (Platform bindings)** maps each term to a concrete platform. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands) only in Appendix I. *Until 2.0.0:* the Claude Code specifics still written inline in the phases and templates are the reference binding and will move to Appendix I; don't add new ones.
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.6.0 | 2026-09-29 | **Instructions as an index, routing chosen per project, and a platform-neutral rule.** Phase 6: the project instructions file is loaded and re-read on every turn, so it becomes an **index**: a size budget in bytes as well as lines, rules and numbers in it with their reasons in the Decisions log, a "Read when" list of the docs, and detail moved to skills, agents' own files, path-scoped instructions and docs; the usage report measures it. Phase 13: model and effort are no longer a fixed table. Once the project type, architecture and dev cycle are known, each role gets a **model tier** (strong, standard or light) and an effort level from how hard its work is, what a miss costs, how often it runs and the usage profile, with a reason, confirmed with the user; the old table becomes the reference build's routing, a starting point. Phase 10 lists starting tiers. A directive at the top and a new **Appendix I, Platform bindings**: the method is platform-neutral, and platform specifics belong in that appendix (Claude Code is the reference binding; its inline specifics move there in 2.0.0). Lesson 22 added. |
 | 1.5.0 | 2026-09-29 | **Readable code for people, not just agents.** A new ground rule (11): code must be easy for a person to read and debug. Phase 5's "agent-readable code" becomes **readable code**, which always applies: the language's standard style guide and idioms, a formatter and linter where the stack allows them (run by the after-edit hook), names that say what things are (with units), file headers that say what the file holds, tests that read as specifications, and errors that name what failed and with which values. Phase 1 asks who will read and debug the code and sets a **comment level** (Agents-first, Standard or Human-maintained), chosen separately from the usage profile because it follows the code's readers, not the budget. Comments explain why, not what. Readability gives way only on measured hot paths and in generated output, with the reason recorded. Phases 3, 4, 6 and 14, the code-quality reviewer, the implementer template, the `CLAUDE.md` skeleton and the definition of done carry it. |
 | 1.4.0 | 2026-09-29 | **Usage profiles.** Phase 1 now asks how much the project should optimise for Claude usage, and records a **usage profile** (Lean, Balanced or Throughput) next to the scale profile. The savings that cost no quality stay in every profile; the profile sets the real trade-offs: review depth, audit breadth, asking before Deep or A/B work, reviewer effort, the user tester's scope, the compaction window, and how strictly code is kept agent-readable. Phase 5 gains **agent-readable code** (small files split by concern, searchable names, quiet tool output), because every agent turn re-reads what it has read. Lesson 21 added. |
 | 1.3.0 | 2026-09-29 | **Usage review and token-efficiency defaults**, from the reference build's first measurement of where its Claude usage went. A **usage report** (`tools/usage_report.py`, specified in Phase 13) prices the project's Claude Code usage from the local session transcripts, per main session and agent type, and prints findings in the audit format without spending model tokens. Every `/audit` runs it, and `/audit usage` runs it alone. New defaults: the main session pins its effort and compacts at 200K tokens; implementers keep a one-hour prompt cache; every agent gets a `maxTurns` guard; `/iterate` runs the tests once and briefs reviewers with the results, always names the `/code-review` level, and calls `triage` once per batch; forks are avoided in large sessions; on a usage-limited plan `/autoiterate` asks before Deep or A/B batches; changes to the safety gates' logic go to the Opus tier; shipped items move to `BACKLOG_DONE.md`. Lessons 19 and 20 added. |
@@ -113,7 +116,7 @@ Some savings cost nothing in quality, so every profile gets them: the usage repo
 | Dimension | **Lean** (usage-limited plan; cost first) | **Balanced** (the default) | **Throughput** (usage isn't a concern; speed and depth first) |
 |---|---|---|---|
 | Suggested for | Pro, or any plan where the user hits limits | Max, Team, or an API budget with headroom | Enterprise or API use where time matters more than tokens |
-| Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with Opus also for the UX and product reviewers, and the Light implementer tier used only for copy and styling |
+| Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with the strong tier also for the UX and product reviewers, and the Light implementer tier used only for copy and styling |
 | `/code-review` level | `low` for `ui`, `tooling` and docs; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
 | Deep items and A/B experiments | Ask before each one; prefer one well-argued approach over an A/B | Ask before A/B experiments | Run them as the backlog says |
 | `/audit` | Focused audits by default (`/audit <focus>`); a full audit only when the Ready list runs thin, and the user tester's personas folded into the UX reviewer | Full audits rarely, focused ones in between | Full audits at each milestone |
@@ -277,7 +280,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 
 ## Phase 6: `CLAUDE.md`, the project's constitution 🚦 (for the targets)
 
-`CLAUDE.md` is loaded into every Claude session, so everything durable goes here (skeleton in Appendix B):
+`CLAUDE.md`, the **project instructions file** (Appendix I names it for each platform), is loaded at the start of every session and re-read on every turn, by the main session and by every agent told to read it. So it holds what every session needs, and it's an **index** to everything else (skeleton in Appendix B):
 
 - **The project in brief:** what it is, a table of the important files, the scale profile.
 - **Before every change ships:** the numbered routine. Run the tests, then the benchmark comparison, then `/code-review`, then the user-tester agent, then the domain-correctness reviewer if the core logic changed, then the **security reviewer** if a sensitive area changed (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools). Then push, or open a PR, and republish or deploy.
@@ -291,8 +294,18 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 - **Security and compliance:** the controls and regimes that apply, and what counts as a sensitive change.
 - **Design pillars.**
 - **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in).
-- **Model and effort:** the routing table from Phase 13, with a date and reason for each setting.
+- **Model and effort:** the routing table from Phase 13. The reasons and dates go in the Decisions log.
 - **Conventions:** commit authorship, header, the code conventions (style guide, formatter and linter, naming, test layout) and the comment level, platform and input conventions, "keep README in step", "all randomness through `rand()`".
+- **Read when:** an index of the docs, one line each, saying when to read which (for example "changing the core logic → `docs/<DOMAIN>.md`", "shipping → `docs/DEV_CYCLE.md`", "why a setting is what it is → the Decisions log").
+
+**Keep it an index.** Every line is paid for on every turn of every session, so:
+
+- Keep it within a **size budget** of about 150 lines *and* 10 KB, whichever comes first. Measure bytes as well as lines, because long lines hide size (Appendix H, lesson 22).
+- State rules and numbers, not their history. The reasons behind a setting and its past values go in the Decisions log (`docs/PROJECT_PROGRESS.md`).
+- Put detail where it's loaded only when it's needed: procedures in skills, a role's instructions in that agent's own file, rules for one area of the code in **path-scoped instructions** (loaded only when files in that area are read), and reference material in `docs/`. Imports that pull another file in at session start don't save anything.
+- Start every doc with a line saying what it covers, so a reader can tell from the index whether to open it.
+- Brief agents with file paths and the excerpts they need, not whole docs.
+- When a doc is added, renamed or split, update the index in the same change.
 
 🚦 **Gate:** propose the numeric targets, the invariants and the security controls, and get them confirmed. Then commit.
 
@@ -373,29 +386,29 @@ Create the agents in `.claude/agents/` (templates in Appendix C).
 
 Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metric, a screenshot path or a `file:line`. Triage discards findings without evidence.
 
-**Core roster** (all profiles):
+**Core roster** (all profiles). Each role's model tier (strong, standard or light) and effort are a starting point; Phase 13 sets them for the project.
 
-| Role | Job | Default model / effort |
+| Role | Job | Starting tier / effort |
 |---|---|---|
-| **domain-correctness reviewer** | Reviews changes to the core logic for correctness, edge cases, stability and the invariants. Measures rather than guesses. | Opus / medium |
-| **perf profiler** | Runs the benchmarks, reads the hot paths, proposes measured improvements tied to a budget. | Opus / medium |
-| **UX reviewer** (user-facing) | Screenshots and live use at several viewport sizes: discoverability, feedback, hierarchy, touch, keyboard, contrast, reduced motion, accessibility. | Sonnet / medium |
-| **product / experience designer** | Is it valuable and pleasant? First-minute experience, "aha" moments, missing capabilities, sharing. Small shippable ideas that serve the pillars. For business tools, "time to answer" and workflow fit. | Sonnet / medium |
-| **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Sonnet / low |
-| **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage, and readability (the code conventions, names, file headers, test structure, comments at the chosen level, stale comments). Respects the stack decision. | Sonnet / medium |
-| **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Opus / medium |
-| **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Sonnet / medium |
-| **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. In `/iterate` it plays the batch's changes, starting from the test run it's given; the full three-persona sweep is for audits. | Sonnet / low |
+| **domain-correctness reviewer** | Reviews changes to the core logic for correctness, edge cases, stability and the invariants. Measures rather than guesses. | Strong / medium |
+| **perf profiler** | Runs the benchmarks, reads the hot paths, proposes measured improvements tied to a budget. | Strong / medium |
+| **UX reviewer** (user-facing) | Screenshots and live use at several viewport sizes: discoverability, feedback, hierarchy, touch, keyboard, contrast, reduced motion, accessibility. | Standard / medium |
+| **product / experience designer** | Is it valuable and pleasant? First-minute experience, "aha" moments, missing capabilities, sharing. Small shippable ideas that serve the pillars. For business tools, "time to answer" and workflow fit. | Standard / medium |
+| **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Standard / low |
+| **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage, and readability (the code conventions, names, file headers, test structure, comments at the chosen level, stale comments). Respects the stack decision. | Standard / medium |
+| **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Strong / medium |
+| **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Standard / medium |
+| **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. In `/iterate` it plays the batch's changes, starting from the test run it's given; the full three-persona sweep is for audits. | Standard / low |
 
 **Added by scale or domain:**
 
-| Role | When | Job | Default |
+| Role | When | Job | Starting tier / effort |
 |---|---|---|---|
-| **compliance reviewer** | Regulated domains | Checks the change against the applicable regime's controls, audit trail and data handling | Sonnet / medium |
-| **infra / SRE reviewer** | Hosted services (Team and Enterprise) | Infrastructure-as-code, deployment safety, rollback, observability, SLOs, cost | Sonnet / medium |
-| **data reviewer** | Pipelines, analytics, migrations | Schema, lineage, data quality, idempotency, reproducibility | Sonnet or Opus / medium |
-| **accessibility reviewer** | Enterprise user-facing, or wherever the law requires it | WCAG conformance with evidence | Sonnet / low |
-| **evaluation reviewer** | AI/LLM apps | Eval results, prompt regressions, grounding, refusals, cost | Opus / medium |
+| **compliance reviewer** | Regulated domains | Checks the change against the applicable regime's controls, audit trail and data handling | Standard / medium |
+| **infra / SRE reviewer** | Hosted services (Team and Enterprise) | Infrastructure-as-code, deployment safety, rollback, observability, SLOs, cost | Standard / medium |
+| **data reviewer** | Pipelines, analytics, migrations | Schema, lineage, data quality, idempotency, reproducibility | Standard or strong / medium |
+| **accessibility reviewer** | Enterprise user-facing, or wherever the law requires it | WCAG conformance with evidence | Standard / low |
+| **evaluation reviewer** | AI/LLM apps | Eval results, prompt regressions, grounding, refusals, cost | Strong / medium |
 
 **Finding format** (every auditor uses it):
 
@@ -413,11 +426,11 @@ Give each agent a **"Known quirks (not bugs)"** list that grows over time. Quirk
 
 There are three tiers with the same instructions. They implement, test and report per item. They **never commit, push, merge or deploy**.
 
-| Agent | Model / effort | Takes |
+| Agent | Starting tier / effort | Takes |
 |---|---|---|
-| `implementer` | Sonnet / medium | **Light tier:** effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
-| `implementer-opus` | Opus / medium | **Opus tier:** core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
-| `implementer-deep` | Opus / high | **Deep tier:** the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
+| `implementer` | Standard / medium | **Light tier:** effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
+| `implementer-opus` | Strong / medium | **Opus tier:** core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
+| `implementer-deep` | Strong / high | **Deep tier:** the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
 
 Every implementer report includes:
 
@@ -428,7 +441,7 @@ Every implementer report includes:
 
 ### Triage: the backlog and batching engine
 
-`triage` turns findings into `BACKLOG.md` and groups the work into batches (Phase 11). Run it on Sonnet at **medium** effort. At low effort, its first attempt at grouping broke its own rules: it mixed tiers, put effort-3 items outside `solo`, and miscategorised a refactor of core-logic identifiers. The full rules are in Appendix D.
+`triage` turns findings into `BACKLOG.md` and groups the work into batches (Phase 11). Start it on the standard tier at **medium** effort. At low effort, its first attempt at grouping broke its own rules: it mixed tiers, put effort-3 items outside `solo`, and miscategorised a refactor of core-logic identifiers. The full rules are in Appendix D.
 
 Commit the roster.
 
@@ -534,28 +547,40 @@ Commit.
 
 ## Phase 13: Model routing and token efficiency 🚦 (confirm with the user)
 
-Apply this policy unless the user says otherwise: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* The table below is the Balanced profile; apply the usage profile's changes from section 1 on top of it, and record the result in `CLAUDE.md`.
+By now the project type, the architecture (Phase 5), the dev cycle (Phases 10 to 12) and the usage profile are known. Use them to choose each role's model and effort for *this* project, rather than copying a default. The policy: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.*
 
-| Setting | Default |
+1. **Sort the platform's models into tiers:** **strong** (the best reasoning, the dearest), **standard**, and **light** (fast and cheap). Check the current models, prices and caching rules; Appendix I binds the tiers for each platform.
+2. **Profile each role:** every agent, the main session, triage and the change-review step.
+   - How hard is its reasoning *in this project*? A numerical core, concurrency, money, security or data-migration logic is hard; checklists, copy and styling aren't.
+   - What does a miss cost? A missed data-loss or security bug costs more than a missed spacing issue.
+   - How much does it read against what it writes, and how often does it run per batch?
+   - Does it wait between turns (for benchmarks, or for reviews before a fix round)? That sets its cache lifetime.
+3. **Give each role a tier and an effort level** (low, medium or high), with a one-line reason, then apply the usage profile's changes (section 1). Start from the reference routing below, and move a role only when the profile of its work says so. For example, an analysis project's data reviewer does its hardest reasoning and belongs on the strong tier, while a static brochure site may need no strong-tier implementer at all.
+4. 🚦 Show the routing table with its reasons, and confirm it with the user. Record the table in `CLAUDE.md` and the reasons in the Decisions log.
+
+**Reference routing** (the reference build: Balanced profile, Claude Code, 2026-09). A starting point, not a default:
+
+| Setting | Reference build |
 |---|---|
-| Session default | Sonnet at **medium**, pinned in `.claude/settings.json` (`"model": "sonnet"`, `"effortLevel": "medium"`), compacting at 200K tokens (`"autoCompactWindow": "200k"`) so a long run doesn't grow its context without limit |
-| `/effort high` | In the main session, only for hard reasoning, then back to medium. Avoid xhigh and max. |
-| Opus, medium | domain-correctness, perf, security and evaluation reviewers, and `implementer-opus`. Name `model: opus` explicitly (not `inherit`) so they stay on Opus in a Sonnet session. |
-| Opus, high | `implementer-deep` only |
-| Sonnet, medium | UX, product, code-quality, compliance, infra and data reviewers, `implementer`, `triage` |
-| Sonnet, low | efficiency auditor, user tester, accessibility reviewer |
-| Haiku | Only where it's proven good enough (for example mechanical formatting or lookups), after a trial |
+| Session default | Standard tier (Sonnet) at **medium**, pinned in `.claude/settings.json` (`"model": "sonnet"`, `"effortLevel": "medium"`), compacting at 200K tokens (`"autoCompactWindow": "200k"`) so a long run doesn't grow its context without limit |
+| Raising effort (`/effort high`) | In the main session, only for hard reasoning, then back to medium. Avoid xhigh and max. |
+| Strong (Opus), medium | domain-correctness, perf, security and evaluation reviewers, and `implementer-opus`. Name `model: opus` explicitly (not `inherit`) so they stay on Opus in a Sonnet session. |
+| Strong (Opus), high | `implementer-deep` only |
+| Standard (Sonnet), medium | UX, product, code-quality, compliance, infra and data reviewers, `implementer`, `triage` |
+| Standard (Sonnet), low | efficiency auditor, user tester, accessibility reviewer |
+| Light (Haiku) | Only where it's proven good enough (for example mechanical formatting or lookups), after a trial |
 | Agent guards | `maxTurns` on every agent, set well above a normal run, as a runaway guard. `experimental: cacheTtl: 1h` on the implementers and on any agent that waits more than five minutes between turns (benchmarks, reviews before a fix round): each expiry of the default five-minute cache re-caches the agent's whole context. |
-| `/code-review` | Always with a level: `low` for `ui` and `tooling`, `medium` otherwise, `high` for Deep items or on request |
+| Change review (`/code-review`) | Always with a level: `low` for `ui` and `tooling`, `medium` otherwise, `high` for Deep items or on request |
 
 - **Judge cost per finished task, not per token.** In an agentic session most of the cost is re-reading cached context, which at 2026-09 prices costs the same per token on Sonnet and Opus (Opus is dearer only for new input and output; check current prices). A stronger model that finishes in fewer turns and fix rounds can cost less. The big levers are context size, cache expiry, duplicated work and agent fan-out, before the model.
-- Change agent settings **one level at a time**, with a reason, and record the date and reason in `CLAUDE.md`.
+- Change agent settings **one level at a time**, with a reason. Record the new setting in `CLAUDE.md`, and the date and reason in the Decisions log.
+- **Keep the always-loaded context small** (Phase 6). The project instructions file, and everything else loaded at session start, is re-read on every turn of every session.
 - Switch models at the **start** of a session, because prompt caching is per model.
 - Let batching save the cost: one cycle per batch, not per item. Run `/audit` rarely.
 - Don't spawn agents for work that takes a couple of direct tool calls.
 - Durable project preferences go in the checked-in docs. Personal preferences go in memory.
 
-**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline.
+**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then the size, in lines and bytes, of every instruction file loaded at session start; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, instruction files over their size budget (Phase 6), agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline.
 
 Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 
@@ -627,7 +652,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] A working v1, shown to the user
 - [ ] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
 - [ ] `docs/ARCHITECTURE.md` accurate; the system is deterministic, steppable and inspectable from tests; threat model (all profiles) and data classification (T/E)
-- [ ] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions
+- [ ] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
 - [ ] Tests (full, quick and screens), the cross-platform matrix, invariant tests and accessibility checks all pass; security and dependency scans (T/E)
 - [ ] Benchmarks with a median-of-N baseline, a 5% compare gate and a budget report
 - [ ] Environment helper; MCP with a fallback; allowed-tool list (E)
@@ -636,7 +661,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
 - [ ] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
 - [ ] Hooks (formatter, linter and quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
-- [ ] The usage report, run by `/audit`, with a first snapshot saved; the session's effort and compaction window pinned; agent turn caps and cache lifetimes set
+- [ ] Model routing chosen for the project, with reasons, and confirmed; the usage report, run by `/audit`, with a first snapshot saved; the session's effort and compaction window pinned; agent turn caps and cache lifetimes set
 - [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
 - [ ] First audit, first batch shipped, retrospective done, settings tuned
 - [ ] `docs/USER_GUIDE.md`, the domain-logic reference and `docs/OPERATIONS.md` written and reviewed; `docs/DEV_CYCLE.md` written; all docs consistent; summary given to the user
@@ -670,6 +695,8 @@ Rename the categories and agents to fit the project. For example, the reference 
 
 <One paragraph: what it is, for whom, stack, where it runs. Scale profile: Solo | Team | Enterprise. `docs/ARCHITECTURE.md` explains the code; `docs/DEV_CYCLE.md` explains the dev loop.>
 
+<!-- Keep this file within about 150 lines and 10 KB: rules and numbers here, their reasons in the Decisions log, detail in the docs listed under "Read when". -->
+
 ## Files
 - `<main source>`: …
 - `tests/…`: one command; `--quick`, `--screens`.
@@ -677,6 +704,10 @@ Rename the categories and agents to fit the project. For example, the reference 
 - `tools/…`: environment helper, hosted-copy build.
 - `.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`, `.mcp.json`, CI config
 - `BACKLOG.md`: batches and items, triaged.
+
+## Read when
+- Changing <the core logic> → `docs/<DOMAIN>.md` · How the code is laid out → `docs/ARCHITECTURE.md` · Shipping, batches, commands → `docs/DEV_CYCLE.md`
+- Deploying or rolling back → `docs/OPERATIONS.md` · A security-sensitive change → `docs/THREAT_MODEL.md` · Why a setting is what it is → the Decisions log in `docs/PROJECT_PROGRESS.md`
 
 ## Before every change ships
 1. Tests: every check passes.
@@ -701,7 +732,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
 ### Model & effort
 - Usage profile: <Lean / Balanced / Throughput>, chosen <date> because <reason>.
-- <Phase 13 routing table with the profile's changes, with dates and reasons; the session's effort and compaction window; the /code-review levels; the latest usage report's headline>
+- <Phase 13 routing table: one line per tier and effort, with the roles on it; the session's effort and compaction window; the change-review levels. Reasons and dates go in the Decisions log.>
 ### Documentation
 - Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
@@ -1098,3 +1129,29 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 19. **Measure where the usage goes, and fix the shape before the model.** The reference user, on a usage-limited plan, was hitting the session limit a couple of hours into each session. Pricing every transcript by model showed where it went: the orchestrating main session was 47% of all usage (one session ran for a day and a half without compacting and reached about 740K tokens, all of it re-read on every turn); the one A/B experiment was 21%, most of it spent re-caching the implementers' whole context after idle gaps longer than the five-minute cache; two `/code-review high` runs were 7%; and reviewers re-ran the test suite the orchestrator had just run. The model mix wasn't the problem: cached re-reads cost the same on Opus and Sonnet, and the Opus reviews took 6-15 turns where the Sonnet ones took 24-71. The fixes were a compaction window, a one-hour cache for implementers, named review levels, briefing reviewers with the results, one triage call per batch, and a script that repeats the analysis in every audit without spending model tokens.
 20. **A weaker first pass can cost more than it saves.** A Sonnet-tier fix to the reference project's push gate needed two review rounds, which found 5 and then 10 real bugs, each round meaning more implementation and another review. Output tokens, which effort mostly changes, were under a tenth of usage; the cost is in turns and context. Judge settings by cost per finished task, and send the logic of safety gates to the stronger tier.
 21. **Decide the usage ethos at the start.** The reference project was launched without asking how much its owner could spend, so it was tuned for thoroughness: Opus reviewers, full audits, high-level code reviews, A/B experiments. Its owner was on a usage-limited plan, hit the session limit a couple of hours into each session, and the retuning came only after two days of work. Asking in Phase 1, and setting a usage profile that shapes the agents, the workflow and the code layout from the first commit, would have avoided that.
+22. **Keep the always-loaded instructions an index.** The reference project's `CLAUDE.md` was 101 lines, well inside the usual guidance of 200, but 18 KB, because each line was a paragraph. About 5.5 KB of it was the model-and-effort section: dated reasoning and the story of a usage review, which no task needed but every session, and every agent told to read the file first, paid for on each turn. Budget the file in bytes as well as lines, keep rules and numbers in it with their reasons in the Decisions log, and point to docs, skills and path-scoped instructions for the rest.
+
+---
+
+## Appendix I: Platform bindings
+
+The phases describe the method in platform-neutral terms. This appendix binds each term to a concrete platform. To launch on a platform with no binding here, map each term to its nearest equivalent, note anything with no equivalent and how you worked around it, and record the mapping in the Decisions log. When editing Coldstarter, platform-specific detail goes here, not in the phases.
+
+*Until 2.0.0:* Claude Code is the reference platform, and many of its specifics are still written inline in the phases and templates (settings keys, hook events, agent frontmatter, model names, `/code-review`, the usage report's transcript format). Treat them as its binding. Version 2.0.0 moves them here.
+
+| Neutral term | What it is | Claude Code (reference binding, checked 2026-09) |
+|---|---|---|
+| Project instructions file | Loaded into every session; kept as an index (Phase 6) | `CLAUDE.md` at the repo root (or `.claude/CLAUDE.md`), about 200 lines at most. It reads `AGENTS.md` instead when there's no `CLAUDE.md`. To share one file with other tools, keep the instructions in `AGENTS.md` and put `@AGENTS.md` at the top of `CLAUDE.md`. `@path` imports load at session start, so they don't shrink the context. Block-level HTML comments are stripped before loading, so notes for people cost nothing. |
+| Path-scoped instructions | Rules that load only when files in one area are read | `.claude/rules/*.md` with a `paths:` list of globs in the frontmatter, or a `CLAUDE.md` in a subdirectory, which loads when files there are read |
+| Skill | A procedure loaded only when invoked or relevant | `.claude/skills/<name>/SKILL.md` |
+| Subagent | A separately prompted agent with its own tools, model and effort | `.claude/agents/<name>.md` (frontmatter: `model`, `effort`, `tools`, `maxTurns`) |
+| Hook | A deterministic script run at a fixed point, such as before a command or after an edit | `hooks` in `.claude/settings.json`: `PreToolUse` and `PostToolUse`; exit code 2 blocks |
+| Model tiers | Strong, standard, light | Opus, Sonnet, Haiku (check the current models and prices) |
+| Effort | How long the model reasons per turn | `effortLevel` in settings, `/effort` in a session, `effort` in agent frontmatter |
+| Context limit for the main session | Where a long session compacts | `autoCompactWindow` in settings |
+| Change review | An automated review of a diff, at a named depth | `/code-review <level>` |
+| Browser tool | Lets agents drive the running product | The Playwright MCP server, in `.mcp.json` |
+| Usage data | Per-session token records for the usage report | `~/.claude/projects/<project path>/*.jsonl` transcripts (Phase 13) |
+| Personal memory | Preferences that aren't project rules | Auto memory, in `~/.claude/projects/<project path>/memory/` |
+
+**Other platforms.** `AGENTS.md` is a cross-tool convention for the project instructions file that many coding agents read; prefer it where the platform supports it. Add a column, or a table, for each platform once a project has been launched on it, with the date its binding was checked.

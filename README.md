@@ -32,6 +32,7 @@ Coldstarter is a specification you give to [Claude Code](https://claude.com/clau
 2. **A working first version**, in a git repository with the CI/CD flow your scale needs.
 3. **A development framework that keeps improving the project:**
    - readable, conventional code a person can debug, commented to a level you choose (agents-first, standard or human-maintained)
+   - a short project instructions file that works as an index, so each session loads only what it needs
    - tests and correctness invariants
    - benchmarks with a regression gate
    - read-only specialist reviewer agents, including a dedicated security reviewer
@@ -64,24 +65,26 @@ It includes adaptations for web apps, internal tools, integrations, data pipelin
 
 If a session ends partway through, open Claude Code in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
+Claude Code is the reference platform, but the method is written to be platform-neutral: its phases talk about a project instructions file, subagents, skills, hooks and strong, standard and light model tiers, and the spec's **Appendix I (Platform bindings)** maps those terms to a platform. Some Claude Code specifics are still written inline in the phases; version 2.0.0 moves them all into that appendix.
+
 ## The project team: agents, models and effort
 
-Coldstarter sets up a fixed team of Claude Code agents in `.claude/agents/`, split into two kinds:
+Coldstarter sets up a team of agents (in Claude Code, in `.claude/agents/`), split into two kinds:
 
 - **Reviewers and auditors** are read-only — they never get Edit or Write tools, so they can only report findings, not change code. The core roster (every profile gets these) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
-- **Implementers** are the only agents that edit, and they never commit, push, merge or deploy themselves. There are three tiers: a **Light** implementer for effort-1 work outside the core logic, an **Opus** implementer for core-logic, performance or security items, and a **Deep** implementer (Opus at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
+- **Implementers** are the only agents that edit, and they never commit, push, merge or deploy themselves. There are three tiers: a **Light** implementer for effort-1 work outside the core logic, a strong-tier implementer (**Opus** in the reference build) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
-Every agent's model and effort are set deliberately, not left on defaults, because agent work is the main cost once a project has an active backlog:
+Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, Claude sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
 
-| Setting | Used for |
+| Tier and effort | Used for in the reference build (Claude Code: strong = Opus, standard = Sonnet, light = Haiku) |
 |---|---|
-| Sonnet, medium (the session default) | UX, product, code-quality, compliance, infra and data reviewers; the Light implementer; the triage engine |
-| Opus, medium | Domain-correctness, performance, security and evaluation reviewers; the Opus implementer |
-| Opus, high | The Deep implementer only |
-| Sonnet, low | Efficiency auditor, user tester, accessibility reviewer — checklist-style work that doesn't need deep reasoning |
-| Haiku | Only for mechanical, proven-safe work, adopted after a trial |
+| Standard, medium (the session default) | UX, product, code-quality, compliance, infra and data reviewers; the Light implementer; the triage engine |
+| Strong, medium | Domain-correctness, performance, security and evaluation reviewers; the strong-tier implementer |
+| Strong, high | The Deep implementer only |
+| Standard, low | Efficiency auditor, user tester, accessibility reviewer — checklist-style work that doesn't need deep reasoning |
+| Light | Only for mechanical, proven-safe work, adopted after a trial |
 
-The rule behind the table: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* Settings change one level at a time, with the date and reason recorded in `CLAUDE.md`, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
+The rule behind it: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* An analysis project might move its data reviewer to the strong tier; a static brochure site might need no strong-tier implementer at all. Settings change one level at a time, with the setting in `CLAUDE.md` and the date and reason in the project's Decisions log, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
 
 How much the project should optimise for usage is asked up front. Phase 1 sets a **usage profile** next to the scale profile: **Lean** for a usage-limited plan (cost first), **Balanced**, or **Throughput** (speed and depth first). It shapes the agents' review depth, how broad audits are, whether Deep work and A/B experiments need a go-ahead, and how strictly the code is kept small and easy for agents to read.
 
@@ -104,7 +107,8 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 |---|---|
 | `COLDSTARTER.md` | The specification itself: 17 launch phases, scale profiles, project-type adaptations, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
 | `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
-| `CLAUDE.md` | Instructions for Claude Code when maintaining the spec itself. |
+| `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays platform-neutral. |
+| `CLAUDE.md` | Imports `AGENTS.md`, so Claude Code reads the same instructions. |
 
 ## Where it came from
 
@@ -130,4 +134,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.5.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.6.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
