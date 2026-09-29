@@ -15,12 +15,12 @@ Most people who build with an AI coding agent have no process. They open a sessi
 - **There's no memory between sessions.** Decisions, known quirks, rejected ideas and the reasons behind them live in a chat that's gone the next day. The next session rediscovers them, or contradicts them.
 - **Priorities are whatever comes to mind.** There's no backlog, no evidence for why one change matters more than another, and no record of what was done or how long it took.
 
-Modern coding agents, such as Claude Code, already have the features to fix all of this: subagents with their own tools and model settings, skills that package a workflow into one command, hooks that enforce rules deterministically, and project files that persist decisions. What's hard is knowing how to put them together. You have to know the features exist, then design a team of agents that don't step on each other, decide which work deserves an expensive model, write the gates, and set up a backlog that stays honest. Most of the failure modes don't show up until they've already cost you something. A few examples:
+Modern coding agents already have the features to fix all of this: subagents with their own tools and model settings, skills that package a workflow into one command, hooks that enforce rules deterministically, and project files that persist decisions. What's hard is knowing how to put them together. You have to know the features exist, then design a team of agents that don't step on each other, decide which work deserves an expensive model, write the gates, and set up a backlog that stays honest. Most of the failure modes don't show up until they've already cost you something. A few examples:
 
 - In the reference build, an implementer added a feature and silently changed unrelated behaviour. Only an independent review caught it.
 - In the reference build, a claimed speed-up from 64 ms to 37 ms didn't reproduce when it was measured again.
 - In the reference build, one hand edit to the backlog silently dropped 12 items.
-- A publish gate with too short a timeout doesn't block anything. On some platforms, including Claude Code, a hook that times out is a non-blocking error, so the publish goes through unchecked.
+- A publish gate with too short a timeout doesn't block anything. On some platforms, a hook that times out is a non-blocking error, so the publish goes through unchecked.
 
 Coldstarter packages the working answers into one document. Reviewers are read-only and have to cite evidence. Only implementers edit, and they're tiered by how hard the work is. Each role runs on the cheapest model and effort that does it well. A backlog scores and batches the work, so reviews and tests run once per batch, not once per item. Hooks block a publish that fails the tests or the benchmarks. Decisions, targets and lessons are written into the project so the next session starts where the last one stopped. You get the process without having to learn it the hard way.
 
@@ -68,29 +68,29 @@ Each size has its own life cycle and a trigger for moving up (for example, when 
 ## How to use it
 
 1. Create an empty folder for your project (or open an existing codebase), and copy `COLDSTARTER.md` into it.
-2. Open Claude Code (or another AI coding agent) in that folder and say:
+2. Open your AI coding agent in that folder and say:
 
    > Read COLDSTARTER.md and launch a project for: *your idea, problem or question*
 
 3. Answer the intake questions. By default they come in one round, and most have sensible defaults. For high-stakes or vague projects, the agent suggests **grill mode** instead: one question at a time, each with a recommended answer, until every decision the plan depends on is settled. You can switch modes at any time. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
-4. When the launch finishes, `/devmanual` (Light and up) or the README's "Working on this" section (None) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (run under a loop or scheduler, such as `/loop /autoiterate` in Claude Code, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
+4. When the launch finishes, `/devmanual` (Light and up) or the README's "Working on this" section (None) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (run under your platform's loop or scheduler, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
 
 If a session ends partway through, open the agent in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
-Claude Code is the reference platform, but the method is platform-neutral. Since version 2.0.0, the phases and templates talk only in neutral terms: the agent, a project instructions file, subagents, skills, hooks, project settings, a change review, a browser tool, and strong, standard and light model tiers. The agent and skill templates give their settings as neutral tables. All the Claude Code detail (file paths, settings, frontmatter, hook input and output, commands, the transcript format the usage report reads) is in the spec's **Appendix I (Platform bindings)**. To use another platform, map the terms there, and record the mapping in the project's Decisions log.
+The method is platform-neutral. Since version 2.0.0, the phases and templates talk only in neutral terms: the agent, a project instructions file, subagents, skills, hooks, project settings, a change review, a browser tool, and strong, standard and light model tiers. The agent and skill templates give their settings as neutral tables. All the reference platform's detail (file paths, settings, frontmatter, hook input and output, commands, the transcript format the usage report reads) is in the spec's **Appendix I (Platform bindings)**. To use another platform, map the terms there, and record the mapping in the project's Decisions log.
 
 Version control is a choice too. Intake asks for Git (the default), another tool such as Subversion, dated snapshots of the folder, or none at all, and checks any tool is installed. Git doesn't come with Windows, for example. Git isn't the same as GitHub: it runs on your own machine, and a hosted copy is optional. The spec's **Appendix K (Version control bindings)** maps committing, publishing, branches, reviews and the rest to Git, to Subversion, to snapshots, and to working with no version control at all (for one-offs).
 
 ## The project team: agents, models and effort
 
-Coldstarter sets up a team of agents (subagents; in Claude Code, in `.claude/agents/`), split into two kinds:
+Coldstarter sets up a team of agents (subagents), split into two kinds:
 
 - **Reviewers and auditors** are read-only — they never get edit tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
 - **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, publish, merge or deploy themselves. There are three, one for each **work tier** of the backlog: a **Routine** implementer for effort-1 work outside the core logic, a **Hard** implementer (strong model tier) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
 Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, the agent sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
 
-| Tier and effort | Used for in the reference build (Claude Code: strong = Opus, standard = Sonnet, light = Haiku) |
+| Tier and effort | Used for in the reference build |
 |---|---|
 | Standard, medium (the session default) | UX, product, code-quality, compliance, infra and data reviewers; the Routine implementer; the triage engine |
 | Strong, medium | Domain-correctness, performance, security and evaluation reviewers; the Hard implementer |
@@ -102,14 +102,14 @@ The rule behind it: *use the strongest model only where it's clearly better, and
 
 How much the project should optimise for usage is asked up front. Phase 1 sets a **usage profile** next to the scale profile: **Lean** for a usage-limited plan (cost first), **Balanced**, or **Throughput** (speed and depth first). It shapes the agents' review depth, how broad audits are, whether Deep work and A/B experiments need a go-ahead, and how strictly the code is kept small and easy for agents to read.
 
-Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's sessions and agent runs from their local records (Claude Code's transcripts in the reference binding), without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
+Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's sessions and agent runs from their local records, without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
 
 ## Code, instructions and design that hold up
 
 Three rules keep a project easy to work on, for people and for agents:
 
 - **Readable code.** From the first line of v1, the code follows its language's standard style and idioms (with a formatter and linter where the stack allows), uses names that say what things are, puts a header on every file, writes tests that read as specifications, and fails with errors that say what went wrong. How much it's commented is a choice made at intake, by who will read and debug it: **agents-first** (only where the reason isn't obvious), **standard** (plus doc comments on everything public), or **human-maintained** (plus comments on every non-obvious block and a "how to debug this" note per module). Comments explain why, not what.
-- **Instructions as an index.** The project instructions file (`CLAUDE.md` in Claude Code) is read on every turn of every session, so it stays short: rules and numbers, with a "Read when" list pointing to the docs, and the reasons behind decisions kept in the Decisions log. In the reference build it had grown to 18 KB in just 101 lines, most of it history that no task needed.
+- **Instructions as an index.** The project instructions file is read on every turn of every session, so it stays short: rules and numbers, with a "Read when" list pointing to the docs, and the reasons behind decisions kept in the Decisions log. In the reference build it had grown to 18 KB in just 101 lines, most of it history that no task needed.
 - **Considered design.** Anything with a user interface starts from a visual direction (who it's for, how it should feel, what it must never look like) and a design guide with tokens, written before the first screen. The guide lists the statistically likely defaults that make interfaces look machine-made, such as purple gradients, the three-card landing page and buzzword copy, and allows each only when the direction calls for it.
 
 ## The development cycle: batching for speed
@@ -130,7 +130,7 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 | `COLDSTARTER.md` | The specification itself: 17 launch phases, scale and usage profiles, framework sizing, project-type adaptations (including data views and dashboards), a design-guide template, platform and version-control bindings, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
 | `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
 | `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays neutral about the AI platform and the version control. |
-| `CLAUDE.md` | Imports `AGENTS.md`, so Claude Code reads the same instructions. |
+| `CLAUDE.md` | Imports `AGENTS.md`, for the reference platform, which reads `CLAUDE.md`. |
 | `ROADMAP.md` | Ideas and planned changes for future versions, before they go into the spec. |
 
 ## Where it came from
