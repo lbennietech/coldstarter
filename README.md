@@ -52,7 +52,18 @@ It's designed to scale from solo hobby projects to enterprise work. A **Solo / T
 - the reviewer roster and how much autonomy the agents get
 - compliance and operations work
 
-It includes adaptations for web apps, internal tools, integrations, data pipelines and analyses, AI applications, CLIs and libraries, mobile apps, games and automation.
+It includes adaptations for web apps, internal tools, integrations, data pipelines and analyses, data views and dashboards, AI applications, CLIs and libraries, mobile apps, games and automation.
+
+Not every project needs all of that. At the end of solution design, Coldstarter **sizes the framework** to the project and writes a short dev plan, with a reason for everything included and a trigger for adding anything left out:
+
+| Size | For | What it gets |
+|---|---|---|
+| **None** | One-offs nobody will change | The deliverable, a README, and one security check |
+| **Light** | Small or short-lived tools, data views and dashboards (for example a one-page view for a marketing team), automations | Instructions, tests, one implementer, the security reviewer, change review, a to-do list, and a `/devmanual` guide; no audit or backlog machinery |
+| **Standard** | Products and tools that will keep changing | The full framework, with only the agents the project type needs |
+| **Full** | Team or Enterprise scale, regulated, or hosted with uptime targets | Standard plus the scale's extra reviewers, with CI as the authority |
+
+Each size has its own life cycle and a trigger for moving up (for example, when change requests keep coming, a Light tool gains a backlog and `/iterate`). The handoff teaches only the project's own life cycle, and `/devmanual` prints it on demand.
 
 ## How to use it
 
@@ -61,8 +72,8 @@ It includes adaptations for web apps, internal tools, integrations, data pipelin
 
    > Read COLDSTARTER.md and launch a project for: *your idea, problem or question*
 
-3. Answer the intake questions. Most have sensible defaults. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
-4. When the launch finishes, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (as `/loop /autoiterate`, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
+3. Answer the intake questions. By default they come in one round, and most have sensible defaults. For high-stakes or vague projects, Claude suggests **grill mode** instead: one question at a time, each with a recommended answer, until every decision the plan depends on is settled. You can switch modes at any time. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
+4. When the launch finishes, `/devmanual` shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (as `/loop /autoiterate`, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
 
 If a session ends partway through, open Claude Code in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
@@ -93,7 +104,7 @@ Usage is measured, not guessed: every `/audit` runs a small usage report that pr
 
 ## The development cycle: batching for speed
 
-Once the first version ships, work doesn't flow item-by-item — it flows through an evidence-based backlog and a batching engine, because reviewing and testing forty single-item changes costs far more than reviewing and testing eight batches of five:
+For Standard and Full projects, once the first version ships, work doesn't flow item-by-item — it flows through an evidence-based backlog and a batching engine, because reviewing and testing forty single-item changes costs far more than reviewing and testing eight batches of five:
 
 1. **`/audit`** (rare, expensive) runs every relevant reviewer in parallel in the background against the current build, always including the security reviewer. Their findings — each with evidence — go to `triage`, which discards anything unsupported, merges duplicates, scores everything by impact ÷ effort, and assigns a tier and a time estimate.
 2. **Triage groups the backlog into batches.** Every batch has exactly one category and one tier, so its reviews only need to run once for the whole batch instead of once per item. Categories are capped by size and by how much they can interact with each other: `ui` and `tooling` batches can hold up to 15 items because polish rarely conflicts; `core`, `perf`, `security`, `infra` cap at 5 because those changes do interact; `data` caps at 3; anything Deep-tier, an A/B experiment, or an irreversible change runs `solo`, one item at a time through its own full pipeline.
@@ -135,4 +146,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.7.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.8.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.

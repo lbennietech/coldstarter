@@ -7,7 +7,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.7.0 (2026-09-29) |
+| **Version** | 1.8.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 > **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases describe the method in neutral terms: the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, and *strong, standard and light model tiers*. **Appendix I (Platform bindings)** maps each term to a concrete platform. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands) only in Appendix I. *Until 2.0.0:* the Claude Code specifics still written inline in the phases and templates are the reference binding and will move to Appendix I; don't add new ones.
@@ -16,6 +16,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.8.0 | 2026-09-29 | **Framework sizing, data views and grill mode.** Phase 2 ends by **sizing the framework**, None, Light, Standard or Full, from the project type, scale, risk and lifespan, and writes a short **dev plan**: the phases, agents, skills and gates the project gets, each with a reason, and a trigger for each thing left out. Sizing decides whether machinery exists; the usage profile still decides how it runs. Each size has its own **life cycle** and **upgrade trigger** (section 1); the handoff teaches only that life cycle (None and Light projects get no `/audit`, `/iterate` or `/autoiterate`), and the **definition of done** is marked by size. A new **`/devmanual`** skill prints a short developers' guide sized to the project (the level, its life cycle, the commands that apply, the current state and the upgrade trigger), and `/devmanual full` the whole `DEV_CYCLE.md`. **Data views and dashboards** (for example single-page HTML views for marketing teams) get an Appendix A row, intake questions (source, a refresh the audience can run, a metric dictionary, audience, sharing, sensitivity), invariants, a privacy rule, a chart-quality check and delivery rules. Phase 1 gains **grill mode**, one question at a time with a recommended answer, suggested for high-stakes or vague projects, drawing on Matt Pocock's `grill-me` skill. The security reviewer applies from Light up; a None deliverable gets a one-off security pass. |
 | 1.7.0 | 2026-09-29 | **A design guide against generic defaults.** Anything with a user interface gets a **visual direction** in Phase 2 (who it's for, how it should feel, references, and what it must never look like), confirmed at the gate, and a **design guide**, `docs/DESIGN.md`, written with the design tokens before the first screen is built (Phase 4; template in the new **Appendix J**). The guide makes the tokens the only source of values, gives colour a job, sets type, density, states, motion and copy rules, and lists the statistically likely defaults that make an interface look machine-made (purple gradients, the three-card landing page, cards around everything, buzzword copy), each allowed only when the direction calls for it, with the reason written down. An organisation's own design system beats it. The UX reviewer and the implementers work from it, and the docs, the `CLAUDE.md` skeleton and the definition of done carry it. It's platform-neutral: it doesn't depend on any one tool's design skill. |
 | 1.6.0 | 2026-09-29 | **Instructions as an index, routing chosen per project, and a platform-neutral rule.** Phase 6: the project instructions file is loaded and re-read on every turn, so it becomes an **index**: a size budget in bytes as well as lines, rules and numbers in it with their reasons in the Decisions log, a "Read when" list of the docs, and detail moved to skills, agents' own files, path-scoped instructions and docs; the usage report measures it. Phase 13: model and effort are no longer a fixed table. Once the project type, architecture and dev cycle are known, each role gets a **model tier** (strong, standard or light) and an effort level from how hard its work is, what a miss costs, how often it runs and the usage profile, with a reason, confirmed with the user; the old table becomes the reference build's routing, a starting point. Phase 10 lists starting tiers. A directive at the top and a new **Appendix I, Platform bindings**: the method is platform-neutral, and platform specifics belong in that appendix (Claude Code is the reference binding; its inline specifics move there in 2.0.0). Lesson 22 added. |
 | 1.5.0 | 2026-09-29 | **Readable code for people, not just agents.** A new ground rule (11): code must be easy for a person to read and debug. Phase 5's "agent-readable code" becomes **readable code**, which always applies: the language's standard style guide and idioms, a formatter and linter where the stack allows them (run by the after-edit hook), names that say what things are (with units), file headers that say what the file holds, tests that read as specifications, and errors that name what failed and with which values. Phase 1 asks who will read and debug the code and sets a **comment level** (Agents-first, Standard or Human-maintained), chosen separately from the usage profile because it follows the code's readers, not the budget. Comments explain why, not what. Readability gives way only on measured hot paths and in generated output, with the reason recorded. Phases 3, 4, 6 and 14, the code-quality reviewer, the implementer template, the `CLAUDE.md` skeleton and the definition of done carry it. |
@@ -33,7 +34,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | 1.0.1 | 2026-09-28 | Renamed from Launchframe to Coldstarter (file `COLDSTARTER.md`, repo `lbennietech/coldstarter`). No changes to the method. |
 | 1.0 | 2026-09-28 | First release, as Launchframe: scale profiles (Solo/Team/Enterprise), project types, 17 launch phases, core agent roster with a dedicated security reviewer, triage and batching engine, hooks and CI, model routing, lessons from the reference build. |
 
-> **What this is.** A general launch pad for any serious project, for business or pleasure, solo or enterprise. You give it an idea, a business problem, a question to answer, a product or tool to build, or an integration to set up. It turns that into a working first version and a self-improving development framework. The framework includes:
+> **What this is.** A general launch pad for any serious project, for business or pleasure, solo or enterprise. You give it an idea, a business problem, a question to answer, a product or tool to build, or an integration to set up. It turns that into a working first version and a self-improving development framework, sized to the project: a one-off gets almost none of it, a small tool a light version, and a product that will keep changing all of it. The full framework includes:
 >
 > - a repository with a CI/CD flow to match
 > - readable, conventional code that a person can debug, commented to the level you choose
@@ -53,7 +54,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 >
 > Copy `COLDSTARTER.md` into the new folder first, or give Claude its full path.
 >
-> Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the whole framework, stopping at key decision points. When it's done, you run `/iterate` for one development cycle, or `/autoiterate` to let it keep working through the backlog on its own.
+> Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the framework at the size the project needs, stopping at key decision points. When it's done, a Standard or Full project runs `/iterate` for one development cycle, or `/autoiterate` to let it keep working through the backlog on its own.
 >
 > **Where it came from.** The method was distilled from building a real project end to end (Pocket Universe, a browser simulation) and its development loop, including the mistakes. Nothing here is game-specific. Every role and rule is stated generically, and Appendix A maps it to each kind of project.
 
@@ -75,13 +76,13 @@ You are launching a project for the user: from problem to working first version 
 ### Ground rules
 
 1. **Interview before building.** Phase 1 is a conversation. Don't write project code until the user confirms the problem statement, the scale profile and the solution direction.
-2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch the full framework if the user still wants it.
+2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch the full framework if the user still wants it. Size the framework to the project too (Phase 2): run only the phases in its dev plan, and add the rest when a trigger in the plan fires.
 3. **Stop at the gates** marked 🚦. Between gates, make the reasonable call, say what you chose, and keep moving.
 4. **Keep a progress file.** `docs/PROJECT_PROGRESS.md` holds the phase checklist and a **Decisions** log (date, decision, who made it, why). Its first line records where the framework came from: *"Launched with Coldstarter v<version> by Luke Bennie."* The project itself belongs to whoever the user names as its owner. A fresh session must be able to resume when the user says "continue the project launch".
 5. **Commit at the end of every phase** (`Phase N: …`), following the git flow of the chosen scale profile. Never force-push to shared branches. Ask before creating remote repositories, making anything public, deploying, or touching cloud accounts, billing or production.
 6. **Check the current docs** before writing config: Claude Code (agents, skills, hooks, settings, MCP) at code.claude.com/docs, and the chosen platforms' CI and hosting. The templates here reflect formats as of 2026-09. Verify them rather than assume.
 7. **Adapt, don't transplant.** Every role has a domain equivalent (Appendix A). Rename and reshape it, but keep its *function*.
-8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby project up. Only the depth of its checks scales with the profile.
+8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project sized Light or above gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby tool up, and a deliverable sized None gets a one-off security pass before it's delivered. Only the depth of the checks scales with the profile.
 9. **Respect the token budget.** Ask about it in Phase 1 and set a **usage profile** (Lean, Balanced or Throughput; section 1) from the answer. It shapes the agent specs, the workflow and the code layout, not just the models. Measure where the usage actually goes (the usage report) rather than guess.
 10. **Write docs for a person who starts cold.** Plain, direct sentences, tables for reference material, no filler.
 11. **Write code a person can read and debug.** From the first line of v1: the language's standard conventions and idioms, clear names, the stack's usual file layout, tests that read as specifications, and comments at the level chosen in Phase 1 ("Readable code" in Phase 5). Readability gives way only where a measured need forces it, and the code says why.
@@ -131,6 +132,24 @@ The usage profile doesn't set how much the code is commented: that's the **comme
 
 Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effort"). Revisit it at each retrospective with the usage report's numbers: a Lean project whose reviews keep missing real bugs should move a dimension up, and a Balanced project whose user keeps hitting limits should move one down, one dimension at a time.
 
+### Framework sizing
+
+The scale profile sets how heavy each piece of process is, and the usage profile how much usage it spends. **Framework sizing** decides which pieces exist at all: a one-off script doesn't need a reviewer roster, and a marketing dashboard doesn't need a batching engine. Choose it at the end of Phase 2, once the project type, scale, risk and expected lifespan are known.
+
+| | **None** | **Light** | **Standard** | **Full** |
+|---|---|---|---|---|
+| For | One-offs nobody will change later: a script, an analysis, a converted file, a single page | Small or short-lived tools, data views and dashboards, automations, internal utilities, prototypes | Products, services, integrations, libraries and games that will keep changing | Standard projects at Team or Enterprise scale, or that are regulated, or hosted with uptime targets |
+| Phases | 1 (quick), 2 (short), 4, and a short 17 | 1 to 7 (the docs kept short); 8 only if speed is a target; 13 for the session and the one implementer; 14's after-edit check and secrets guard; 16 as a single review; 17 | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
+| Agents | None beyond the session | One implementer and the security reviewer | The core roster (Phase 10) for the project type, three implementer tiers, triage | Standard's, plus the scale profile's extra reviewers |
+| Skills | None | `/devmanual`, and at most one small project skill (for example `/refresh` for a data view) | `/audit`, `/iterate`, `/autoiterate`, `/devmanual` | As Standard |
+| Backlog | None | `docs/TODO.md`: a short list of known issues and ideas, no triage | `BACKLOG.md` with triage and batches | As Standard |
+| Before a change ships | Run it and look at it; a one-off security pass | The tests, the change review, and the security reviewer on sensitive changes | The full ship routine (Phase 6) | The full ship routine, gated by CI and people |
+| Developers' guide | A "Working on this" section in README | `docs/DEV_CYCLE.md`, about half a page | `docs/DEV_CYCLE.md` in full (Phase 17) | As Standard, plus the scale profile's docs |
+| Life cycle | Deliver. A later change is a new request. | Ask for a change; it's implemented, tested and reviewed, then committed and deployed. Recurring chores, like a data refresh, run through the project skill. | `/audit` rarely; triage; `/iterate` or `/autoiterate` batch by batch | As Standard, through PRs and human approval |
+| Upgrade when | Someone asks for a second round of changes, or it will be kept and used: go to Light | Change requests keep coming (more than a handful waiting), more than one person relies on it, or it becomes a shared tool: go to Standard, adding the backlog, triage and `/iterate` first, then the roster and `/audit` | It moves to Team or Enterprise scale, handles regulated data, or becomes a hosted service with uptime targets: go to Full | — |
+
+Sizing is separate from the usage profile: sizing decides whether a piece of machinery exists, and the usage profile how the pieces that exist run. A size can go down as well as up: a finished product that only gets occasional fixes can drop from Standard to Light. Record either move in the Decisions log and the dev plan; an upgrade then runs the phases it adds.
+
 ---
 
 ## Phase 1: Intake and problem analysis 🚦
@@ -148,7 +167,11 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - **infrastructure or platform**
 
    Some inputs are more than one of these. A business *question* ("should we expand into X?") usually becomes an analysis project, whose deliverable is a report or dashboard rather than an app. The same framework applies (Appendix A).
-3. Ask the follow-up questions in **one grouped round**: at most about 15, each with a suggested default, so the user can answer "defaults are fine" to most of them.
+3. Ask the follow-up questions, in one of two modes. The user can switch at any time.
+   - **Quick round** (the default): one grouped round of at most about 15 questions, each with a suggested default, so the user can answer "defaults are fine" to most of them.
+   - **Grill mode:** one question at a time, each with a recommended answer and a line on why. Settle the decisions others depend on first (the problem and who it's for, then scale, data and security, then form and stack). Don't ask what the existing code or documents can answer: check them and say what you found. Stop when the problem analysis and the dev plan have what they need. Log every answer in the Decisions log. Suggest grill mode, with a one-line reason, when the project is at Team or Enterprise scale; handles money, health or personal data; integrates with external systems; makes irreversible changes (data migrations, deletions, anything public or financial); is meant to last; or when the requirements stay vague after the first answers. It draws on Matt Pocock's `grill-me` skill ([mattpocock/skills](https://github.com/mattpocock/skills)), which interviews the user about a plan until every branch of the decision tree is resolved.
+
+   Cover these topics in either mode:
    - **Problem and value:** what problem, for whom, what they do today, and why now. For business projects, add the stakeholders, the decision-maker, the business case and the KPIs the project should move.
    - **Success:** what "working" looks like, with measurable targets (speed, accuracy, cost, conversion, time saved, uptime).
    - **Form and platforms:** web, mobile, desktop, CLI, API, pipeline, report or dashboard, AI assistant. Desktop, phone or both. Online, offline or both.
@@ -156,7 +179,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - **Constraints:** budget (build and running cost), deadlines, hosting or cloud preferences, and existing systems to integrate with.
    - **Security and compliance:** personal, financial or health data; authentication and SSO needs; regulatory regimes; data residency; audit needs.
    - **Stack:** languages, frameworks and clouds the team knows or mandates, or "no preference".
-   - **Data:** sources, ownership, sensitivity, volume, and whether it's fresh or historical.
+   - **Data:** sources, ownership, sensitivity, volume, and whether it's fresh or historical. For a data view or dashboard, also: where the data comes from and who can access it; how it's refreshed, as a step its audience can run themselves; the metric definitions (a metric dictionary); who reads it; how it's shared and forwarded; and how sensitive it is (Appendix A).
    - **Distribution:** public or private repo, open source or proprietary, the organisation or GitHub account, and where it deploys.
    - **Identity:** project name, author or organisation for commits and copyright headers, and licence.
    - **Working style:** how autonomous Claude should be, and how often the user wants to review.
@@ -171,7 +194,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - constraints
    - risks and unknowns
    - what's out of scope for v1
-   - the **recommended scale profile**, **usage profile**, **comment level** and **project type**, with reasons
+   - the **recommended scale profile**, **usage profile**, **comment level** and **project type**, with reasons, and a first guess at the **framework size** (Phase 2 settles it)
 
    If a non-software answer is better, say so here (ground rule 2).
 5. 🚦 **Gate:** the user confirms or corrects the problem analysis, the scale profile, the usage profile, the comment level and the project type.
@@ -203,7 +226,8 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    If the organisation has a design system or brand guidelines, the direction starts from them. The direction becomes the top of `docs/DESIGN.md` (Phase 4, Appendix J).
 6. Propose a **v1 feature list** that can be built in one or two sessions, plus an architecture sketch (components, data flow, hot paths, trust boundaries).
 7. **Team and Enterprise:** write the key choices as decision records (`docs/adr/0001-<title>.md`: context, decision, alternatives, consequences).
-8. 🚦 **Gate:** the user confirms the stack, the non-functional requirements, the pillars, the visual direction (if there's a user interface) and the v1 scope.
+8. **Size the framework** (section 1, "Framework sizing"). From the project type, the scale, the risk (money, health or personal data, irreversible changes, external integrations) and the expected lifespan, recommend None, Light, Standard or Full. Write a short **dev plan** in `docs/PROJECT_PROGRESS.md`: the phases, agents, skills and gates the project gets, each with a reason, and for each thing left out, the trigger that would add it (for example "add benchmarks when a page takes over a second to load"). From here on, run only the phases in the dev plan, and keep the phase checklist to those.
+9. 🚦 **Gate:** the user confirms the stack, the non-functional requirements, the pillars, the visual direction (if there's a user interface), the v1 scope, and the framework size with its dev plan.
 
 ---
 
@@ -261,7 +285,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - determinism notes
    - test, bench, build and deploy commands
 2. Fill any gaps in testability left over from Phase 4.
-3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md` or `PIPELINE.md`): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
+3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md`, `PIPELINE.md`, or `METRICS.md` for a data view): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
 4. Write **operations notes** in `docs/OPERATIONS.md`: how to build, deploy, verify what's live (a version or build stamp), and roll back. For Solo, a few lines. Team and Enterprise extend it into runbooks (Phase 15).
 5. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
 6. Set up **readable code**, for the people who debug it and for agents. Claude writes clear, conventional code as fast as unclear code, and it pays back in every debugging session, human or agent. And every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost.
@@ -391,7 +415,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 
 ## Phase 10: Agent roster
 
-Create the agents in `.claude/agents/` (templates in Appendix C).
+Create the agents in `.claude/agents/` (templates in Appendix C). A **Light** project gets only one implementer (the standard tier by default) and the security reviewer; a **None** project gets no agents. The rest of this phase is for Standard and Full.
 
 ### Reviewers and auditors (read-only: never give them Edit or Write tools)
 
@@ -407,7 +431,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 | **product / experience designer** | Is it valuable and pleasant? First-minute experience, "aha" moments, missing capabilities, sharing. Small shippable ideas that serve the pillars. For business tools, "time to answer" and workflow fit. | Standard / medium |
 | **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Standard / low |
 | **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage, and readability (the code conventions, names, file headers, test structure, comments at the chosen level, stale comments). Respects the stack decision. | Standard / medium |
-| **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Strong / medium |
+| **security reviewer** | A dedicated security specialist, on **every project sized Light or above, and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Strong / medium |
 | **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Standard / medium |
 | **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. In `/iterate` it plays the batch's changes, starting from the test run it's given; the full three-persona sweep is for audits. | Standard / low |
 
@@ -499,9 +523,9 @@ Commit the roster.
 
 ---
 
-## Phase 12: Skills: `/audit`, `/iterate` and `/autoiterate`
+## Phase 12: Skills: `/audit`, `/iterate`, `/autoiterate` and `/devmanual`
 
-Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.claude/skills/autoiterate/SKILL.md` (skeletons in Appendix F). Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
+Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md`, `.claude/skills/autoiterate/SKILL.md` and `.claude/skills/devmanual/SKILL.md` (skeletons in Appendix F). Light: only `/devmanual`, plus at most one small skill for a chore the project repeats (for example `/refresh`, which rebuilds a data view from a new export); no `/audit`, `/iterate` or `/autoiterate`. None: no skills. Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
 
 **`/audit`**: rare and expensive; the backlog's source of truth.
 1. Check the build is current and the tools work.
@@ -543,6 +567,8 @@ Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.
 **When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent with SendMessage. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
 
 **Keep the orchestrating session lean** (in any skill). It re-reads its whole context on every turn, which makes it the biggest single cost in a long run: read parts of large files (`Grep`, or a read with an offset and limit) rather than whole ones, open images only when you need to see them, point agents at files rather than pasting them, and ask for short reports. Use typed agents rather than forks, since a fork starts with a copy of the whole session. After a compaction, rebuild state from the backlog's In progress rows, `git status` and the list of running agents. When the user runs `/iterate` by hand, suggest `/clear` between batches: the backlog and git hold the state. If an agent stops at its `maxTurns` cap, resume it with SendMessage rather than starting over.
+
+**`/devmanual`**: the developers' guide on demand, so nobody has to read `docs/DEV_CYCLE.md` to remember how the project works. With no argument it prints a short version: the framework size and its life cycle; only the commands that exist in this project; the current state (Standard and Full: the batch in progress and the next one; Light: the open items in `docs/TODO.md`, or when the data was last refreshed); and the upgrade trigger. `/devmanual full` prints the whole of `DEV_CYCLE.md`. It reads that doc, the backlog or `docs/TODO.md`, and git, and changes nothing. It's part of the docs that move together (Phase 17): a workflow change updates it in the same change.
 
 **`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
 - **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and push or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or stashing the rest, never leaving half-finished edits. Under `/loop`, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
@@ -591,7 +617,7 @@ By now the project type, the architecture (Phase 5), the dev cycle (Phases 10 to
 - Don't spawn agents for work that takes a couple of direct tool calls.
 - Durable project preferences go in the checked-in docs. Personal preferences go in memory.
 
-**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then the size, in lines and bytes, of every instruction file loaded at session start; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, instruction files over their size budget (Phase 6), agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline.
+**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then the size, in lines and bytes, of every instruction file loaded at session start; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, instruction files over their size budget (Phase 6), agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline. Light projects skip the usage report until they grow to Standard.
 
 Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 
@@ -599,7 +625,7 @@ Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 
 ## Phase 14: Hooks and CI: deterministic enforcement
 
-**Local hooks** (all profiles): scripts in `.claude/hooks/`, wired in `.claude/settings.json` (templates in Appendix G).
+**Local hooks** (all profiles): scripts in `.claude/hooks/`, wired in `.claude/settings.json` (templates in Appendix G). A Light project uses `after_edit.py` and `protect_secrets.py`, and a push gate that runs the tests only, unless its dev plan adds benchmarks.
 
 | Hook | Event | What it does |
 |---|---|---|
@@ -627,6 +653,8 @@ Commit.
 
 ## Phase 16: First audit, first batch, retrospective
 
+Standard and Full. **Light:** run the change review and the security reviewer once over v1, fix the blockers, and hold a short retrospective: does the size still fit? **None:** skip this phase.
+
 1. Run the full "before every change ships" routine once on the current state, and fix the blockers.
 2. 🚦 Ask before the first `/audit`, since it costs the most. Run it, then report the top 5 items and the batches.
 3. Run the first `/iterate`. Watch for:
@@ -640,7 +668,12 @@ Commit.
 
 ## Phase 17: Handoff
 
-1. Write `docs/USER_GUIDE.md` (with the docs writer): everything a user needs, in plain language and without code — how to use every feature, what the outputs mean, limits and error messages. Link it from the product's own help where there is one. Then write `docs/DEV_CYCLE.md`, the developers' guide. It covers:
+1. Write `docs/USER_GUIDE.md` (with the docs writer): everything a user needs, in plain language and without code — how to use every feature, what the outputs mean, limits and error messages. Link it from the product's own help where there is one. For None and Light, a README section can be the user guide.
+
+   Then write the developers' guide, **sized to the project**, and teach only its own life cycle: None and Light projects don't get `/audit`, `/iterate` or `/autoiterate`, and their docs don't mention them.
+   - **None:** a "Working on this" section in README: how to run it, how to change it, and when it would be worth more process (the upgrade trigger).
+   - **Light:** `docs/DEV_CYCLE.md` of about half a page: the life cycle, the commands that exist, where things live, the recurring chores, and the upgrade trigger.
+   - **Standard and Full:** `docs/DEV_CYCLE.md` in full. It covers:
    - a table of the commands
    - the backlog columns (Tier, estimated and actual time)
    - the batch categories and why the caps exist
@@ -650,33 +683,40 @@ Commit.
    - the A/B experiment convention
    - how to keep usage down
    - three worked examples using real batches from the backlog
-2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills, the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
+   - the upgrade and downgrade triggers for the framework size
+2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills (including `/devmanual`), the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
 3. Tick every phase in `docs/PROJECT_PROGRESS.md`. Once the development loop is live, mark it and this spec as archived history.
-4. Give the user a brief summary of the dev loop, with its commands and the first batch to run.
+4. Give the user a brief summary of the project's life cycle, with its commands (`/devmanual` repeats it at any time) and, for Standard and Full, the first batch to run.
 
 ### Definition of done
 
-Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both.
+Each item is marked with the smallest framework size it applies to: **[Light+]** for Light, Standard and Full; **[Standard+]** for Standard and Full; **[Full]** for Full only. Unmarked items apply to every size, None included. Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both. A project isn't incomplete for lacking what its size leaves out, as long as its dev plan records each omission and its trigger.
 
 - [ ] Problem analysis, project type, scale profile, usage profile, comment level, stack, non-functional requirements and pillars confirmed (in the Decisions log)
-- [ ] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
+- [ ] The framework size chosen, and the dev plan written: phases, agents, skills and gates, each with a reason, and a trigger for each thing left out
 - [ ] A working v1, shown to the user
-- [ ] User interfaces: the visual direction confirmed; design tokens and `docs/DESIGN.md` in place, and the UX reviewer checks against them
-- [ ] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
-- [ ] `docs/ARCHITECTURE.md` accurate; the system is deterministic, steppable and inspectable from tests; threat model (all profiles) and data classification (T/E)
-- [ ] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
-- [ ] Tests (full, quick and screens), the cross-platform matrix, invariant tests and accessibility checks all pass; security and dependency scans (T/E)
-- [ ] Benchmarks with a median-of-N baseline, a 5% compare gate and a budget report
-- [ ] Environment helper; MCP with a fallback; allowed-tool list (E)
-- [ ] Read-only reviewers with evidence rules and quirk lists, **including the security reviewer**; the three implementer tiers; triage
-- [ ] The first audit includes a security baseline; secret and dependency scans pass
-- [ ] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
-- [ ] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
-- [ ] Hooks (formatter, linter and quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
-- [ ] Model routing chosen for the project, with reasons, and confirmed; the usage report, run by `/audit`, with a first snapshot saved; the session's effort and compaction window pinned; agent turn caps and cache lifetimes set
-- [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
-- [ ] First audit, first batch shipped, retrospective done, settings tuned
-- [ ] `docs/USER_GUIDE.md`, the domain-logic reference and `docs/OPERATIONS.md` written and reviewed; `docs/DEV_CYCLE.md` written; all docs consistent; summary given to the user
+- [ ] User interfaces: the visual direction confirmed. [Light+] Design tokens and `docs/DESIGN.md` in place, and reviews check against them
+- [ ] None only: a one-off security pass over the deliverable, and a README that says what it is, how to run it, and how to work on it
+- [ ] [Light+] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
+- [ ] [Light+] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
+- [ ] [Light+] `docs/ARCHITECTURE.md` accurate (a few lines for a small project); the system is deterministic, steppable and inspectable from tests; threat model, and data classification (T/E)
+- [ ] [Light+] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
+- [ ] [Light+] Tests (full and quick; screens for user interfaces), invariant tests and accessibility checks all pass. [Standard+] The cross-platform matrix; security and dependency scans (T/E)
+- [ ] [Light+] The security reviewer and the change review in place. Light: one implementer, and `docs/TODO.md` for known issues and ideas
+- [ ] [Light+] Hooks: formatter, linter and quick check, and the secrets guard. [Standard+] The push gate and the baseline guard; CI mirrors them (T/E)
+- [ ] [Light+] Model routing chosen for the project, with reasons, and confirmed; the session's effort and compaction window pinned
+- [ ] [Light+] `/devmanual` working, and `docs/DEV_CYCLE.md` sized to the project
+- [ ] [Standard+] Benchmarks with a median-of-N baseline, a 5% compare gate and a budget report (Light: only if the dev plan adds them)
+- [ ] [Standard+] Environment helper; MCP with a fallback; allowed-tool list (E)
+- [ ] [Standard+] Read-only reviewers with evidence rules and quirk lists, **including the security reviewer**; the three implementer tiers; triage
+- [ ] [Standard+] The first audit includes a security baseline; secret and dependency scans pass
+- [ ] [Standard+] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
+- [ ] [Standard+] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
+- [ ] [Standard+] The usage report, run by `/audit`, with a first snapshot saved; agent turn caps and cache lifetimes set
+- [ ] [Full] The scale profile's extra reviewers; CI as the authority for the gates
+- [ ] [Standard+] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
+- [ ] [Standard+] First audit, first batch shipped, retrospective done, settings tuned. Light: v1 reviewed once, and a short retrospective on whether the size fits
+- [ ] [Light+] `docs/USER_GUIDE.md` (or its README section), the domain-logic reference and `docs/OPERATIONS.md` written (short for Light) and reviewed; all docs consistent. Every size: a summary of the project's life cycle given to the user
 
 ---
 
@@ -694,9 +734,21 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 | **Mobile app** | PWA first; then React Native/Flutter | Web, app stores | Device emulation, then device farms | offline behaviour, state restore, permissions | no data loss across restarts or offline | startup time, frame time, battery and network |
 | **CLI / library / SDK** | Python, Go, Rust, TypeScript | PyPI, npm, crates, releases | Unit and golden-file tests on each OS | API contract, backward compatibility | documented behaviour holds; round-trips; no crash on bad input | throughput, startup, size |
 | **Game / simulation** (the reference project) | Plain JS with Canvas/WebGL (one file or a few modules); or an engine | itch.io, Pages, stores | Playwright or engine test runner, invariant tests | numerical stability, conservation, determinism | same seed gives the same state; drift within tolerance; no NaN or tunnelling | fps per scenario, slow-device profile, memory |
+| **Data view / dashboard page** (for example a one-page view for a marketing team) | A small script that turns the source export into one self-contained HTML page, with the data aggregated and embedded; the organisation's BI tool if it has one | Email, SharePoint, Google Drive or an intranet page; works offline and prints | The build script run on a fixture export; a reconciliation check; a headless-browser screenshot | metric definitions, aggregation, filters, time zones and periods, chart choice | totals reconcile with the source; the same data gives the same numbers; filters never silently drop rows; missing data shows as "no data", never 0 | page size and filter time on the largest expected export; refresh time |
 | **Automation / spreadsheet** | Apps Script, Python + openpyxl, workflow tools | The user's workspace | Fixture-based tests | formula logic, dates, currencies | totals reconcile; reruns idempotent | runtime on large inputs |
 
 Rename the categories and agents to fit the project. For example, the reference project's `sim` category is `core` here, and its physics reviewer is the domain-correctness reviewer.
+
+**Typical framework size** (Phase 2 decides): a one-off analysis or script is usually None; a data view or dashboard, an automation or a small internal tool, Light; a product, service, integration, library or game that will keep changing, Standard; anything at Team or Enterprise scale, regulated, or hosted with uptime targets, Full.
+
+**Data views and dashboards** (for example single HTML pages for marketing people). Usually sized Light.
+
+- **Metric dictionary:** `docs/METRICS.md` is the domain-logic reference. For each metric: its name, what it means in plain language, the formula, the source fields, the filters, and who owns the definition. The page's labels use the same names.
+- **Refresh:** one documented step the audience can run themselves (for example, save the new export into a folder and run one command, or open one file). The page shows the date its data runs to. A project skill such as `/refresh` does the same for the developer.
+- **Invariants,** tested on every build: totals reconcile with the source; the same data gives the same numbers; filters never silently drop rows (show a count of what each filter excludes); missing data shows as "no data", never as 0.
+- **Privacy:** aggregate before embedding. A shipped file can be forwarded to anyone, so it holds no personal data and no group small enough to identify a person. Row-level detail stays in the source system, behind its own access controls.
+- **Chart quality,** checked in review: the chart fits the question (a line for a trend, bars for a comparison, a table when people need exact numbers); a colour-blind-safe palette; plain labels with units; bars that start at zero; direct labels rather than a legend where possible. The look follows `docs/DESIGN.md`, at the compact density a dashboard needs.
+- **Delivery:** it works as an email attachment, from SharePoint or Drive, offline, and printed (a print stylesheet), and makes no external requests that the audience's network might block.
 
 ---
 
@@ -705,7 +757,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 ```markdown
 # <Project name>
 
-<One paragraph: what it is, for whom, stack, where it runs. Scale profile: Solo | Team | Enterprise. `docs/ARCHITECTURE.md` explains the code; `docs/DEV_CYCLE.md` explains the dev loop.>
+<One paragraph: what it is, for whom, stack, where it runs. Scale profile: Solo | Team | Enterprise. Framework size: Light | Standard | Full (the dev plan is in `docs/PROJECT_PROGRESS.md`). `docs/ARCHITECTURE.md` explains the code; `docs/DEV_CYCLE.md` explains the dev loop.>
 
 <!-- Keep this file within about 150 lines and 10 KB: rules and numbers here, their reasons in the Decisions log, detail in the docs listed under "Read when". -->
 
@@ -847,7 +899,7 @@ Work through the items one at a time as separate, isolated edits. If an item tur
 
 ## Appendix C2: Security reviewer (full spec)
 
-Every project gets this agent, whatever its scale. Solo projects run the core checklist; Team and Enterprise add the CI scanners and compliance mapping.
+Every project sized Light or above gets this agent, whatever its scale; a deliverable sized None gets one pass with this checklist before it's delivered. Solo projects run the core checklist; Team and Enterprise add the CI scanners and compliance mapping.
 
 ```markdown
 ---
@@ -1025,7 +1077,15 @@ description: Audit the whole of <Project>: run the tests, benchmarks, scans and 
 ---
 ```
 
-The bodies follow Phase 12 step by step, including intake, the reviews-by-category table, the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
+```markdown
+---
+name: devmanual
+description: Print <Project>'s developers' guide, sized to the project - the framework size and its life cycle, the commands that apply, the current state and the upgrade trigger. 'full' prints the whole of docs/DEV_CYCLE.md. Use when the user asks how to work on the project, what the commands are, or what to do next.
+argument-hint: "[nothing for the short version, or 'full']"
+---
+```
+
+Standard and Full projects get all four; Light projects get only `/devmanual` (and at most one project skill). The bodies follow Phase 12 step by step, including intake, the reviews-by-category table, the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
 
 ---
 
