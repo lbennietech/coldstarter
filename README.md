@@ -125,6 +125,8 @@ For Standard and Full projects, once the first version ships, work doesn't flow 
 
 **Good enough is a result.** A system built to find improvements will always find more, and an autonomous loop could spend hours on changes nobody needed. So an improvement becomes backlog work only if it passes an **actionability test**. It's set aside when the behaviour is intentional, the measurable benefit is negligible, the change adds more complexity than it earns, users wouldn't notice, the code is already within its budget, or it serves no design pillar, target or requirement. Security, correctness and regression blockers always pass. Set-aside findings are recorded as "won't do: good enough", so reviewers don't raise them again unless the evidence changes, and "nothing here is worth changing" counts as a valid audit result.
 
+**Stop digging.** The same goes for ending work. When the requested behaviour works, the tests pass, the review finds no blocker and the measured targets are met, the agent stops and ships. It doesn't keep refactoring to make the code "better" unless the change is tied to a documented requirement, invariant, budget, security issue or backlog item. Anything it notices on the way becomes a finding for triage, not part of the change, so a simple fix doesn't turn into an architecture rewrite.
+
 The payoff is measured, not assumed: in the reference build, 14 small `ui` and `tooling` fixes shipped in about 35 minutes as batches, against an estimated 175–245 minutes if they'd been done one at a time. Every batch's actual time gets recorded next to its estimate, so the estimates get more accurate the more the project runs `/iterate`.
 
 ## What's in this repository
