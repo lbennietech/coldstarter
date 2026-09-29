@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.4.0 (2026-09-29) |
+| **Version** | 1.5.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.5.0 | 2026-09-29 | **Readable code for people, not just agents.** A new ground rule (11): code must be easy for a person to read and debug. Phase 5's "agent-readable code" becomes **readable code**, which always applies: the language's standard style guide and idioms, a formatter and linter where the stack allows them (run by the after-edit hook), names that say what things are (with units), file headers that say what the file holds, tests that read as specifications, and errors that name what failed and with which values. Phase 1 asks who will read and debug the code and sets a **comment level** (Agents-first, Standard or Human-maintained), chosen separately from the usage profile because it follows the code's readers, not the budget. Comments explain why, not what. Readability gives way only on measured hot paths and in generated output, with the reason recorded. Phases 3, 4, 6 and 14, the code-quality reviewer, the implementer template, the `CLAUDE.md` skeleton and the definition of done carry it. |
 | 1.4.0 | 2026-09-29 | **Usage profiles.** Phase 1 now asks how much the project should optimise for Claude usage, and records a **usage profile** (Lean, Balanced or Throughput) next to the scale profile. The savings that cost no quality stay in every profile; the profile sets the real trade-offs: review depth, audit breadth, asking before Deep or A/B work, reviewer effort, the user tester's scope, the compaction window, and how strictly code is kept agent-readable. Phase 5 gains **agent-readable code** (small files split by concern, searchable names, quiet tool output), because every agent turn re-reads what it has read. Lesson 21 added. |
 | 1.3.0 | 2026-09-29 | **Usage review and token-efficiency defaults**, from the reference build's first measurement of where its Claude usage went. A **usage report** (`tools/usage_report.py`, specified in Phase 13) prices the project's Claude Code usage from the local session transcripts, per main session and agent type, and prints findings in the audit format without spending model tokens. Every `/audit` runs it, and `/audit usage` runs it alone. New defaults: the main session pins its effort and compacts at 200K tokens; implementers keep a one-hour prompt cache; every agent gets a `maxTurns` guard; `/iterate` runs the tests once and briefs reviewers with the results, always names the `/code-review` level, and calls `triage` once per batch; forks are avoided in large sessions; on a usage-limited plan `/autoiterate` asks before Deep or A/B batches; changes to the safety gates' logic go to the Opus tier; shipped items move to `BACKLOG_DONE.md`. Lessons 19 and 20 added. |
 | 1.2.1 | 2026-09-29 | `/autoiterate` gets an explicit off switch as an argument rather than a second command: `/autoiterate stop` finishes the batch in flight and stops; `/autoiterate stop now` stops at the next safe point without leaving half-finished edits; under `/loop`, both cancel the scheduled wake-up. |
@@ -31,6 +32,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 > **What this is.** A general launch pad for any serious project, for business or pleasure, solo or enterprise. You give it an idea, a business problem, a question to answer, a product or tool to build, or an integration to set up. It turns that into a working first version and a self-improving development framework. The framework includes:
 >
 > - a repository with a CI/CD flow to match
+> - readable, conventional code that a person can debug, commented to the level you choose
 > - tests and quality gates
 > - performance and correctness measurement
 > - specialist reviewer agents
@@ -77,6 +79,7 @@ You are launching a project for the user: from problem to working first version 
 8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby project up. Only the depth of its checks scales with the profile.
 9. **Respect the token budget.** Ask about it in Phase 1 and set a **usage profile** (Lean, Balanced or Throughput; section 1) from the answer. It shapes the agent specs, the workflow and the code layout, not just the models. Measure where the usage actually goes (the usage report) rather than guess.
 10. **Write docs for a person who starts cold.** Plain, direct sentences, tables for reference material, no filler.
+11. **Write code a person can read and debug.** From the first line of v1: the language's standard conventions and idioms, clear names, the stack's usual file layout, tests that read as specifications, and comments at the level chosen in Phase 1 ("Readable code" in Phase 5). Readability gives way only where a measured need forces it, and the code says why.
 
 ---
 
@@ -117,7 +120,9 @@ Some savings cost nothing in quality, so every profile gets them: the usage repo
 | User tester in `/iterate` | Plays only the batch's changes, at the sizes they affect | Plays the batch's changes at desktop and phone sizes | Plays the batch's changes, plus a short newcomer pass every batch |
 | Main session | Compacts at 200K; `/clear` between hand-run batches | Compacts at 200K | Compacts at 400K, for more continuity |
 | Batch caps | As Phase 11 (bigger batches mean fewer review cycles, but don't raise the caps: failures get harder to isolate) | As Phase 11 | As Phase 11 |
-| Code layout (see "Agent-readable code" in Phase 5) | A rule: files split by concern and kept small, tool output quiet by default, checked in code review | Strong guidance | Guidance |
+| Code layout (see "Readable code" in Phase 5) | A rule: files split by concern and kept small, tool output quiet by default, checked in code review | Strong guidance | Guidance |
+
+The usage profile doesn't set how much the code is commented: that's the **comment level** (Phase 5), chosen by who will read and debug the code. A Lean project maintained by people can still be Human-maintained; it just pays for longer files knowingly.
 
 Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effort"). Revisit it at each retrospective with the usage report's numbers: a Lean project whose reviews keep missing real bugs should move a dimension up, and a Balanced project whose user keeps hitting limits should move one down, one dimension at a time.
 
@@ -125,7 +130,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 
 ## Phase 1: Intake and problem analysis 🚦
 
-**Goal:** an agreed problem statement, project type, scale profile and usage profile, before any solutioning.
+**Goal:** an agreed problem statement, project type, scale profile, usage profile and comment level, before any solutioning.
 
 1. Read the user's input. If the folder already has code, survey it first (stack, entry points, tests, CI, deployment) and say what you found.
 2. **Classify the input:**
@@ -151,6 +156,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - **Identity:** project name, author or organisation for commits and copyright headers, and licence.
    - **Working style:** how autonomous Claude should be, and how often the user wants to review.
    - **Usage plan and ethos:** the Claude plan (Pro, Max, Team, Enterprise, or API), whether the user hits usage limits, and how much the project should optimise for usage in its agent specs, workflow and coding style: cost first (Lean), balanced, or speed and depth first (Throughput). Suggest the profile from the plan (Pro → Lean, Max or Team → Balanced), and say in a line what each would change.
+   - **Code readers:** who will read and debug the code: agents only, agents plus a person who looks in now and then, or people who will maintain it (a handoff, a team, a learning project, long-lived code). This sets the **comment level** (Phase 5): suggest Standard, or Human-maintained when people will maintain it, and say in a line that higher levels mean longer files, which every agent reading them pays for.
    - **Reporting:** how the user wants progress reported (tables, summaries, which columns).
    - **v1 scope:** the smallest version that would be worth having.
 4. Write back a **problem analysis** of about one page:
@@ -160,10 +166,10 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - constraints
    - risks and unknowns
    - what's out of scope for v1
-   - the **recommended scale profile**, **usage profile** and **project type**, with reasons
+   - the **recommended scale profile**, **usage profile**, **comment level** and **project type**, with reasons
 
    If a non-software answer is better, say so here (ground rule 2).
-5. 🚦 **Gate:** the user confirms or corrects the problem analysis, the scale profile, the usage profile and the project type.
+5. 🚦 **Gate:** the user confirms or corrects the problem analysis, the scale profile, the usage profile, the comment level and the project type.
 
 ---
 
@@ -198,7 +204,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - `docs/PROJECT_PROGRESS.md`
    - Team and Enterprise: `CONTRIBUTING.md`, and a PR template
    - Enterprise: `CODEOWNERS`, `SECURITY.md`, and a changelog convention
-3. Set the **header convention** for new source files (copyright or licence line) and record it in `CLAUDE.md`.
+3. Set the **header convention** for new source files (the copyright or licence line, then a line or two saying what the file holds) and the **code conventions** ("Readable code" in Phase 5): the language's standard style guide or the organisation's own, a formatter and linter where the stack allows them (for example Prettier and ESLint, Black or Ruff, gofmt, rustfmt), the test framework's usual layout, and the comment level from Phase 1. Record them in `CLAUDE.md`.
 4. 🚦 **Ask before creating the remote**: the account or organisation, public or private (for example `gh repo create`). Then:
    - **Solo:** push `main` and set up deployment (static hosting, a platform deploy).
    - **Team:** add CI, running the same test and bench commands the local hooks run, plus preview deployments per PR, and protect `main` so merging requires CI to pass.
@@ -216,7 +222,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 
 **Goal:** something real that runs end to end, not scaffolding.
 
-1. Build the v1 features in the chosen stack. Keep the structure as simple as the stack allows.
+1. Build the v1 features in the chosen stack. Keep the structure as simple as the stack allows, and write to the code conventions from the first line ("Readable code" in Phase 5): clear code costs no more to write than unclear code, and far less than cleaning it up later.
 2. Design for the development loop from day one:
    - **Deterministic by construction:** all randomness that shapes behaviour goes through one seedable function (for example `rand()`). Time and external inputs can be injected or faked in tests.
    - **Steppable:** the core loop or workflow can run without real time or real services (fixed steps, fake clock, recorded fixtures).
@@ -244,11 +250,27 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md` or `PIPELINE.md`): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
 4. Write **operations notes** in `docs/OPERATIONS.md`: how to build, deploy, verify what's live (a version or build stamp), and roll back. For Solo, a few lines. Team and Enterprise extend it into runbooks (Phase 15).
 5. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
-6. Set up **agent-readable code.** Every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost, in every usage profile. Under a Lean usage profile these are rules, checked in code review; otherwise they're strong guidance.
-   - Split code by concern into files an agent can read whole (a few hundred lines, not thousands), and keep `docs/ARCHITECTURE.md` saying what lives where, so an agent reads only the files a change touches.
-   - Use distinctive, searchable names, and cite code by file and function name, so agents find things with one search instead of paging.
-   - Make tools quiet by default: tests, builds and benchmarks print a one-line summary on success and the details only on failure (with a `--verbose` flag for more).
-   - Keep generated or bundled output out of agents' way: mark it as generated, and point agents at the source.
+6. Set up **readable code**, for the people who debug it and for agents. Claude writes clear, conventional code as fast as unclear code, and it pays back in every debugging session, human or agent. And every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost.
+   - **Always** (every profile and comment level; checked in code review and by the code-quality reviewer):
+     - **Conventions:** follow the language's standard style guide and idioms (for example PEP 8, Effective Go, the Rust API guidelines, a well-known JavaScript or TypeScript guide) or the organisation's own, with a formatter and linter enforcing them where the stack allows. Prefer the well-known way to do a thing over a clever one.
+     - **Names** say what things are: full words in the language's naming convention, units where they matter (`timeoutMs`, `massKg`), booleans that read as questions (`isVisible`, `hasErrors`), no single letters outside short loops and standard maths, and one name per concept across the codebase. Keep them distinctive and searchable, and cite code by file and function name, so people and agents find things with one search instead of paging.
+     - **Structure:** the stack's conventional project layout; code split by concern into files that can be read whole (a few hundred lines, not thousands); functions that do one thing; and `docs/ARCHITECTURE.md` saying what lives where, so a reader opens only the files a change touches.
+     - **File headers:** every source file starts with the header convention (Phase 3), including a line or two on what the file holds.
+     - **Tests read as specifications:** the framework's usual layout, mirroring the source; names that state the behaviour (`test_merge_conserves_momentum`); arrange, act, assert; one behaviour per test; no logic beyond setup; and failure messages that show the expected and actual values.
+     - **Debuggable errors:** fail loudly, with a message naming what failed and the values involved. Never swallow an error silently.
+     - **Quiet tools:** tests, builds and benchmarks print a one-line summary on success and the details only on failure (with a `--verbose` flag for more).
+     - **Generated output** (bundles, minified or compiled files) is marked as generated, and points readers at the source, which stays readable.
+   - **Comment level**, chosen in Phase 1 and recorded in `CLAUDE.md` (Conventions):
+
+     | Level | For | Comments |
+     |---|---|---|
+     | **Agents-first** | Code only agents maintain, where usage matters most | File headers, and comments only where the reason isn't obvious from the code (a workaround, a constraint, where a tolerance comes from) |
+     | **Standard** (the default) | Most projects: a person reads the code now and then, to debug or review it | Plus a doc comment on every public function, class and module, in the language's convention (JSDoc, docstrings, Javadoc, rustdoc, XML doc comments): purpose, parameters with units, return value, errors |
+     | **Human-maintained** | Handoffs, teams, learning projects, long-lived code that people will own | Plus doc comments on internal functions, a comment on every non-obvious block (algorithms, maths, state machines, concurrency), and a short "how to debug this" note in each module's header: what to inspect or log, and the known failure modes |
+
+     At every level, comments explain *why* and name the constraints; they don't restate *what* the next line does, because a comment that repeats the code goes stale and misleads. A change that makes a comment wrong updates it. Higher levels make files longer, and every agent that reads a file pays for its length on each turn, so choose the lowest level that serves the people who will read the code.
+   - **Where readability gives way:** a measured hot path may trade clarity for speed, with a comment giving the reason and the measurement; shipped output may be minified or bundled while the source stays readable. Nothing else is an exception.
+   - Under a Lean usage profile the layout rules (small files split by concern, quiet tools) are rules, checked in code review; otherwise they're strong guidance (section 1).
 7. Commit.
 
 ---
@@ -270,7 +292,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 - **Design pillars.**
 - **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in).
 - **Model and effort:** the routing table from Phase 13, with a date and reason for each setting.
-- **Conventions:** commit authorship, header, code style, platform and input conventions, "keep README in step", "all randomness through `rand()`".
+- **Conventions:** commit authorship, header, the code conventions (style guide, formatter and linter, naming, test layout) and the comment level, platform and input conventions, "keep README in step", "all randomness through `rand()`".
 
 🚦 **Gate:** propose the numeric targets, the invariants and the security controls, and get them confirmed. Then commit.
 
@@ -360,7 +382,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 | **UX reviewer** (user-facing) | Screenshots and live use at several viewport sizes: discoverability, feedback, hierarchy, touch, keyboard, contrast, reduced motion, accessibility. | Sonnet / medium |
 | **product / experience designer** | Is it valuable and pleasant? First-minute experience, "aha" moments, missing capabilities, sharing. Small shippable ideas that serve the pillars. For business tools, "time to answer" and workflow fit. | Sonnet / medium |
 | **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Sonnet / low |
-| **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage. Respects the stack decision. | Sonnet / medium |
+| **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage, and readability (the code conventions, names, file headers, test structure, comments at the chosen level, stale comments). Respects the stack decision. | Sonnet / medium |
 | **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Opus / medium |
 | **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Sonnet / medium |
 | **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. In `/iterate` it plays the batch's changes, starting from the test run it's given; the full three-persona sweep is for audits. | Sonnet / low |
@@ -545,7 +567,7 @@ Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 
 | Hook | Event | What it does |
 |---|---|---|
-| `after_edit.py` | PostToolUse on Edit/Write/MultiEdit | If a watched file changed (source, test harness, bench scenarios), runs the **quick** check. Exits 2 with the output on failure. |
+| `after_edit.py` | PostToolUse on Edit/Write/MultiEdit | If a watched file changed (source, test harness, bench scenarios), runs the formatter and linter on it (if the project has them), then the **quick** check. Exits 2 with the output on failure. |
 | `before_push.py` | PreToolUse on Bash/PowerShell | On a real `git push` (matching `git [global options] push`, not `git stash push` or "push" inside a message) **of this repository**, runs the full tests and `bench --compare`. Exits 2 to block. It works out the push's target from any `cd`/`Set-Location` earlier in the command and from `git -C <dir>`, then asks git which repo that is. Pushes of other repos made from the same session pass through, and an undeterminable target is gated (fail safe). |
 | `protect_baseline.py` | PreToolUse on Edit/Write/MultiEdit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
 | `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
@@ -600,9 +622,10 @@ Commit.
 
 Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both.
 
-- [ ] Problem analysis, project type, scale profile, usage profile, stack, non-functional requirements and pillars confirmed (in the Decisions log)
+- [ ] Problem analysis, project type, scale profile, usage profile, comment level, stack, non-functional requirements and pillars confirmed (in the Decisions log)
 - [ ] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
 - [ ] A working v1, shown to the user
+- [ ] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
 - [ ] `docs/ARCHITECTURE.md` accurate; the system is deterministic, steppable and inspectable from tests; threat model (all profiles) and data classification (T/E)
 - [ ] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions
 - [ ] Tests (full, quick and screens), the cross-platform matrix, invariant tests and accessibility checks all pass; security and dependency scans (T/E)
@@ -612,7 +635,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] The first audit includes a security baseline; secret and dependency scans pass
 - [ ] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
 - [ ] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
-- [ ] Hooks (quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
+- [ ] Hooks (formatter, linter and quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
 - [ ] The usage report, run by `/audit`, with a first snapshot saved; the session's effort and compaction window pinned; agent turn caps and cache lifetimes set
 - [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
 - [ ] First audit, first batch shipped, retrospective done, settings tuned
@@ -682,7 +705,9 @@ Rename the categories and agents to fit the project. For example, the reference 
 ### Documentation
 - Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
-- Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line)
+- Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line), then a line or two on what the file holds.
+- Code: <style guide>; <formatter and linter>, run by the after-edit hook. Names say what things are, with units. Tests: <layout>, names that state the behaviour, arrange/act/assert. Errors name what failed and the values.
+- Comment level: <Agents-first / Standard / Human-maintained>, chosen <date> because <reason>. Comments say why, not what; update them with the code.
 - Commits authored as <Name> <email> (repo git config). <Style, platform and input conventions.> Keep README in step. All randomness through `rand()`.
 ```
 
@@ -759,7 +784,7 @@ You implement backlog items for <Project>. Read `CLAUDE.md` first.
 You implement and test. You never commit, push, merge or deploy.
 
 ## What to do
-1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules.
+1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules. Write to the code conventions and comment level in `CLAUDE.md`: clear names, the language's idioms, comments that say why, and doc comments at the chosen level. Update any comment your change makes wrong.
 2. Add or extend a test for new behaviour.
 3. Run the full tests once at the end. If something fails, fix it or report exactly what's blocking. Don't work around it. Don't run the full benchmark comparison: /iterate runs it right after you (the exception is one arm of an A/B experiment, which benchmarks itself once, near the end).
 4. Update README.md or the docs if behaviour or usage changed.
@@ -1044,7 +1069,7 @@ Test the targeting logic from a file, not from a command line that contains the 
   "permissionDecisionReason": "bench/baseline.json only changes through the --baseline command, and only when the numbers genuinely improved."}}
 ```
 
-`after_edit.py`: if `tool_input.file_path` ends with a watched path, run the tests with `--quick` and exit 2 with the tail of the output on failure.
+`after_edit.py`: if `tool_input.file_path` ends with a watched path, run the formatter and linter on that file (if the project has them), then the tests with `--quick`, and exit 2 with the tail of the output on failure.
 
 For Team and Enterprise, add a CI workflow (for example GitHub Actions) that runs the same test and bench-compare commands on every PR, and make them required status checks.
 
