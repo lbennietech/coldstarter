@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.1.0 (2026-09-29) |
+| **Version** | 1.2.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.2.0 | 2026-09-29 | Documentation for every profile, not just developer docs: a **user guide** (`docs/USER_GUIDE.md`), a **domain-logic reference** (the rules the system follows, reviewed by the domain-correctness reviewer) and **operations notes** (`docs/OPERATIONS.md`: build, deploy, verify, roll back) join README, ARCHITECTURE, DEV_CYCLE and the threat model. A new core agent, the **docs writer** (Sonnet, medium; edits docs only), writes them and checks every doc against the code in each `/audit`. `CLAUDE.md` gains a Documentation rule: every behaviour change updates its doc in the same change. Lesson 18 added. |
 | 1.1.0 | 2026-09-29 | New `/autoiterate` skill: it loops the `/iterate` cycle batch after batch without waiting for the user, stops only when the backlog is done, a decision needs the user, or something is broken, and pauses and resumes on its own around session limits (run as `/loop /autoiterate` for unattended runs). `/iterate` stays a single cycle and gains step 0, Intake: requests the user sends mid-run are consolidated with queued items, then triage regroups and refreshes priorities, keeping the user's pins. A limit rule for both: on a usage or rate-limit error, check the real clock before pausing; if the reset has passed, resume. Lessons 16 and 17 added. |
 | 1.0.7 | 2026-09-28 | The reference project's single-file layout is no longer presented as the default or as a lesson to copy: it was a starting choice that hardened into a rule the owner never set, and it has been dropped. Lesson 1 records what that cost. Phase 2 now asks for the stack to be recorded as a decision with a revisit trigger. The web-app and game stack suggestions no longer lead with "single file". |
 | 1.0.6 | 2026-09-28 | Licence clarified: an additional permission makes clear that products built with Coldstarter, including commercial ones, belong to whoever builds them. The non-commercial condition covers only selling, sublicensing or repackaging the spec. No changes to the method. |
@@ -89,7 +90,7 @@ Pick one in Phase 1. It decides how heavy every later phase is. Anything not mar
 | Secrets | A git-ignored `.env` | The hosting platform's secret store | Vault or KMS, with rotation and least-privilege access. Never in agent context. |
 | Security review depth | A dedicated security reviewer on every audit and on sensitive changes: OWASP-style checklist, secrets and dependency hygiene | Plus a threat model kept current, security regression tests, and dependency and secret scanning in CI | Plus a formal threat model, SAST/DAST/SCA/IaC scanning as required checks, findings ready for a pen test, and a compliance mapping |
 | Extra reviewers | None | A compliance reviewer if the domain is regulated | Compliance, infrastructure/SRE, accessibility, data governance, architecture |
-| Docs | README, ARCHITECTURE, DEV_CYCLE | Plus decision records in `docs/adr/`, and CONTRIBUTING | Plus a threat model, runbooks, SLOs, a data classification, onboarding docs and a changelog |
+| Docs | README, a user guide, ARCHITECTURE, a domain-logic reference, operations notes, DEV_CYCLE and a threat model | Plus decision records in `docs/adr/`, CONTRIBUTING and a changelog | Plus runbooks, SLOs, a data classification and onboarding docs |
 | Operations | None, or console logging | Error tracking and basic metrics | Logging, metrics, tracing, SLOs, alerting, and incident and rollback runbooks |
 | Compliance | None | Privacy basics (GDPR/CCPA if personal data) | Whatever applies: SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS, accessibility law. Plus an audit trail. |
 | Agent autonomy | High: implements, commits and pushes | Medium: implements and opens PRs; people merge | Low to medium: implements and opens PRs; people approve. No production access. Tools restricted. |
@@ -217,8 +218,10 @@ Mixed cases are normal. For example, a solo developer building something that ha
    - determinism notes
    - test, bench, build and deploy commands
 2. Fill any gaps in testability left over from Phase 4.
-3. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
-4. Commit.
+3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md` or `PIPELINE.md`): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
+4. Write **operations notes** in `docs/OPERATIONS.md`: how to build, deploy, verify what's live (a version or build stamp), and roll back. For Solo, a few lines. Team and Enterprise extend it into runbooks (Phase 15).
+5. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
+6. Commit.
 
 ---
 
@@ -331,6 +334,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 | **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Sonnet / low |
 | **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage. Respects the stack decision. | Sonnet / medium |
 | **security reviewer** | A dedicated security specialist, on **every project and every audit**, and on any change that touches a sensitive area. Covers the threat model, authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, headers and CSP, CI/CD and infrastructure config, data protection, and LLM-specific risks. Full spec in Appendix C2. | Opus / medium |
+| **docs writer** | Writes the user guide, the domain-logic reference and the operations notes, and in every `/audit` checks each doc against the code and product, flagging drift and features that shipped undocumented. The one non-implementer allowed to edit, and only docs. Domain docs need their expert's review. | Sonnet / medium |
 | **user tester** | Runs the tests with screenshots, then uses the product live as **three personas**: *newcomer* (the first 60 seconds, arriving cold), *power user* (builds something deliberate), *breaker* (spams input, extreme values, resizing, switching mid-action). Gives a ship verdict or audit findings. | Sonnet / low |
 
 **Added by scale or domain:**
@@ -428,7 +432,7 @@ Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.
 **`/audit`**: rare and expensive; the backlog's source of truth.
 1. Check the build is current and the tools work.
 2. Collect evidence: the tests with `--screens`, `bench --compare`, and the security scans (Team and Enterprise).
-3. Dispatch every relevant reviewer **in parallel, in the background**, always including the security reviewer. Brief each with the key numbers and the evidence paths. They're read-only and cite their evidence. If the project's agents aren't available as agent types, run general-purpose agents told to follow the matching agent file.
+3. Dispatch every relevant reviewer **in parallel, in the background**, always including the security reviewer and the docs writer (in audit mode). Brief each with the key numbers and the evidence paths. They're read-only and cite their evidence. If the project's agents aren't available as agent types, run general-purpose agents told to follow the matching agent file.
 4. `triage` merges the findings and scores them, assigns Tier and Est. time, and regroups the batches.
 5. Report: the headline numbers, the top 5 Ready items, the batches, and the decisions the user needs to make. Commit `BACKLOG.md` (in a PR, for Team and Enterprise).
 
@@ -541,7 +545,7 @@ Commit.
 
 ## Phase 17: Handoff
 
-1. Write `docs/DEV_CYCLE.md`, the human guide. It covers:
+1. Write `docs/USER_GUIDE.md` (with the docs writer): everything a user needs, in plain language and without code — how to use every feature, what the outputs mean, limits and error messages. Link it from the product's own help where there is one. Then write `docs/DEV_CYCLE.md`, the developers' guide. It covers:
    - a table of the commands
    - the backlog columns (Tier, estimated and actual time)
    - the batch categories and why the caps exist
@@ -551,7 +555,7 @@ Commit.
    - the A/B experiment convention
    - how to keep usage down
    - three worked examples using real batches from the backlog
-2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the skills, the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
+2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the skills, the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
 3. Tick every phase in `docs/PROJECT_PROGRESS.md`. Once the development loop is live, mark it and this spec as archived history.
 4. Give the user a brief summary of the dev loop, with its commands and the first batch to run.
 
@@ -574,7 +578,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] Hooks (quick check, push gate, baseline guard, secrets guard); CI mirrors them (T/E)
 - [ ] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
 - [ ] First audit, first batch shipped, retrospective done, settings tuned
-- [ ] `docs/DEV_CYCLE.md` written, all docs consistent, summary given to the user
+- [ ] `docs/USER_GUIDE.md`, the domain-logic reference and `docs/OPERATIONS.md` written and reviewed; `docs/DEV_CYCLE.md` written; all docs consistent; summary given to the user
 
 ---
 
@@ -636,6 +640,8 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
 ### Model & effort
 - <Phase 13 routing table, with dates and reasons>
+### Documentation
+- Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
 - Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line)
 - Commits authored as <Name> <email> (repo git config). <Style, platform and input conventions.> Keep README in step. All randomness through `rand()`.
@@ -671,6 +677,27 @@ You never edit, commit, push or deploy, and you never use production credentials
 ## Report
 Findings only, most valuable first, in the AREA-### format. No evidence, no finding.
 (When reviewing a change rather than auditing: findings with file:line, a concrete trigger scenario and your confidence. Say plainly if nothing is worth fixing.)
+```
+
+**Docs writer** (edits docs only):
+
+```markdown
+---
+name: docs-writer
+description: Writes and audits <Project>'s documentation - user guide, domain-logic reference, operations notes, threat model - and checks in /audit that every doc still matches the code. Edits documentation only.
+model: sonnet
+effort: medium
+tools: Bash, Read, Edit, Write, Glob, Grep   # + mcp__playwright to use a UI
+---
+
+You write and maintain <Project>'s docs. Read `CLAUDE.md` and `docs/ARCHITECTURE.md` first.
+You edit only README and `docs/`; never code, tests, tools or agents; never commit, push or deploy.
+
+## Writing
+Confirm every claim in the code or the running product. Plain sentences for a reader who starts cold; tables for reference; one concern per doc, linking instead of duplicating. Domain docs need their expert's review before they ship.
+
+## Auditing
+Check every doc against the current code and product. Report each mismatch, and each feature that shipped without docs, as a DOC-### finding with evidence (doc line vs code or observation).
 ```
 
 **Implementer** (three copies: `implementer` sonnet/medium, `implementer-opus` opus/medium, `implementer-deep` opus/high):
@@ -987,3 +1014,4 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 15. **Scope the gates to their repository.** The reference project's push gate fired on every push the session ran, so publishing a separate repo (this spec) was blocked by the game's benchmark noise. A gate must check which repo a command targets, and still fail safe when it can't tell.
 16. **Consolidate requests as they arrive.** The reference user sent ideas in bursts while agents were working: a bug, a progression system, a save system, a font theme, scene ideas. Taken one by one they would have produced near-duplicate items (a save system, a snapshot link, an undo and a share link all needed the same serializer). An intake step merged them into existing items, retired two as superseded, and had triage re-order the queue while keeping the user's pins. Run it at the start of every cycle, not just at audits.
 17. **Separate one cycle from the loop, and check the clock on limits.** "Keep iterating while I'm away" and "do the next batch" are different commands: `/iterate` for one cycle, `/autoiterate` for the loop. During the reference build an agent failed with "session limit, resets 2pm"; the orchestrator treated it as live and rerouted work, but it was already 4:45pm and the limit had long reset. Late notifications are normal, so read the real clock before pausing.
+18. **Documentation is more than developer docs.** The reference build had a strong README, architecture guide and dev-cycle guide, but no user guide and no reference for the rules the simulation follows. Those rules were scattered across code comments and backlog entries, so every reviewer re-derived them. The owner noticed only after dozens of batches. Plan the user guide, the domain-logic reference and the operations notes from launch, give one agent the job of keeping them true, and audit docs like code.

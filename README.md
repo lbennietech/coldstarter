@@ -37,6 +37,7 @@ Coldstarter is a specification you give to [Claude Code](https://claude.com/clau
    - tiered implementer agents
    - an evidence-based backlog with a triage and batching engine
    - `/audit`, `/iterate` and `/autoiterate` loops
+   - documentation for users, developers and operators, kept true by a docs writer
    - enforcement hooks
    - token-efficient model routing
    - all the supporting docs
@@ -124,4 +125,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.1.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.2.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
