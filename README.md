@@ -59,11 +59,13 @@ Not every project needs all of that. At the end of solution design, Coldstarter 
 | Size | For | What it gets |
 |---|---|---|
 | **None** | One-offs nobody will change | The deliverable, a README, and one security check |
-| **Light** | Small or short-lived tools, data views and dashboards (for example a one-page view for a marketing team), automations | Instructions, tests, one implementer, the security reviewer, change review, a to-do list, and a `/devmanual` guide; no audit or backlog machinery |
+| **Light** | Small or short-lived tools, data views and dashboards (for example a one-page view for a marketing team), automations, internal utilities | A minimum set: a README that doubles as the user and developers' guide, a short instructions file, tests, the security reviewer, change review, three small hooks and a to-do list. Everything else (architecture and other docs, a threat model, a design guide, an implementer agent, `/devmanual`, benchmarks) waits for a trigger in the dev plan. No audit or backlog machinery |
 | **Standard** | Products and tools that will keep changing | The full framework, with only the agents the project type needs |
 | **Full** | Standard projects at Team or Enterprise scale, regulated, or hosted with uptime targets | Standard plus the scale's extra reviewers, with CI as the authority |
 
-Each size has its own life cycle and a trigger for moving up (for example, when change requests keep coming, a Light tool gains a backlog and `/iterate`). The handoff teaches only the project's own life cycle; from Light up, `/devmanual` prints it on demand (a None project's README has a "Working on this" section instead).
+Each size has its own life cycle and a trigger for moving up (for example, when change requests keep coming, a Light tool gains a backlog and `/iterate`). The handoff teaches only the project's own life cycle: a Standard or Full project's `/devmanual` prints it on demand, and a None or Light project's README has a "Working on this" section instead.
+
+**Process has to earn its place.** The biggest practical risk with a framework like this is that the process becomes the product: an agent spends the budget of a small tool writing architecture docs, threat models and agent rosters instead of building the tool. So every document, agent, skill and gate needs a reason that holds for *this* project, and the process stays in proportion to what the project is worth. Intake asks what it's worth, and the dev plan checks the framework work against the effort of building v1; for a None or Light project it has to come in well under. You can also cut anything directly, for example *"We're building a $100 internal utility. Don't write architecture documentation unless the complexity warrants it."* Each cut is logged with the trigger that would bring it back, and every retrospective prunes process nobody uses.
 
 ## How to use it
 
@@ -73,7 +75,7 @@ Each size has its own life cycle and a trigger for moving up (for example, when 
    > Read COLDSTARTER.md and launch a project for: *your idea, problem or question*
 
 3. Answer the intake questions. By default they come in one round, and most have sensible defaults. For high-stakes or vague projects, the agent suggests **grill mode** instead: one question at a time, each with a recommended answer, until every decision the plan depends on is settled. You can switch modes at any time. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
-4. When the launch finishes, `/devmanual` (Light and up) or the README's "Working on this" section (None) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (run under your platform's loop or scheduler, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
+4. When the launch finishes, `/devmanual` (Standard and Full) or the README's "Working on this" section (None and Light) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (run under your platform's loop or scheduler, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
 
 If a session ends partway through, open the agent in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
@@ -85,7 +87,7 @@ Version control is a choice too. Intake asks for Git (the default), another tool
 
 Coldstarter sets up a team of agents (subagents), split into two kinds:
 
-- **Reviewers and auditors** are read-only — they never get edit tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
+- **Reviewers and auditors** are read-only — they never get edit tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets only the security reviewer, and its session does the implementing) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
 - **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, publish, merge or deploy themselves. There are three, one for each **work tier** of the backlog: a **Routine** implementer for effort-1 work outside the core logic, a **Hard** implementer (strong model tier) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
 Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, the agent sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
@@ -158,4 +160,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 2.0.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 2.1.0 (2026-09-30). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
