@@ -2,7 +2,7 @@
 
 Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4.0 (see `LICENSE`).
 
-This repository holds **Coldstarter**, Luke Bennie's specification for Claude Code that launches any project, of any scale and in any domain: problem analysis, a first working version, and a full self-improving development framework. There's no code here. The product is the document, `COLDSTARTER.md`.
+This repository holds **Coldstarter**, Luke Bennie's specification for AI coding agents (Claude Code is the reference platform) that launches any project, of any scale and in any domain: problem analysis, a first working version, and a full self-improving development framework. There's no code here. The product is the document, `COLDSTARTER.md`.
 
 ## Files
 

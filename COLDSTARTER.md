@@ -1,13 +1,13 @@
 # Coldstarter
 
-*From idea to a self-improving project: the project-launch uber-prompt for Claude Code.*
+*From idea to a self-improving project: the project-launch uber-prompt for AI coding agents (Claude Code is the reference platform).*
 
 Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4.0 (see `LICENSE`), with one extra permission: projects and products you build with Coldstarter are yours, including commercial ones. Selling, sublicensing or repackaging this spec, or adaptations of it, needs the author's written permission.
 
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.8.0 (2026-09-29) |
+| **Version** | 1.8.1 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 > **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases describe the method in neutral terms: the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, and *strong, standard and light model tiers*. **Appendix I (Platform bindings)** maps each term to a concrete platform. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands) only in Appendix I. *Until 2.0.0:* the Claude Code specifics still written inline in the phases and templates are the reference binding and will move to Appendix I; don't add new ones.
@@ -16,6 +16,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.8.1 | 2026-09-29 | Fixes from a full review of the spec. Framework sizing now reaches everywhere it should: a Light launch runs Phases 10 and 12 for its implementer, security reviewer and `/devmanual`, and has a tests-only push gate (the sizing table, Phase 14 and the definition of done now agree); a None deliverable gets its security pass in the handoff and follows its visual direction without a separate design guide; Phase 6, the `CLAUDE.md` skeleton and the docs rule describe the Light routine; Full means Standard-type projects at Team or Enterprise scale. The readable-code layout rules follow the usage profile, as section 1 says. Settings reasons go in the Decisions log at the retrospective too. The Deep and A/B go-ahead and the `/code-review` levels follow the usage profiles. Appendix G wires and describes the secrets guard and pins effort and compaction; the docs-writer and security-reviewer templates get `maxTurns`. The implementer tier names are explained against model tiers and sizes; the docs writer is noted as the one other agent that edits (documentation only). The DEV_CYCLE list in Phase 17 renders nested. The tagline, README and `AGENTS.md` describe Coldstarter as a spec for AI coding agents, with Claude Code as the reference platform. |
 | 1.8.0 | 2026-09-29 | **Framework sizing, data views and grill mode.** Phase 2 ends by **sizing the framework**, None, Light, Standard or Full, from the project type, scale, risk and lifespan, and writes a short **dev plan**: the phases, agents, skills and gates the project gets, each with a reason, and a trigger for each thing left out. Sizing decides whether machinery exists; the usage profile still decides how it runs. Each size has its own **life cycle** and **upgrade trigger** (section 1); the handoff teaches only that life cycle (None and Light projects get no `/audit`, `/iterate` or `/autoiterate`), and the **definition of done** is marked by size. A new **`/devmanual`** skill prints a short developers' guide sized to the project (the level, its life cycle, the commands that apply, the current state and the upgrade trigger), and `/devmanual full` the whole `DEV_CYCLE.md`. **Data views and dashboards** (for example single-page HTML views for marketing teams) get an Appendix A row, intake questions (source, a refresh the audience can run, a metric dictionary, audience, sharing, sensitivity), invariants, a privacy rule, a chart-quality check and delivery rules. Phase 1 gains **grill mode**, one question at a time with a recommended answer, suggested for high-stakes or vague projects, drawing on Matt Pocock's `grill-me` skill. The security reviewer applies from Light up; a None deliverable gets a one-off security pass. |
 | 1.7.0 | 2026-09-29 | **A design guide against generic defaults.** Anything with a user interface gets a **visual direction** in Phase 2 (who it's for, how it should feel, references, and what it must never look like), confirmed at the gate, and a **design guide**, `docs/DESIGN.md`, written with the design tokens before the first screen is built (Phase 4; template in the new **Appendix J**). The guide makes the tokens the only source of values, gives colour a job, sets type, density, states, motion and copy rules, and lists the statistically likely defaults that make an interface look machine-made (purple gradients, the three-card landing page, cards around everything, buzzword copy), each allowed only when the direction calls for it, with the reason written down. An organisation's own design system beats it. The UX reviewer and the implementers work from it, and the docs, the `CLAUDE.md` skeleton and the definition of done carry it. It's platform-neutral: it doesn't depend on any one tool's design skill. |
 | 1.6.0 | 2026-09-29 | **Instructions as an index, routing chosen per project, and a platform-neutral rule.** Phase 6: the project instructions file is loaded and re-read on every turn, so it becomes an **index**: a size budget in bytes as well as lines, rules and numbers in it with their reasons in the Decisions log, a "Read when" list of the docs, and detail moved to skills, agents' own files, path-scoped instructions and docs; the usage report measures it. Phase 13: model and effort are no longer a fixed table. Once the project type, architecture and dev cycle are known, each role gets a **model tier** (strong, standard or light) and an effort level from how hard its work is, what a miss costs, how often it runs and the usage profile, with a reason, confirmed with the user; the old table becomes the reference build's routing, a starting point. Phase 10 lists starting tiers. A directive at the top and a new **Appendix I, Platform bindings**: the method is platform-neutral, and platform specifics belong in that appendix (Claude Code is the reference binding; its inline specifics move there in 2.0.0). Lesson 22 added. |
@@ -76,7 +77,7 @@ You are launching a project for the user: from problem to working first version 
 ### Ground rules
 
 1. **Interview before building.** Phase 1 is a conversation. Don't write project code until the user confirms the problem statement, the scale profile and the solution direction.
-2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch the full framework if the user still wants it. Size the framework to the project too (Phase 2): run only the phases in its dev plan, and add the rest when a trigger in the plan fires.
+2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch a project if the user still wants one, and size its framework (Phase 2): run only the phases in its dev plan, and add the rest when a trigger in the plan fires.
 3. **Stop at the gates** marked 🚦. Between gates, make the reasonable call, say what you chose, and keep moving.
 4. **Keep a progress file.** `docs/PROJECT_PROGRESS.md` holds the phase checklist and a **Decisions** log (date, decision, who made it, why). Its first line records where the framework came from: *"Launched with Coldstarter v<version> by Luke Bennie."* The project itself belongs to whoever the user names as its owner. A fresh session must be able to resume when the user says "continue the project launch".
 5. **Commit at the end of every phase** (`Phase N: …`), following the git flow of the chosen scale profile. Never force-push to shared branches. Ask before creating remote repositories, making anything public, deploying, or touching cloud accounts, billing or production.
@@ -120,11 +121,11 @@ Some savings cost nothing in quality, so every profile gets them: the usage repo
 |---|---|---|---|
 | Suggested for | Pro, or any plan where the user hits limits | Max, Team, or an API budget with headroom | Enterprise or API use where time matters more than tokens |
 | Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with the strong tier also for the UX and product reviewers, and the Light implementer tier used only for copy and styling |
-| `/code-review` level | `low` for `ui`, `tooling` and docs; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
+| `/code-review` level | `low` for `ui` and `tooling`; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
 | Deep items and A/B experiments | Ask before each one; prefer one well-argued approach over an A/B | Ask before A/B experiments | Run them as the backlog says |
 | `/audit` | Focused audits by default (`/audit <focus>`); a full audit only when the Ready list runs thin, and the user tester's personas folded into the UX reviewer | Full audits rarely, focused ones in between | Full audits at each milestone |
 | User tester in `/iterate` | Plays only the batch's changes, at the sizes they affect | Plays the batch's changes at desktop and phone sizes | Plays the batch's changes, plus a short newcomer pass every batch |
-| Main session | Compacts at 200K; `/clear` between hand-run batches | Compacts at 200K | Compacts at 400K, for more continuity |
+| Main session | Compacts at 200K | Compacts at 200K | Compacts at 400K, for more continuity |
 | Batch caps | As Phase 11 (bigger batches mean fewer review cycles, but don't raise the caps: failures get harder to isolate) | As Phase 11 | As Phase 11 |
 | Code layout (see "Readable code" in Phase 5) | A rule: files split by concern and kept small, tool output quiet by default, checked in code review | Strong guidance | Guidance |
 
@@ -139,7 +140,7 @@ The scale profile sets how heavy each piece of process is, and the usage profile
 | | **None** | **Light** | **Standard** | **Full** |
 |---|---|---|---|---|
 | For | One-offs nobody will change later: a script, an analysis, a converted file, a single page | Small or short-lived tools, data views and dashboards, automations, internal utilities, prototypes | Products, services, integrations, libraries and games that will keep changing | Standard projects at Team or Enterprise scale, or that are regulated, or hosted with uptime targets |
-| Phases | 1 (quick), 2 (short), 4, and a short 17 | 1 to 7 (the docs kept short); 8 only if speed is a target; 13 for the session and the one implementer; 14's after-edit check and secrets guard; 16 as a single review; 17 | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
+| Phases | 1 (quick), 2 (short), 4, and a short 17 (with the one-off security pass) | 1 to 7 (the docs kept short); 8 only if speed is a target; 10 for one implementer and the security reviewer; 12 for `/devmanual` and at most one project skill; 13 for the session and those two agents; 14's after-edit check, secrets guard and a tests-only push gate; 16 as a single review; 17 | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
 | Agents | None beyond the session | One implementer and the security reviewer | The core roster (Phase 10) for the project type, three implementer tiers, triage | Standard's, plus the scale profile's extra reviewers |
 | Skills | None | `/devmanual`, and at most one small project skill (for example `/refresh` for a data view) | `/audit`, `/iterate`, `/autoiterate`, `/devmanual` | As Standard |
 | Backlog | None | `docs/TODO.md`: a short list of known issues and ideas, no triage | `BACKLOG.md` with triage and batches | As Standard |
@@ -260,7 +261,8 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 **Goal:** something real that runs end to end, not scaffolding.
 
 1. Build the v1 features in the chosen stack. Keep the structure as simple as the stack allows, and write to the code conventions from the first line ("Readable code" in Phase 5): clear code costs no more to write than unclear code, and far less than cleaning it up later.
-   For anything with a user interface, set up the **design tokens** (colour, type scale, spacing, radii, shadows, motion) and write `docs/DESIGN.md` from the template in Appendix J *before* building the first screen, then build every screen from them.
+
+   For anything with a user interface sized Light or above, set up the **design tokens** (colour, type scale, spacing, radii, shadows, motion) and write `docs/DESIGN.md` from the template in Appendix J *before* building the first screen, then build every screen from them. A None deliverable follows the visual direction without a separate guide.
 2. Design for the development loop from day one:
    - **Deterministic by construction:** all randomness that shapes behaviour goes through one seedable function (for example `rand()`). Time and external inputs can be injected or faked in tests.
    - **Steppable:** the core loop or workflow can run without real time or real services (fixed steps, fake clock, recorded fixtures).
@@ -288,8 +290,8 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md`, `PIPELINE.md`, or `METRICS.md` for a data view): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
 4. Write **operations notes** in `docs/OPERATIONS.md`: how to build, deploy, verify what's live (a version or build stamp), and roll back. For Solo, a few lines. Team and Enterprise extend it into runbooks (Phase 15).
 5. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
-6. Set up **readable code**, for the people who debug it and for agents. Claude writes clear, conventional code as fast as unclear code, and it pays back in every debugging session, human or agent. And every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost.
-   - **Always** (every profile and comment level; checked in code review and by the code-quality reviewer):
+6. Set up **readable code**, for the people who debug it and for agents. An agent writes clear, conventional code as fast as unclear code, and it pays back in every debugging session, human or agent. And every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost.
+   - **Always** (every comment level; the layout items' strictness follows the usage profile, below; checked in code review and by the code-quality reviewer):
      - **Conventions:** follow the language's standard style guide and idioms (for example PEP 8, Effective Go, the Rust API guidelines, a well-known JavaScript or TypeScript guide) or the organisation's own, with a formatter and linter enforcing them where the stack allows. Prefer the well-known way to do a thing over a clever one.
      - **Names** say what things are: full words in the language's naming convention, units where they matter (`timeoutMs`, `massKg`), booleans that read as questions (`isVisible`, `hasErrors`), no single letters outside short loops and standard maths, and one name per concept across the codebase. Keep them distinctive and searchable, and cite code by file and function name, so people and agents find things with one search instead of paging.
      - **Structure:** the stack's conventional project layout; code split by concern into files that can be read whole (a few hundred lines, not thousands); functions that do one thing; and `docs/ARCHITECTURE.md` saying what lives where, so a reader opens only the files a change touches.
@@ -308,7 +310,7 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 
      At every level, comments explain *why* and name the constraints; they don't restate *what* the next line does, because a comment that repeats the code goes stale and misleads. A change that makes a comment wrong updates it. Higher levels make files longer, and every agent that reads a file pays for its length on each turn, so choose the lowest level that serves the people who will read the code.
    - **Where readability gives way:** a measured hot path may trade clarity for speed, with a comment giving the reason and the measurement; shipped output may be minified or bundled while the source stays readable. Nothing else is an exception.
-   - Under a Lean usage profile the layout rules (small files split by concern, quiet tools) are rules, checked in code review; otherwise they're strong guidance (section 1).
+   - The Structure and Quiet tools items above are rules, checked in code review, under a Lean usage profile; strong guidance under Balanced; and guidance under Throughput (section 1). The rest of the list always applies.
 7. Commit.
 
 ---
@@ -318,7 +320,7 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 `CLAUDE.md`, the **project instructions file** (Appendix I names it for each platform), is loaded at the start of every session and re-read on every turn, by the main session and by every agent told to read it. So it holds what every session needs, and it's an **index** to everything else (skeleton in Appendix B):
 
 - **The project in brief:** what it is, a table of the important files, the scale profile.
-- **Before every change ships:** the numbered routine. Run the tests, then the benchmark comparison, then `/code-review`, then the user-tester agent, then the domain-correctness reviewer if the core logic changed, then the **security reviewer** if a sensitive area changed (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools). Then push, or open a PR, and republish or deploy.
+- **Before every change ships:** the numbered routine, sized to the dev plan (Light: the tests, the change review, and the security reviewer on sensitive changes). Standard and Full: run the tests, then the benchmark comparison, then `/code-review`, then the user-tester agent, then the domain-correctness reviewer if the core logic changed, then the **security reviewer** if a sensitive area changed (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools). Then push, or open a PR, and republish or deploy.
 - **Targets:**
   - **Performance budgets** with numbers (for example "p95 API latency ≤ 200 ms at 50 requests/s", "60 fps for the everyday scenario", "a nightly job finishes in ≤ 15 minutes", "bundle ≤ 200 KB gzipped")
   - a **stretch target**, marked as a backlog goal
@@ -328,7 +330,7 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 - **Correctness:** the domain's **invariants** with tolerances (Appendix A).
 - **Security and compliance:** the controls and regimes that apply, and what counts as a sensitive change.
 - **Design pillars.**
-- **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in).
+- **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in). Light: the change-request life cycle and the project skill (section 1).
 - **Model and effort:** the routing table from Phase 13. The reasons and dates go in the Decisions log.
 - **Conventions:** commit authorship, header, the code conventions (style guide, formatter and linter, naming, test layout) and the comment level, platform and input conventions, "keep README in step", "all randomness through `rand()`".
 - **Read when:** an index of the docs, one line each, saying when to read which (for example "changing the core logic → `docs/<DOMAIN>.md`", "UI work → `docs/DESIGN.md`", "shipping → `docs/DEV_CYCLE.md`", "why a setting is what it is → the Decisions log").
@@ -421,7 +423,7 @@ Create the agents in `.claude/agents/` (templates in Appendix C). A **Light** pr
 
 Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metric, a screenshot path or a `file:line`. Triage discards findings without evidence.
 
-**Core roster** (all profiles). Each role's model tier (strong, standard or light) and effort are a starting point; Phase 13 sets them for the project.
+**Core roster** (every scale profile). Each role's model tier (strong, standard or light) and effort are a starting point; Phase 13 sets them for the project.
 
 | Role | Job | Starting tier / effort |
 |---|---|---|
@@ -457,7 +459,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 
 Give each agent a **"Known quirks (not bugs)"** list that grows over time. Quirks of the test environment shouldn't come back as findings every audit.
 
-### Implementers (the only agents that edit)
+### Implementers (the only agents that edit code)
 
 There are three tiers with the same instructions. They implement, test and report per item. They **never commit, push, merge or deploy**.
 
@@ -466,6 +468,8 @@ There are three tiers with the same instructions. They implement, test and repor
 | `implementer` | Standard / medium | **Light tier:** effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
 | `implementer-opus` | Strong / medium | **Opus tier:** core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
 | `implementer-deep` | Strong / high | **Deep tier:** the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
+
+The tier names label backlog work, not model tiers or framework sizes: the Light tier runs on the standard model tier, and a Light-sized project's single implementer takes every item.
 
 Every implementer report includes:
 
@@ -549,7 +553,7 @@ Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/itera
 1. **Pick.** State the batch, its category, tier, items, reviews and Est. time. Move the items to In progress. Regroup first if the batches are stale. Team and Enterprise: create a branch named `batch/<id>-<slug>`.
 2. **Implement.** Brief **one** implementer of the batch's tier with every item's row and proposal. It works through them as separate, isolated edits and runs the tests once at the end. **Never run two implementers on the same working tree**: they overwrite each other's uncommitted edits. Parallel work needs separate git worktrees. An item that turns out riskier than its category goes back to Ready.
 3. **Test.** The full tests pass, run once with screenshots so the user tester reads them rather than running the suite again. Put the test and bench results in every reviewer's brief. If `bench --compare` fails, run the stash/pop A/B test to tell a real regression from machine noise.
-4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list. Always name the `/code-review` level, since it otherwise reuses the last one typed: `low` for `ui` and `tooling`, `medium` for the other categories, `high` only for Deep items or when the user asks (it fans out to several sub-agents).
+4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list. Always name the `/code-review` level, since it otherwise reuses the last one typed: `low` for `ui` and `tooling`, `medium` for the other categories, `high` only for Deep items or when the user asks (it fans out to several sub-agents). These are the Balanced levels; the usage profile moves them (section 1).
 5. **Triage.**
    - Blockers go back to **the same implementer via SendMessage**, so it keeps its context. If that agent has already finished, start a fresh one and give it the full context.
    - Re-run steps 3–4 after the fix.
@@ -573,7 +577,7 @@ Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/itera
 **`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
 - **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and push or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or stashing the rest, never leaving half-finished edits. Under `/loop`, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
 - **Stop only when** the Ready list is empty or wholly blocked on the user; a decision only the user can make blocks the next useful work (ask once, and keep working on batches that don't depend on it); something is broken that one fix round couldn't repair; the user says stop; or an argument limit is reached (`/autoiterate 3` for three batches, `/autoiterate until ID`). On stopping, report every batch shipped in the run.
-- **On a usage-limited plan,** treat a Deep `solo` batch or an A/B experiment as needing the user's go-ahead unless they've already given it for that item (in the reference build, one A/B experiment used about a fifth of all usage to that point). Ask once, and carry on with other batches meanwhile.
+- **Under the Lean profile,** treat a Deep `solo` batch or an A/B experiment (under Balanced, only an A/B experiment) as needing the user's go-ahead unless they've already given it for that item (in the reference build, one A/B experiment used about a fifth of all usage to that point). Ask once, and carry on with other batches meanwhile.
 - **Never end a turn idle:** either an agent or command is in flight (its notification resumes the session), a wake-up is scheduled, or the loop has stopped for one of the reasons above.
 - **Session limits:** apply the limit rule above. Run as `/loop /autoiterate` for unattended work: when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups past the one-hour cap), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
 - **Team and Enterprise:** each batch ends in its PR per the git flow, and the loop carries on with batches that don't depend on an unmerged PR (branching from the main branch). It stops when the next useful batch depends on a PR still waiting for human review.
@@ -632,7 +636,7 @@ Commit `CLAUDE.md`, the agent frontmatter and the usage report.
 | `after_edit.py` | PostToolUse on Edit/Write/MultiEdit | If a watched file changed (source, test harness, bench scenarios), runs the formatter and linter on it (if the project has them), then the **quick** check. Exits 2 with the output on failure. |
 | `before_push.py` | PreToolUse on Bash/PowerShell | On a real `git push` (matching `git [global options] push`, not `git stash push` or "push" inside a message) **of this repository**, runs the full tests and `bench --compare`. Exits 2 to block. It works out the push's target from any `cd`/`Set-Location` earlier in the command and from `git -C <dir>`, then asks git which repo that is. Pushes of other repos made from the same session pass through, and an undeterminable target is gated (fail safe). |
 | `protect_baseline.py` | PreToolUse on Edit/Write/MultiEdit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
-| `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
+| `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash/PowerShell | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
 
 **CI** (Team and Enterprise) runs the same commands, so what's verified locally and what's verified in CI can't drift. Enterprise adds the security scans and required checks. Never bypass a gate (no `--no-verify`). When a gate blocks, find the root cause. Give gate hooks a generous timeout (at least 2× the time the tests and benchmarks take together): a PreToolUse hook that times out is a non-blocking error, so the push would go through unchecked.
 
@@ -661,29 +665,29 @@ Standard and Full. **Light:** run the change review and the security reviewer on
    - scope creep in the implementer's diff
    - noise in the benchmark gate
    - findings that repeat known quirks (add these to the agents' quirk lists)
-4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report) against the usage profile, which agents found real problems and which produced noise, and whether the scale profile still fits. Tune the model and effort settings and the batch caps **one level at a time**, and record every change and its reason in `CLAUDE.md`.
+4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report) against the usage profile, which agents found real problems and which produced noise, and whether the scale profile and the framework size still fit. Tune the model and effort settings and the batch caps **one level at a time**, and record each new setting in `CLAUDE.md` and its date and reason in the Decisions log.
 5. Commit.
 
 ---
 
 ## Phase 17: Handoff
 
-1. Write `docs/USER_GUIDE.md` (with the docs writer): everything a user needs, in plain language and without code — how to use every feature, what the outputs mean, limits and error messages. Link it from the product's own help where there is one. For None and Light, a README section can be the user guide.
+1. Write `docs/USER_GUIDE.md` (with the docs writer, where the project has one): everything a user needs, in plain language and without code — how to use every feature, what the outputs mean, limits and error messages. Link it from the product's own help where there is one. For None and Light, a README section can be the user guide.
 
    Then write the developers' guide, **sized to the project**, and teach only its own life cycle: None and Light projects don't get `/audit`, `/iterate` or `/autoiterate`, and their docs don't mention them.
-   - **None:** a "Working on this" section in README: how to run it, how to change it, and when it would be worth more process (the upgrade trigger).
+   - **None:** a "Working on this" section in README: how to run it, how to change it, and when it would be worth more process (the upgrade trigger). Before delivering, run the one-off security pass with Appendix C2's checklist (ground rule 8).
    - **Light:** `docs/DEV_CYCLE.md` of about half a page: the life cycle, the commands that exist, where things live, the recurring chores, and the upgrade trigger.
    - **Standard and Full:** `docs/DEV_CYCLE.md` in full. It covers:
-   - a table of the commands
-   - the backlog columns (Tier, estimated and actual time)
-   - the batch categories and why the caps exist
-   - the steps of `/iterate`, `/autoiterate` and `/audit`, including intake and the limit rule
-   - the git and PR flow for this profile
-   - how to choose what to iterate on (by theme, cost, dependencies, fixes before features)
-   - the A/B experiment convention
-   - how to keep usage down
-   - three worked examples using real batches from the backlog
-   - the upgrade and downgrade triggers for the framework size
+     - a table of the commands
+     - the backlog columns (Tier, estimated and actual time)
+     - the batch categories and why the caps exist
+     - the steps of `/iterate`, `/autoiterate` and `/audit`, including intake and the limit rule
+     - the git and PR flow for this profile
+     - how to choose what to iterate on (by theme, cost, dependencies, fixes before features)
+     - the A/B experiment convention
+     - how to keep usage down
+     - three worked examples using real batches from the backlog
+     - the upgrade and downgrade triggers for the framework size
 2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills (including `/devmanual`), the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
 3. Tick every phase in `docs/PROJECT_PROGRESS.md`. Once the development loop is live, mark it and this spec as archived history.
 4. Give the user a brief summary of the project's life cycle, with its commands (`/devmanual` repeats it at any time) and, for Standard and Full, the first batch to run.
@@ -697,13 +701,13 @@ Each item is marked with the smallest framework size it applies to: **[Light+]**
 - [ ] A working v1, shown to the user
 - [ ] User interfaces: the visual direction confirmed. [Light+] Design tokens and `docs/DESIGN.md` in place, and reviews check against them
 - [ ] None only: a one-off security pass over the deliverable, and a README that says what it is, how to run it, and how to work on it
-- [ ] [Light+] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
+- [ ] [Light+] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection (T/E) and CODEOWNERS (E); environments as infrastructure-as-code (E)
 - [ ] [Light+] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
 - [ ] [Light+] `docs/ARCHITECTURE.md` accurate (a few lines for a small project); the system is deterministic, steppable and inspectable from tests; threat model, and data classification (T/E)
 - [ ] [Light+] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
 - [ ] [Light+] Tests (full and quick; screens for user interfaces), invariant tests and accessibility checks all pass. [Standard+] The cross-platform matrix; security and dependency scans (T/E)
 - [ ] [Light+] The security reviewer and the change review in place. Light: one implementer, and `docs/TODO.md` for known issues and ideas
-- [ ] [Light+] Hooks: formatter, linter and quick check, and the secrets guard. [Standard+] The push gate and the baseline guard; CI mirrors them (T/E)
+- [ ] [Light+] Hooks: formatter, linter and quick check, the secrets guard, and a push gate that runs the tests. [Standard+] The benchmark comparison in the push gate, and the baseline guard; CI mirrors them (T/E)
 - [ ] [Light+] Model routing chosen for the project, with reasons, and confirmed; the session's effort and compaction window pinned
 - [ ] [Light+] `/devmanual` working, and `docs/DEV_CYCLE.md` sized to the project
 - [ ] [Standard+] Benchmarks with a median-of-N baseline, a 5% compare gate and a budget report (Light: only if the dev plan adds them)
@@ -714,7 +718,7 @@ Each item is marked with the smallest framework size it applies to: **[Light+]**
 - [ ] [Standard+] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
 - [ ] [Standard+] The usage report, run by `/audit`, with a first snapshot saved; agent turn caps and cache lifetimes set
 - [ ] [Full] The scale profile's extra reviewers; CI as the authority for the gates
-- [ ] [Standard+] Observability, SLOs, runbooks and cost alerts (T/E, hosted services)
+- [ ] [Full] Observability, SLOs, runbooks and cost alerts (hosted services)
 - [ ] [Standard+] First audit, first batch shipped, retrospective done, settings tuned. Light: v1 reviewed once, and a short retrospective on whether the size fits
 - [ ] [Light+] `docs/USER_GUIDE.md` (or its README section), the domain-logic reference and `docs/OPERATIONS.md` written (short for Light) and reviewed; all docs consistent. Every size: a summary of the project's life cycle given to the user
 
@@ -739,7 +743,7 @@ Each item is marked with the smallest framework size it applies to: **[Light+]**
 
 Rename the categories and agents to fit the project. For example, the reference project's `sim` category is `core` here, and its physics reviewer is the domain-correctness reviewer.
 
-**Typical framework size** (Phase 2 decides): a one-off analysis or script is usually None; a data view or dashboard, an automation or a small internal tool, Light; a product, service, integration, library or game that will keep changing, Standard; anything at Team or Enterprise scale, regulated, or hosted with uptime targets, Full.
+**Typical framework size** (Phase 2 decides): a one-off analysis or script is usually None; a data view or dashboard, an automation or a small internal tool, Light; a product, service, integration, library or game that will keep changing, Standard; and any of those at Team or Enterprise scale, regulated, or hosted with uptime targets, Full.
 
 **Data views and dashboards** (for example single HTML pages for marketing people). Usually sized Light.
 
@@ -767,13 +771,14 @@ Rename the categories and agents to fit the project. For example, the reference 
 - `bench/…`: `bench/baseline.json` is committed; results are ignored.
 - `tools/…`: environment helper, hosted-copy build.
 - `.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`, `.mcp.json`, CI config
-- `BACKLOG.md`: batches and items, triaged.
+- `BACKLOG.md`: batches and items, triaged. (Light: `docs/TODO.md`.)
 
 ## Read when
 - Changing <the core logic> → `docs/<DOMAIN>.md` · UI work → `docs/DESIGN.md` · How the code is laid out → `docs/ARCHITECTURE.md` · Shipping, batches, commands → `docs/DEV_CYCLE.md`
 - Deploying or rolling back → `docs/OPERATIONS.md` · A security-sensitive change → `docs/THREAT_MODEL.md` · Why a setting is what it is → the Decisions log in `docs/PROJECT_PROGRESS.md`
 
 ## Before every change ships
+<!-- Light: steps 1 and 3, the security reviewer from step 5, then step 6. -->
 1. Tests: every check passes.
 2. Bench `--compare` when speed could change: no regression over 5%.
 3. `/code-review`, and fix what it finds.
@@ -792,13 +797,14 @@ Rename the categories and agents to fit the project. For example, the reference 
 ### Design pillars
 1. … 2. … 3. …
 ### Workflow
-- Audit (rare) · Iterate by batch (see DEV_CYCLE.md) · Bench run / --compare / --baseline (only on genuine improvement)
+- <Standard/Full:> Audit (rare) · Iterate by batch (see DEV_CYCLE.md) · Bench run / --compare / --baseline (only on genuine improvement)
+- <Light: ask for a change; implement, test, review, commit; chores via the project skill>
 - Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
 ### Model & effort
 - Usage profile: <Lean / Balanced / Throughput>, chosen <date> because <reason>.
 - <Phase 13 routing table: one line per tier and effort, with the roles on it; the session's effort and compaction window; the change-review levels. Reasons and dates go in the Decisions log.>
 ### Documentation
-- Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), DESIGN (the look and feel, for user interfaces), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
+- Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), DESIGN (the look and feel, for user interfaces), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit (Light: the change review does).
 ## Conventions
 - Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line), then a line or two on what the file holds.
 - Code: <style guide>; <formatter and linter>, run by the after-edit hook. Names say what things are, with units. Tests: <layout>, names that state the behaviour, arrange/act/assert. Errors name what failed and the values.
@@ -848,6 +854,7 @@ name: docs-writer
 description: Writes and audits <Project>'s documentation - user guide, domain-logic reference, operations notes, threat model - and checks in /audit that every doc still matches the code. Edits documentation only.
 model: sonnet
 effort: medium
+maxTurns: 60             # runaway guard
 tools: Bash, Read, Edit, Write, Glob, Grep   # + mcp__playwright to use a UI
 ---
 
@@ -907,6 +914,7 @@ name: security-reviewer
 description: Dedicated security specialist for <Project>. Reviews the whole system in /audit, and any change that touches a sensitive area, against the threat model. Covers authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, browser security headers, CI/CD and infrastructure, data protection, and LLM-specific risks. Read-only.
 model: opus
 effort: medium
+maxTurns: 60             # runaway guard
 tools: Bash, Read, Glob, Grep   # + mcp__playwright for web apps; never Edit/Write
 ---
 
@@ -1085,7 +1093,7 @@ argument-hint: "[nothing for the short version, or 'full']"
 ---
 ```
 
-Standard and Full projects get all four; Light projects get only `/devmanual` (and at most one project skill). The bodies follow Phase 12 step by step, including intake, the reviews-by-category table, the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
+Standard and Full projects get all four; Light projects get only `/devmanual` (and at most one project skill). The bodies follow Phase 12 step by step, including intake, the reviews-by-category table (Phase 11), the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
 
 ---
 
@@ -1096,12 +1104,16 @@ Standard and Full projects get all four; Light projects get only `/devmanual` (a
 ```json
 {
   "model": "sonnet",
+  "effortLevel": "medium",
+  "autoCompactWindow": "200k",
   "hooks": {
     "PreToolUse": [
       { "matcher": "Bash|PowerShell",
         "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/before_push.py\"", "timeout": 900 }] },
       { "matcher": "Edit|Write|MultiEdit",
-        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_baseline.py\"", "timeout": 10 }] }
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_baseline.py\"", "timeout": 10 }] },
+      { "matcher": "Edit|Write|Bash|PowerShell",
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_secrets.py\"", "timeout": 10 }] }
     ],
     "PostToolUse": [
       { "matcher": "Edit|Write|MultiEdit",
@@ -1174,6 +1186,8 @@ Test the targeting logic from a file, not from a command line that contains the 
 
 `after_edit.py`: if `tool_input.file_path` ends with a watched path, run the formatter and linter on that file (if the project has them), then the tests with `--quick`, and exit 2 with the tail of the output on failure.
 
+`protect_secrets.py`: deny (same JSON as `protect_baseline.py`) an Edit or Write whose new content matches a key pattern or a high-entropy token, and a command that reads `.env` or a credential file.
+
 For Team and Enterprise, add a CI workflow (for example GitHub Actions) that runs the same test and bench-compare commands on every PR, and make them required status checks.
 
 ---
@@ -1213,10 +1227,10 @@ The phases describe the method in platform-neutral terms. This appendix binds ea
 
 | Neutral term | What it is | Claude Code (reference binding, checked 2026-09) |
 |---|---|---|
-| Project instructions file | Loaded into every session; kept as an index (Phase 6) | `CLAUDE.md` at the repo root (or `.claude/CLAUDE.md`), about 200 lines at most. It reads `AGENTS.md` instead when there's no `CLAUDE.md`. To share one file with other tools, keep the instructions in `AGENTS.md` and put `@AGENTS.md` at the top of `CLAUDE.md`. `@path` imports load at session start, so they don't shrink the context. Block-level HTML comments are stripped before loading, so notes for people cost nothing. |
+| Project instructions file | Loaded into every session; kept as an index (Phase 6) | `CLAUDE.md` at the repo root (or `.claude/CLAUDE.md`). Claude Code's own guidance is under 200 lines; Coldstarter's budget (Phase 6) is tighter. It reads `AGENTS.md` instead when there's no `CLAUDE.md`. To share one file with other tools, keep the instructions in `AGENTS.md` and put `@AGENTS.md` at the top of `CLAUDE.md`. `@path` imports load at session start, so they don't shrink the context. Block-level HTML comments are stripped before loading, so notes for people cost nothing. |
 | Path-scoped instructions | Rules that load only when files in one area are read | `.claude/rules/*.md` with a `paths:` list of globs in the frontmatter, or a `CLAUDE.md` in a subdirectory, which loads when files there are read |
 | Skill | A procedure loaded only when invoked or relevant | `.claude/skills/<name>/SKILL.md` |
-| Subagent | A separately prompted agent with its own tools, model and effort | `.claude/agents/<name>.md` (frontmatter: `model`, `effort`, `tools`, `maxTurns`) |
+| Subagent | A separately prompted agent with its own tools, model and effort | `.claude/agents/<name>.md` (frontmatter: `model`, `effort`, `tools`, `maxTurns`, and `experimental.cacheTtl`, `5m` or `1h`) |
 | Hook | A deterministic script run at a fixed point, such as before a command or after an edit | `hooks` in `.claude/settings.json`: `PreToolUse` and `PostToolUse`; exit code 2 blocks |
 | Model tiers | Strong, standard, light | Opus, Sonnet, Haiku (check the current models and prices) |
 | Effort | How long the model reasons per turn | `effortLevel` in settings, `/effort` in a session, `effort` in agent frontmatter |
