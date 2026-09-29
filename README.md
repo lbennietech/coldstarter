@@ -20,7 +20,7 @@ Claude Code already has the features to fix all of this: subagents with their ow
 - In the reference build, an implementer added a feature and silently changed unrelated behaviour. Only an independent review caught it.
 - In the reference build, a claimed speed-up from 64 ms to 37 ms didn't reproduce when it was measured again.
 - In the reference build, one hand edit to the backlog silently dropped 12 items.
-- A publish gate with too short a timeout doesn't block anything. Claude Code treats a hook that times out as a non-blocking error, so the push goes through unchecked.
+- A publish gate with too short a timeout doesn't block anything. Claude Code treats a hook that times out as a non-blocking error, so the publish goes through unchecked.
 
 Coldstarter packages the working answers into one document. Reviewers are read-only and have to cite evidence. Only implementers edit, and they're tiered by how hard the work is. Each role runs on the cheapest model and effort that does it well. A backlog scores and batches the work, so reviews and tests run once per batch, not once per item. Hooks block a publish that fails the tests or the benchmarks. Decisions, targets and lessons are written into the project so the next session starts where the last one stopped. You get the process without having to learn it the hard way.
 
@@ -47,7 +47,7 @@ Coldstarter is a specification you give to an AI coding agent; the reference pla
 
 It's designed to scale from solo hobby projects to enterprise work. A **Solo / Team / Enterprise** scale profile sets:
 
-- the git flow and quality gates
+- the version-control flow and quality gates
 - environments and secrets handling
 - the reviewer roster and how much autonomy the agents get
 - compliance and operations work
@@ -86,7 +86,7 @@ Version control is a choice too. Intake asks for Git (the default), another tool
 Coldstarter sets up a team of agents (subagents; in Claude Code, in `.claude/agents/`), split into two kinds:
 
 - **Reviewers and auditors** are read-only — they never get edit tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
-- **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, push, merge or deploy themselves. There are three, one for each **work tier** of the backlog: a **Routine** implementer for effort-1 work outside the core logic, a **Hard** implementer (strong model tier) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
+- **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, publish, merge or deploy themselves. There are three, one for each **work tier** of the backlog: a **Routine** implementer for effort-1 work outside the core logic, a **Hard** implementer (strong model tier) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
 Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, the agent sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
 
@@ -129,7 +129,7 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 |---|---|
 | `COLDSTARTER.md` | The specification itself: 17 launch phases, scale and usage profiles, framework sizing, project-type adaptations (including data views and dashboards), a design-guide template, platform and version-control bindings, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
 | `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
-| `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays platform-neutral. |
+| `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays neutral about the AI platform and the version control. |
 | `CLAUDE.md` | Imports `AGENTS.md`, so Claude Code reads the same instructions. |
 | `ROADMAP.md` | Ideas and planned changes for future versions, before they go into the spec. |
 
