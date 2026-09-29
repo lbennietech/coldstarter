@@ -6,7 +6,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under [CC BY-NC 
 
 ## Why it exists
 
-Most people who build with Claude Code have no process. They open a session, ask for a feature, look at the result, ask for the next one, and carry on until something breaks. That works for a weekend script. On anything bigger, the same problems keep coming up:
+Most people who build with an AI coding agent have no process. They open a session, ask for a feature, look at the result, ask for the next one, and carry on until something breaks. That works for a weekend script. On anything bigger, the same problems keep coming up:
 
 - **The model checks its own work.** The session that wrote the code also decides whether the code is good. Nothing independent looks at correctness, security or usability, so problems surface when a user hits them, not before.
 - **Nothing stops a regression.** If tests exist at all, they were written alongside the feature and nobody runs them before a push. Performance gets worse a little at a time and nobody notices until it's slow.
@@ -15,12 +15,12 @@ Most people who build with Claude Code have no process. They open a session, ask
 - **There's no memory between sessions.** Decisions, known quirks, rejected ideas and the reasons behind them live in a chat that's gone the next day. The next session rediscovers them, or contradicts them.
 - **Priorities are whatever comes to mind.** There's no backlog, no evidence for why one change matters more than another, and no record of what was done or how long it took.
 
-Claude Code already has the features to fix all of this: subagents with their own tools and model settings, skills that package a workflow into one command, hooks that enforce rules deterministically, and project files that persist decisions. What's hard is knowing how to put them together. You have to know the features exist, then design a team of agents that don't step on each other, decide which work deserves an expensive model, write the gates, and set up a backlog that stays honest. Most of the failure modes don't show up until they've already cost you something. A few examples:
+Modern coding agents, such as Claude Code, already have the features to fix all of this: subagents with their own tools and model settings, skills that package a workflow into one command, hooks that enforce rules deterministically, and project files that persist decisions. What's hard is knowing how to put them together. You have to know the features exist, then design a team of agents that don't step on each other, decide which work deserves an expensive model, write the gates, and set up a backlog that stays honest. Most of the failure modes don't show up until they've already cost you something. A few examples:
 
 - In the reference build, an implementer added a feature and silently changed unrelated behaviour. Only an independent review caught it.
 - In the reference build, a claimed speed-up from 64 ms to 37 ms didn't reproduce when it was measured again.
 - In the reference build, one hand edit to the backlog silently dropped 12 items.
-- A publish gate with too short a timeout doesn't block anything. Claude Code treats a hook that times out as a non-blocking error, so the publish goes through unchecked.
+- A publish gate with too short a timeout doesn't block anything. On some platforms, including Claude Code, a hook that times out is a non-blocking error, so the publish goes through unchecked.
 
 Coldstarter packages the working answers into one document. Reviewers are read-only and have to cite evidence. Only implementers edit, and they're tiered by how hard the work is. Each role runs on the cheapest model and effort that does it well. A backlog scores and batches the work, so reviews and tests run once per batch, not once per item. Hooks block a publish that fails the tests or the benchmarks. Decisions, targets and lessons are written into the project so the next session starts where the last one stopped. You get the process without having to learn it the hard way.
 
