@@ -7,15 +7,16 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.8.1 (2026-09-29) |
+| **Version** | 2.0.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
-> **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases describe the method in neutral terms: the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, and *strong, standard and light model tiers*. **Appendix I (Platform bindings)** maps each term to a concrete platform. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands) only in Appendix I. *Until 2.0.0:* the Claude Code specifics still written inline in the phases and templates are the reference binding and will move to Appendix I; don't add new ones.
+> **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases and templates describe the method in neutral terms: the *agent* (the AI coding agent running the launch), the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, *project settings*, the *change review*, the *browser tool*, *strong, standard and light model tiers*, *effort*, *turn caps* and *cache lifetimes*. **Appendix I (Platform bindings)** maps each term to a concrete platform, with Claude Code as the reference binding. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands, file formats) only in Appendix I. Version control works the same way: the phases speak of *committing*, *publishing*, the *main line*, *branches*, *PRs* (review requests), *setting a change aside* and *isolated working copies*, and **Appendix K (Version control bindings)** maps them to Git (the default), Subversion, snapshots, or none at all.
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 2.0.0 | 2026-09-29 | **Platform-neutral throughout, and version control as a choice.** Every Claude Code specific that was written inline in the phases and templates has moved to **Appendix I**, which is now the full Claude Code binding: a term table (I.1), the project settings with the reference routing and hook wiring (I.2), agent and skill frontmatter (I.3, I.4), hook input and output (I.5) and the usage report's transcript format (I.6). The phases use neutral terms: *the agent*, *the project instructions file* (was `CLAUDE.md`), *project settings*, the *change review* (was `/code-review`), the *browser tool*, *turn caps*, *cache lifetimes*, resuming an agent, and a loop or scheduler. Agent and skill templates (Appendices C, C2, D, F) give their settings as neutral tables (model tier, effort, turn cap, tools as read, search, shell, edit and the browser tool) for each platform to write in its own format. Appendix G's hook scripts mark their two platform bindings (how they read their input and how they block), and `before_push.py` finds its repo through git instead of assuming its folder depth. Usage-profile suggestions name plan levels rather than Claude plans. **Breaking:** the backlog's work tiers are renamed **Routine, Hard and Deep** (were Light, Opus and Deep), and `implementer-opus` becomes `implementer-hard`, so work tiers no longer share names with model tiers or framework sizes. Existing projects rename the Tier values in `BACKLOG.md` and the agent file. The reference binding also wires the secrets guard to `MultiEdit`. **Version control is now chosen in Phase 1:** Git (the default), another tool such as Subversion, snapshots, or none at all. The phases speak of committing, publishing, the main line, branches, PRs, setting a change aside and isolated working copies, and a new **Appendix K** binds them for Git, Subversion, snapshots and none, with install commands (the launch checks the tool is installed and asks before installing it). Standard and Full need version control; a None deliverable can use snapshots or nothing at all, and a Light project can with a logged reason. **Breaking:** the push gate is now the publish gate, `before_publish.py` (it gates `git push`, or `svn commit` in Subversion). |
 | 1.8.1 | 2026-09-29 | Fixes from a full review of the spec. Framework sizing now reaches everywhere it should: a Light launch runs Phases 10 and 12 for its implementer, security reviewer and `/devmanual`, and has a tests-only push gate (the sizing table, Phase 14 and the definition of done now agree); a None deliverable gets its security pass in the handoff and follows its visual direction without a separate design guide; Phase 6, the `CLAUDE.md` skeleton and the docs rule describe the Light routine; Full means Standard-type projects at Team or Enterprise scale. The readable-code layout rules follow the usage profile, as section 1 says. Settings reasons go in the Decisions log at the retrospective too. The Deep and A/B go-ahead and the `/code-review` levels follow the usage profiles. Appendix G wires and describes the secrets guard and pins effort and compaction; the docs-writer and security-reviewer templates get `maxTurns`. The implementer tier names are explained against model tiers and sizes; the docs writer is noted as the one other agent that edits (documentation only). The DEV_CYCLE list in Phase 17 renders nested. The tagline, README and `AGENTS.md` describe Coldstarter as a spec for AI coding agents, with Claude Code as the reference platform. |
 | 1.8.0 | 2026-09-29 | **Framework sizing, data views and grill mode.** Phase 2 ends by **sizing the framework**, None, Light, Standard or Full, from the project type, scale, risk and lifespan, and writes a short **dev plan**: the phases, agents, skills and gates the project gets, each with a reason, and a trigger for each thing left out. Sizing decides whether machinery exists; the usage profile still decides how it runs. Each size has its own **life cycle** and **upgrade trigger** (section 1); the handoff teaches only that life cycle (None and Light projects get no `/audit`, `/iterate` or `/autoiterate`), and the **definition of done** is marked by size. A new **`/devmanual`** skill prints a short developers' guide sized to the project (the level, its life cycle, the commands that apply, the current state and the upgrade trigger), and `/devmanual full` the whole `DEV_CYCLE.md`. **Data views and dashboards** (for example single-page HTML views for marketing teams) get an Appendix A row, intake questions (source, a refresh the audience can run, a metric dictionary, audience, sharing, sensitivity), invariants, a privacy rule, a chart-quality check and delivery rules. Phase 1 gains **grill mode**, one question at a time with a recommended answer, suggested for high-stakes or vague projects, drawing on Matt Pocock's `grill-me` skill. The security reviewer applies from Light up; a None deliverable gets a one-off security pass. |
 | 1.7.0 | 2026-09-29 | **A design guide against generic defaults.** Anything with a user interface gets a **visual direction** in Phase 2 (who it's for, how it should feel, references, and what it must never look like), confirmed at the gate, and a **design guide**, `docs/DESIGN.md`, written with the design tokens before the first screen is built (Phase 4; template in the new **Appendix J**). The guide makes the tokens the only source of values, gives colour a job, sets type, density, states, motion and copy rules, and lists the statistically likely defaults that make an interface look machine-made (purple gradients, the three-card landing page, cards around everything, buzzword copy), each allowed only when the direction calls for it, with the reason written down. An organisation's own design system beats it. The UX reviewer and the implementers work from it, and the docs, the `CLAUDE.md` skeleton and the definition of done carry it. It's platform-neutral: it doesn't depend on any one tool's design skill. |
@@ -49,19 +50,19 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 > - token-efficient model routing
 > - all the supporting docs
 >
-> **How to use it.** Open Claude Code in an empty folder (or an existing codebase) and say:
+> **How to use it.** Open your AI coding agent (Claude Code is the reference platform) in an empty folder (or an existing codebase) and say:
 >
 > *"Read COLDSTARTER.md and launch a project for: <your idea, problem or question>."*
 >
-> Copy `COLDSTARTER.md` into the new folder first, or give Claude its full path.
+> Copy `COLDSTARTER.md` into the new folder first, or give the agent its full path.
 >
-> Claude interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the framework at the size the project needs, stopping at key decision points. When it's done, a Standard or Full project runs `/iterate` for one development cycle, or `/autoiterate` to let it keep working through the backlog on its own.
+> The agent interviews you, proposes a solution, a technology stack and a scale profile, builds v1, then sets up the framework at the size the project needs, stopping at key decision points. When it's done, a Standard or Full project runs `/iterate` for one development cycle, or `/autoiterate` to let it keep working through the backlog on its own.
 >
 > **Where it came from.** The method was distilled from building a real project end to end (Pocket Universe, a browser simulation) and its development loop, including the mistakes. Nothing here is game-specific. Every role and rule is stated generically, and Appendix A maps it to each kind of project.
 
 ---
 
-## 0. Instructions to Claude Code
+## 0. Instructions to the agent
 
 You are launching a project for the user: from problem to working first version to a self-improving development loop. This file is your work order. Follow it phase by phase, in this order:
 
@@ -80,8 +81,8 @@ You are launching a project for the user: from problem to working first version 
 2. **Don't build what isn't needed.** If the best answer is an existing product, a spreadsheet, a no-code tool, a one-off analysis or a process change rather than a software project, say so in Phase 1, with your reasons. Only launch a project if the user still wants one, and size its framework (Phase 2): run only the phases in its dev plan, and add the rest when a trigger in the plan fires.
 3. **Stop at the gates** marked 🚦. Between gates, make the reasonable call, say what you chose, and keep moving.
 4. **Keep a progress file.** `docs/PROJECT_PROGRESS.md` holds the phase checklist and a **Decisions** log (date, decision, who made it, why). Its first line records where the framework came from: *"Launched with Coldstarter v<version> by Luke Bennie."* The project itself belongs to whoever the user names as its owner. A fresh session must be able to resume when the user says "continue the project launch".
-5. **Commit at the end of every phase** (`Phase N: …`), following the git flow of the chosen scale profile. Never force-push to shared branches. Ask before creating remote repositories, making anything public, deploying, or touching cloud accounts, billing or production.
-6. **Check the current docs** before writing config: Claude Code (agents, skills, hooks, settings, MCP) at code.claude.com/docs, and the chosen platforms' CI and hosting. The templates here reflect formats as of 2026-09. Verify them rather than assume.
+5. **Commit at the end of every phase** (`Phase N: …`), following the version-control flow of the chosen scale profile (with snapshots, take one instead; with no version control at all, there's nothing to commit; Appendix K). Never force-push or rewrite shared history. Ask before creating remote repositories, making anything public, deploying, or touching cloud accounts, billing or production.
+6. **Check the current docs** before writing config: your AI coding platform's (subagents, skills, hooks, settings, tool servers; Appendix I links the reference platform's), and the chosen CI and hosting platforms'. The bindings and templates here reflect formats as of 2026-09. Verify them rather than assume.
 7. **Adapt, don't transplant.** Every role has a domain equivalent (Appendix A). Rename and reshape it, but keep its *function*.
 8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project sized Light or above gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby tool up, and a deliverable sized None gets a one-off security pass before it's delivered. Only the depth of the checks scales with the profile.
 9. **Respect the token budget.** Ask about it in Phase 1 and set a **usage profile** (Lean, Balanced or Throughput; section 1) from the answer. It shapes the agent specs, the workflow and the code layout, not just the models. Measure where the usage actually goes (the usage report) rather than guess.
@@ -96,32 +97,32 @@ Pick one in Phase 1. It decides how heavy every later phase is. Anything not mar
 
 | Dimension | **Solo** (personal, hobby, prototype) | **Team** (startup, small business, small team) | **Enterprise** (organisation, regulated, many stakeholders) |
 |---|---|---|---|
-| Git flow | Commit and push to `main`. The local hook gates the push. | Short-lived branches, a PR per batch, squash merge after CI passes. | Protected `main`, PRs with required reviews (CODEOWNERS), signed commits if policy requires, release tags or branches |
-| How `/iterate` ends | Push to `main` and deploy | Open a PR. Merge after CI and a review. | Open a PR. A human approves and merges. Claude never self-merges. |
+| Version-control flow | Commit and publish to the main line. The local hook gates the publish. | Short-lived branches, a PR per batch, merged (squashed where the tool allows) after CI passes. | A protected main line, PRs with required reviews (code owners), signed commits if policy requires, release tags or branches |
+| How `/iterate` ends | Publish to the main line and deploy | Open a PR. Merge after CI and a review. | Open a PR. A human approves and merges. The agent never self-merges. |
 | Quality gates | Local hooks | Local hooks, plus the same commands in CI (CI is required) | CI is the authority. Adds security, dependency and licence scanning and required status checks. |
 | Environments | Local and production (or just a deploy link) | Preview deployments per PR, then production | Dev, staging and production defined as infrastructure-as-code, with promotion and rollback |
-| Secrets | A git-ignored `.env` | The hosting platform's secret store | Vault or KMS, with rotation and least-privilege access. Never in agent context. |
+| Secrets | An `.env` file on the ignore list, never committed | The hosting platform's secret store | Vault or KMS, with rotation and least-privilege access. Never in agent context. |
 | Security review depth | A dedicated security reviewer on every audit and on sensitive changes: OWASP-style checklist, secrets and dependency hygiene | Plus a threat model kept current, security regression tests, and dependency and secret scanning in CI | Plus a formal threat model, SAST/DAST/SCA/IaC scanning as required checks, findings ready for a pen test, and a compliance mapping |
 | Extra reviewers | None | A compliance reviewer if the domain is regulated | Compliance, infrastructure/SRE, accessibility, data governance, architecture |
 | Docs | README, a user guide, ARCHITECTURE, a domain-logic reference, operations notes, DEV_CYCLE, a threat model, and a design guide for anything with a user interface | Plus decision records in `docs/adr/`, CONTRIBUTING and a changelog | Plus runbooks, SLOs, a data classification and onboarding docs |
 | Operations | None, or console logging | Error tracking and basic metrics | Logging, metrics, tracing, SLOs, alerting, and incident and rollback runbooks |
 | Compliance | None | Privacy basics (GDPR/CCPA if personal data) | Whatever applies: SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS, accessibility law. Plus an audit trail. |
-| Agent autonomy | High: implements, commits and pushes | Medium: implements and opens PRs; people merge | Low to medium: implements and opens PRs; people approve. No production access. Tools restricted. |
+| Agent autonomy | High: implements, commits and publishes | Medium: implements and opens PRs; people merge | Low to medium: implements and opens PRs; people approve. No production access. Tools restricted. |
 | Audit cadence | Rarely | Each milestone | Scheduled, with CI-driven checks in between |
 
-Mixed cases are normal. For example, a solo developer building something that handles payments uses Solo git flow but Enterprise-grade secrets handling and security review depth. Record every deviation in the Decisions log.
+Mixed cases are normal. For example, a solo developer building something that handles payments uses the Solo version-control flow but Enterprise-grade secrets handling and security review depth. Record every deviation in the Decisions log.
 
 ### Usage profiles
 
-The scale profile sets how heavy the process is. The **usage profile** sets how much of the user's Claude usage the project spends to get its work done, and it's chosen separately: a solo hobbyist on a Pro plan and a funded team on an API budget can run the same scale profile under very different limits. Pick one in Phase 1.
+The scale profile sets how heavy the process is. The **usage profile** sets how much of the user's AI usage the project spends to get its work done, and it's chosen separately: a solo hobbyist on an entry-level plan and a funded team on an API budget can run the same scale profile under very different limits. Pick one in Phase 1.
 
-Some savings cost nothing in quality, so every profile gets them: the usage report in every audit, a compaction window for the main session, a one-hour cache for agents that wait, turn caps, tests run once with the results passed to reviewers, one triage call per batch, and named `/code-review` levels (Phase 13). The profile only moves the real trade-offs:
+Some savings cost nothing in quality, so every profile gets them: the usage report in every audit, a compaction window for the main session, a one-hour cache for agents that wait, turn caps, tests run once with the results passed to reviewers, one triage call per batch, and a named level for every change review (Phase 13). The profile only moves the real trade-offs:
 
 | Dimension | **Lean** (usage-limited plan; cost first) | **Balanced** (the default) | **Throughput** (usage isn't a concern; speed and depth first) |
 |---|---|---|---|
-| Suggested for | Pro, or any plan where the user hits limits | Max, Team, or an API budget with headroom | Enterprise or API use where time matters more than tokens |
-| Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with the strong tier also for the UX and product reviewers, and the Light implementer tier used only for copy and styling |
-| `/code-review` level | `low` for `ui` and `tooling`; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
+| Suggested for | An entry-level plan, or any plan where the user hits limits | A higher-tier or team plan, or an API budget with headroom | Enterprise or API use where time matters more than tokens |
+| Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with the strong tier also for the UX and product reviewers, and the Routine implementer used only for copy and styling |
+| Change review level | `low` for `ui` and `tooling`; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
 | Deep items and A/B experiments | Ask before each one; prefer one well-argued approach over an A/B | Ask before A/B experiments | Run them as the backlog says |
 | `/audit` | Focused audits by default (`/audit <focus>`); a full audit only when the Ready list runs thin, and the user tester's personas folded into the UX reviewer | Full audits rarely, focused ones in between | Full audits at each milestone |
 | User tester in `/iterate` | Plays only the batch's changes, at the sizes they affect | Plays the batch's changes at desktop and phone sizes | Plays the batch's changes, plus a short newcomer pass every batch |
@@ -131,7 +132,7 @@ Some savings cost nothing in quality, so every profile gets them: the usage repo
 
 The usage profile doesn't set how much the code is commented: that's the **comment level** (Phase 5), chosen by who will read and debug the code. A Lean project maintained by people can still be Human-maintained; it just pays for longer files knowingly.
 
-Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effort"). Revisit it at each retrospective with the usage report's numbers: a Lean project whose reviews keep missing real bugs should move a dimension up, and a Balanced project whose user keeps hitting limits should move one down, one dimension at a time.
+Record the chosen profile in the Decisions log and in the project instructions file ("Model & effort"). Revisit it at each retrospective with the usage report's numbers: a Lean project whose reviews keep missing real bugs should move a dimension up, and a Balanced project whose user keeps hitting limits should move one down, one dimension at a time.
 
 ### Framework sizing
 
@@ -140,10 +141,11 @@ The scale profile sets how heavy each piece of process is, and the usage profile
 | | **None** | **Light** | **Standard** | **Full** |
 |---|---|---|---|---|
 | For | One-offs nobody will change later: a script, an analysis, a converted file, a single page | Small or short-lived tools, data views and dashboards, automations, internal utilities, prototypes | Products, services, integrations, libraries and games that will keep changing | Standard projects at Team or Enterprise scale, or that are regulated, or hosted with uptime targets |
-| Phases | 1 (quick), 2 (short), 4, and a short 17 (with the one-off security pass) | 1 to 7 (the docs kept short); 8 only if speed is a target; 10 for one implementer and the security reviewer; 12 for `/devmanual` and at most one project skill; 13 for the session and those two agents; 14's after-edit check, secrets guard and a tests-only push gate; 16 as a single review; 17 | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
-| Agents | None beyond the session | One implementer and the security reviewer | The core roster (Phase 10) for the project type, three implementer tiers, triage | Standard's, plus the scale profile's extra reviewers |
+| Phases | 1 (quick), 2 (short), 4, and a short 17 (with the one-off security pass) | 1 to 7 (the docs kept short); 8 only if speed is a target; 10 for one implementer and the security reviewer; 12 for `/devmanual` and at most one project skill; 13 for the session and those two agents; 14's after-edit check, secrets guard and a tests-only publish gate; 16 as a single review; 17 | All, with only the agents and phases the project type needs | All, plus the scale profile's extra reviewers, with CI as the authority |
+| Agents | None beyond the session | One implementer and the security reviewer | The core roster (Phase 10) for the project type, three implementers (one per work tier), triage | Standard's, plus the scale profile's extra reviewers |
 | Skills | None | `/devmanual`, and at most one small project skill (for example `/refresh` for a data view) | `/audit`, `/iterate`, `/autoiterate`, `/devmanual` | As Standard |
 | Backlog | None | `docs/TODO.md`: a short list of known issues and ideas, no triage | `BACKLOG.md` with triage and batches | As Standard |
+| Version control | Optional: snapshots, or none at all | Recommended; snapshots or none need a reason in the Decisions log | Required | Required, with the scale profile's review flow |
 | Before a change ships | Run it and look at it; a one-off security pass | The tests, the change review, and the security reviewer on sensitive changes | The full ship routine (Phase 6) | The full ship routine, gated by CI and people |
 | Developers' guide | A "Working on this" section in README | `docs/DEV_CYCLE.md`, about half a page | `docs/DEV_CYCLE.md` in full (Phase 17) | As Standard, plus the scale profile's docs |
 | Life cycle | Deliver. A later change is a new request. | Ask for a change; it's implemented, tested and reviewed, then committed and deployed. Recurring chores, like a data refresh, run through the project skill. | `/audit` rarely; triage; `/iterate` or `/autoiterate` batch by batch | As Standard, through PRs and human approval |
@@ -181,10 +183,11 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
    - **Security and compliance:** personal, financial or health data; authentication and SSO needs; regulatory regimes; data residency; audit needs.
    - **Stack:** languages, frameworks and clouds the team knows or mandates, or "no preference".
    - **Data:** sources, ownership, sensitivity, volume, and whether it's fresh or historical. For a data view or dashboard, also: where the data comes from and who can access it; how it's refreshed, as a step its audience can run themselves; the metric definitions (a metric dictionary); who reads it; how it's shared and forwarded; and how sensitive it is (Appendix A).
-   - **Distribution:** public or private repo, open source or proprietary, the organisation or GitHub account, and where it deploys.
+   - **Version control:** Git (the default), another tool the organisation uses (such as Subversion, Mercurial or Perforce), **snapshots** (dated copies of the project folder, no tool needed), or **none** (no history kept at all). Check a tool is installed, and if not, give the install command for the user's system and ask before installing it (Appendix K). Suggest Git unless there's a reason not to; snapshots and none suit only one-offs and small tools (the framework sizes in section 1), and with none, say in a line that a change can't be undone once the session ends.
+   - **Distribution:** public or private repository, open source or proprietary, where the repository is hosted (GitHub, GitLab, an organisation server, or only on this machine), and where it deploys.
    - **Identity:** project name, author or organisation for commits and copyright headers, and licence.
-   - **Working style:** how autonomous Claude should be, and how often the user wants to review.
-   - **Usage plan and ethos:** the Claude plan (Pro, Max, Team, Enterprise, or API), whether the user hits usage limits, and how much the project should optimise for usage in its agent specs, workflow and coding style: cost first (Lean), balanced, or speed and depth first (Throughput). Suggest the profile from the plan (Pro → Lean, Max or Team → Balanced), and say in a line what each would change.
+   - **Working style:** how autonomous the agent should be, and how often the user wants to review.
+   - **Usage plan and ethos:** the AI platform's plan or API budget, whether the user hits usage limits, and how much the project should optimise for usage in its agent specs, workflow and coding style: cost first (Lean), balanced, or speed and depth first (Throughput). Suggest the profile from the plan (an entry-level plan → Lean, a higher-tier or team plan → Balanced; Appendix I maps the reference platform's plans), and say in a line what each would change.
    - **Code readers:** who will read and debug the code: agents only, agents plus a person who looks in now and then, or people who will maintain it (a handoff, a team, a learning project, long-lived code). This sets the **comment level** (Phase 5): suggest Standard, or Human-maintained when people will maintain it, and say in a line that higher levels mean longer files, which every agent reading them pays for.
    - **Reporting:** how the user wants progress reported (tables, summaries, which columns).
    - **v1 scope:** the smallest version that would be worth having.
@@ -232,23 +235,23 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 
 ---
 
-## Phase 3: Repository, git flow and delivery pipeline 🚦 (before creating any remote or cloud resource)
+## Phase 3: Repository, version control and delivery pipeline 🚦 (before creating any remote or cloud resource)
 
-1. Run `git init`. Set the author identity **in the repo config only**. Use the default branch `main`.
+1. Set up the version control chosen in Phase 1 (Appendix K): check it's installed, create the repository, set the author identity **for this repository only**, and name the main line (`main` in Git). With snapshots, set up the snapshot folder instead, outside the project folder. With none, skip this step.
 2. Add:
-   - `.gitignore` for the stack, plus build outputs, test and bench outputs, caches, `.env` and secrets
+   - the ignore list (`.gitignore` in Git) for the stack, plus build outputs, test and bench outputs, caches, `.env` and secrets
    - `README.md`
    - a licence or a proprietary notice
    - `docs/PROJECT_PROGRESS.md`
    - Team and Enterprise: `CONTRIBUTING.md`, and a PR template
-   - Enterprise: `CODEOWNERS`, `SECURITY.md`, and a changelog convention
-3. Set the **header convention** for new source files (the copyright or licence line, then a line or two saying what the file holds) and the **code conventions** ("Readable code" in Phase 5): the language's standard style guide or the organisation's own, a formatter and linter where the stack allows them (for example Prettier and ESLint, Black or Ruff, gofmt, rustfmt), the test framework's usual layout, and the comment level from Phase 1. Record them in `CLAUDE.md`.
-4. 🚦 **Ask before creating the remote**: the account or organisation, public or private (for example `gh repo create`). Then:
-   - **Solo:** push `main` and set up deployment (static hosting, a platform deploy).
-   - **Team:** add CI, running the same test and bench commands the local hooks run, plus preview deployments per PR, and protect `main` so merging requires CI to pass.
+   - Enterprise: code owners (`CODEOWNERS` on Git hosting), `SECURITY.md`, and a changelog convention
+3. Set the **header convention** for new source files (the copyright or licence line, then a line or two saying what the file holds) and the **code conventions** ("Readable code" in Phase 5): the language's standard style guide or the organisation's own, a formatter and linter where the stack allows them (for example Prettier and ESLint, Black or Ruff, gofmt, rustfmt), the test framework's usual layout, and the comment level from Phase 1. Record them in the project instructions file.
+4. 🚦 **Ask before creating the remote** (the shared repository, if there is one): the host, the account or organisation, public or private (for example `gh repo create` for GitHub). Then:
+   - **Solo:** publish the main line (if there's a remote) and set up deployment (static hosting, a platform deploy).
+   - **Team:** add CI, running the same test and bench commands the local hooks run, plus preview deployments per PR, and protect the main line so merging requires CI to pass.
    - **Enterprise:**
      - CI with required status checks, plus security, dependency (SCA) and licence scanning
-     - branch protection with required reviews
+     - main-line protection with required reviews
      - environments (dev, staging, production) as infrastructure-as-code, with promotion and rollback
      - secrets in the approved store
      - deployment credentials that agents never see
@@ -300,7 +303,7 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
      - **Debuggable errors:** fail loudly, with a message naming what failed and the values involved. Never swallow an error silently.
      - **Quiet tools:** tests, builds and benchmarks print a one-line summary on success and the details only on failure (with a `--verbose` flag for more).
      - **Generated output** (bundles, minified or compiled files) is marked as generated, and points readers at the source, which stays readable.
-   - **Comment level**, chosen in Phase 1 and recorded in `CLAUDE.md` (Conventions):
+   - **Comment level**, chosen in Phase 1 and recorded in the project instructions file (Conventions):
 
      | Level | For | Comments |
      |---|---|---|
@@ -315,12 +318,12 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 
 ---
 
-## Phase 6: `CLAUDE.md`, the project's constitution 🚦 (for the targets)
+## Phase 6: The project instructions file, the project's constitution 🚦 (for the targets)
 
-`CLAUDE.md`, the **project instructions file** (Appendix I names it for each platform), is loaded at the start of every session and re-read on every turn, by the main session and by every agent told to read it. So it holds what every session needs, and it's an **index** to everything else (skeleton in Appendix B):
+The **project instructions file** (Appendix I names it for each platform) is loaded at the start of every session and re-read on every turn, by the main session and by every agent told to read it. So it holds what every session needs, and it's an **index** to everything else (skeleton in Appendix B):
 
 - **The project in brief:** what it is, a table of the important files, the scale profile.
-- **Before every change ships:** the numbered routine, sized to the dev plan (Light: the tests, the change review, and the security reviewer on sensitive changes). Standard and Full: run the tests, then the benchmark comparison, then `/code-review`, then the user-tester agent, then the domain-correctness reviewer if the core logic changed, then the **security reviewer** if a sensitive area changed (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools). Then push, or open a PR, and republish or deploy.
+- **Before every change ships:** the numbered routine, sized to the dev plan (Light: the tests, the change review, and the security reviewer on sensitive changes). Standard and Full: run the tests, then the benchmark comparison, then the change review, then the user-tester agent, then the domain-correctness reviewer if the core logic changed, then the **security reviewer** if a sensitive area changed (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools). Then publish, or open a PR, and republish or deploy.
 - **Targets:**
   - **Performance budgets** with numbers (for example "p95 API latency ≤ 200 ms at 50 requests/s", "60 fps for the everyday scenario", "a nightly job finishes in ≤ 15 minutes", "bundle ≤ 200 KB gzipped")
   - a **stretch target**, marked as a backlog goal
@@ -330,7 +333,7 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
 - **Correctness:** the domain's **invariants** with tolerances (Appendix A).
 - **Security and compliance:** the controls and regimes that apply, and what counts as a sensitive change.
 - **Design pillars.**
-- **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in). Light: the change-request life cycle and the project skill (section 1).
+- **Workflow:** audit, iterate, batches, bench, A/B experiments, the version control and its flow for this profile, unattended runs (off unless the user opts in). Light: the change-request life cycle and the project skill (section 1).
 - **Model and effort:** the routing table from Phase 13. The reasons and dates go in the Decisions log.
 - **Conventions:** commit authorship, header, the code conventions (style guide, formatter and linter, naming, test layout) and the comment level, platform and input conventions, "keep README in step", "all randomness through `rand()`".
 - **Read when:** an index of the docs, one line each, saying when to read which (for example "changing the core logic → `docs/<DOMAIN>.md`", "UI work → `docs/DESIGN.md`", "shipping → `docs/DEV_CYCLE.md`", "why a setting is what it is → the Decisions log").
@@ -398,30 +401,30 @@ Sizing is separate from the usage profile: sizing decides whether a piece of mac
    - **Medians fix noise within a session, not drift between sessions.** A baseline recorded while the machine was running fast will fail later on unchanged code. The robust gate benchmarks the committed code and the working copy in the same session, interleaved, and compares the two. Keep the stored baseline for budgets and history.
    - Ignore metrics near the noise floor.
    - Prefer a dedicated, stable runner in CI (Team and Enterprise).
-   - When `--compare` fails, stash the change and re-measure the untouched code (a stash/pop A/B test) before blaming the change.
+   - When `--compare` fails, set the change aside and re-measure the untouched code, then restore the change (a set-aside A/B test; `git stash` and `git stash pop` in Git, Appendix K) before blaming the change.
    - **Re-baseline only after a genuine improvement.** If the machine got slower, ask the user, and commit the re-baseline on its own with a clear reason.
-6. Commit the first baseline, and set the budgets in `CLAUDE.md` from real numbers.
+6. Commit the first baseline, and set the budgets in the project instructions file from real numbers.
 
 ---
 
 ## Phase 9: Tool access for agents
 
 1. A **local environment helper** (for example `tools/serve.py`, `make dev`, a Docker Compose file) that starts the app and its dependencies if they aren't running, and waits until they're ready.
-2. For UIs, configure the **Playwright MCP** (or Chrome DevTools MCP) in `.mcp.json` so agents can use the product, take screenshots and read the console. For services, give agents the test endpoint and seeded test data, **never production**.
-3. **Plan for tools failing.** Every agent that uses MCP falls back to the scripted test runner and its screenshots, and says so in its report.
+2. For UIs, configure a **browser tool** (for example the Playwright or Chrome DevTools MCP server; Appendix I says where it's configured) so agents can use the product, take screenshots and read the console. For services, give agents the test endpoint and seeded test data, **never production**.
+3. **Plan for tools failing.** Every agent that uses the browser tool falls back to the scripted test runner and its screenshots, and says so in its report.
 4. If there's a hosted copy or demo build, add an idempotent build script (it skips the rebuild when the source hash hasn't changed) that strips anything used only in development.
-5. **Enterprise:** list which MCP servers and tools are allowed, and restrict agent tools accordingly (`tools:` in each agent's frontmatter, plus permission rules in `.claude/settings.json`).
+5. **Enterprise:** list which tool servers and tools are allowed, and restrict agent tools accordingly (each agent's tool list, plus the permission rules in the project settings; Appendix I).
 6. Commit.
 
 ---
 
 ## Phase 10: Agent roster
 
-Create the agents in `.claude/agents/` (templates in Appendix C). A **Light** project gets only one implementer (the standard tier by default) and the security reviewer; a **None** project gets no agents. The rest of this phase is for Standard and Full.
+Create the agents as subagents (templates in Appendix C; Appendix I says where each platform keeps them and how to write their settings). A **Light** project gets only one implementer (on the standard model tier by default) and the security reviewer; a **None** project gets no agents. The rest of this phase is for Standard and Full.
 
-### Reviewers and auditors (read-only: never give them Edit or Write tools)
+### Reviewers and auditors (read-only: never give them edit tools)
 
-Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metric, a screenshot path or a `file:line`. Triage discards findings without evidence.
+Each reviewer reads the project instructions file first. **Every finding needs evidence**: a metric, a screenshot path or a `file:line`. Triage discards findings without evidence.
 
 **Core roster** (every scale profile). Each role's model tier (strong, standard or light) and effort are a starting point; Phase 13 sets them for the project.
 
@@ -461,15 +464,15 @@ Give each agent a **"Known quirks (not bugs)"** list that grows over time. Quirk
 
 ### Implementers (the only agents that edit code)
 
-There are three tiers with the same instructions. They implement, test and report per item. They **never commit, push, merge or deploy**.
+There are three implementers with the same instructions, one per **work tier** of the backlog. They implement, test and report per item. They **never commit, publish, merge or deploy**.
 
-| Agent | Starting tier / effort | Takes |
+| Agent | Starting model tier / effort | Takes |
 |---|---|---|
-| `implementer` | Standard / medium | **Light tier:** effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
-| `implementer-opus` | Strong / medium | **Opus tier:** core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
-| `implementer-deep` | Strong / high | **Deep tier:** the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
+| `implementer` | Standard / medium | **Routine** work: effort-1 items outside the core logic (ux, design, efficiency, code, docs) |
+| `implementer-hard` | Strong / medium | **Hard** work: core-logic, perf or security items, changes to the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or anything at effort 2+ |
+| `implementer-deep` | Strong / high | **Deep** work: the project's hardest class of work (for example concurrency, consistency or transactions, numerical cores, security-critical cryptography or authentication, data migrations, major architecture changes) and A/B experiments |
 
-The tier names label backlog work, not model tiers or framework sizes: the Light tier runs on the standard model tier, and a Light-sized project's single implementer takes every item.
+Work tiers (Routine, Hard, Deep) label backlog work; model tiers (strong, standard, light) label models; framework sizes (None, Light, Standard, Full) label projects. Phase 13 can put any work tier on any model tier, and a Light-sized project's single implementer takes every item.
 
 Every implementer report includes:
 
@@ -500,36 +503,36 @@ Commit the roster.
    - IDs follow the pattern `AREA-###`
    - every Ready row gets a Tier and an Est. time
    - regroup every Ready item into batches on every run, and self-check the result
-3. **Batching.** Each batch has **one category and one tier**. Its reviews run once, for the whole batch.
+3. **Batching.** Each batch has **one category and one work tier**. Its reviews run once, for the whole batch.
 
 | Category | Contents | Reviews | Max size |
 |---|---|---|---|
-| `ui` | Presentation, layout, copy, UI affordances. No change to the core logic. | code-review + user tester | 15 (about 5 when they're effort-2 features) |
-| `tooling` | Only tests, benchmarks, tools and docs. The product doesn't change. | code-review only. No user testing or redeploy. | 15 |
-| `core` | The domain logic: business rules, calculations, simulation, workflows | code-review + user tester + one domain-correctness review | 5 |
-| `perf` | Speed and efficiency work that isn't Deep tier | code-review + user tester + benchmark focus (+ correctness review if core is touched) | 5 |
-| `security` | Authentication, authorisation, input handling, secrets, dependency upgrades with CVEs | code-review + security reviewer (+ user tester if the product's behaviour changes) | 5 |
-| `infra` | CI/CD, infrastructure-as-code, deployment and configuration | code-review + infra/SRE reviewer, then a staging deploy (Enterprise) | 5 |
-| `data` | Schema migrations, pipelines, data fixes | code-review + data reviewer, run against a copy first. Migrations are usually `solo`. | 3 |
-| `solo` | Deep tier, A/B experiments, effort 3, irreversible changes, or anything that would conflict | That item's own full pipeline | 1 |
+| `ui` | Presentation, layout, copy, UI affordances. No change to the core logic. | change review + user tester | 15 (about 5 when they're effort-2 features) |
+| `tooling` | Only tests, benchmarks, tools and docs. The product doesn't change. | change review only. No user testing or redeploy. | 15 |
+| `core` | The domain logic: business rules, calculations, simulation, workflows | change review + user tester + one domain-correctness review | 5 |
+| `perf` | Speed and efficiency work that isn't Deep work | change review + user tester + benchmark focus (+ correctness review if core is touched) | 5 |
+| `security` | Authentication, authorisation, input handling, secrets, dependency upgrades with CVEs | change review + security reviewer (+ user tester if the product's behaviour changes) | 5 |
+| `infra` | CI/CD, infrastructure-as-code, deployment and configuration | change review + infra/SRE reviewer, then a staging deploy (Enterprise) | 5 |
+| `data` | Schema migrations, pipelines, data fixes | change review + data reviewer, run against a copy first. Migrations are usually `solo`. | 3 |
+| `solo` | Deep work, A/B experiments, effort 3, irreversible changes, or anything that would conflict | That item's own full pipeline | 1 |
 
    The size caps limit the damage: bigger batches make it harder to tell which change broke something, spread reviewers' attention thinner, and make pulling out one bad item riskier. Core, security, infra and data changes interact. Polish rarely does. In the reference project, 14 small `ui` and `tooling` fixes shipped in about 35 minutes, against an estimated 175–245 minutes done one at a time.
 4. **Estimates** (planning figures, not measurements):
-   - Light, effort 1: 10–20 min
-   - Opus, effort 1: 15–25 min
+   - Routine, effort 1: 10–20 min
+   - Hard, effort 1: 15–25 min
    - effort 2: 20–35 min
    - effort 3 or Deep: 35–90+ min
    - a batch: its largest item's estimate, plus 2–3 min per extra `ui` or `tooling` item and about 5 min per extra item in the other categories
 
    Record the **actual time** in Done, and recalibrate from real runs.
-5. **Check bulk edits mechanically.** After any bulk change to the backlog, run a short script: every Ready item is in exactly one batch, tiers match, effort-3 items are `solo`, and no batch is over its cap. In the reference project, a single hand edit silently dropped 12 rows.
+5. **Check bulk edits mechanically.** After any bulk change to the backlog, run a short script: every Ready item is in exactly one batch, work tiers match, effort-3 items are `solo`, and no batch is over its cap. In the reference project, a single hand edit silently dropped 12 rows.
 6. Commit.
 
 ---
 
 ## Phase 12: Skills: `/audit`, `/iterate`, `/autoiterate` and `/devmanual`
 
-Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md`, `.claude/skills/autoiterate/SKILL.md` and `.claude/skills/devmanual/SKILL.md` (skeletons in Appendix F). Light: only `/devmanual`, plus at most one small skill for a chore the project repeats (for example `/refresh`, which rebuilds a data view from a new export); no `/audit`, `/iterate` or `/autoiterate`. None: no skills. Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
+Standard and Full: create the skills `audit`, `iterate`, `autoiterate` and `devmanual` (skeletons in Appendix F; Appendix I says where each platform keeps skills and how they're invoked). Light: only `/devmanual`, plus at most one small skill for a chore the project repeats (for example `/refresh`, which rebuilds a data view from a new export); no `/audit`, `/iterate` or `/autoiterate`. None: no skills. Don't pin an effort level in any skill, so the session's effort still applies.
 
 **`/audit`**: rare and expensive; the backlog's source of truth.
 1. Check the build is current and the tools work.
@@ -547,15 +550,15 @@ Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/itera
 | `/iterate ITEM-ID` | Run the batch that contains that item |
 | `/iterate ITEM-ID solo` | Run just that one item |
 | `/iterate B2 without ID` | Run a batch minus some items |
-| `/iterate B3 on Opus` | Raise a batch's tier |
+| `/iterate B3 on Hard` | Raise a batch's work tier |
 
 0. **Intake.** Users send new requests mid-run. Before picking a batch (and whenever new requests arrive), write each one as a goal, with the user's own solution ideas recorded as context rather than requirements. Merge any request that overlaps a queued item into that item instead of adding a near-duplicate; move superseded items to Rejected. Then `triage` regroups the batches and refreshes priorities across the whole Ready list, keeping anything the user explicitly pinned. Tell the user in a line or two what was merged, added or re-ordered.
-1. **Pick.** State the batch, its category, tier, items, reviews and Est. time. Move the items to In progress. Regroup first if the batches are stale. Team and Enterprise: create a branch named `batch/<id>-<slug>`.
-2. **Implement.** Brief **one** implementer of the batch's tier with every item's row and proposal. It works through them as separate, isolated edits and runs the tests once at the end. **Never run two implementers on the same working tree**: they overwrite each other's uncommitted edits. Parallel work needs separate git worktrees. An item that turns out riskier than its category goes back to Ready.
-3. **Test.** The full tests pass, run once with screenshots so the user tester reads them rather than running the suite again. Put the test and bench results in every reviewer's brief. If `bench --compare` fails, run the stash/pop A/B test to tell a real regression from machine noise.
-4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list. Always name the `/code-review` level, since it otherwise reuses the last one typed: `low` for `ui` and `tooling`, `medium` for the other categories, `high` only for Deep items or when the user asks (it fans out to several sub-agents). These are the Balanced levels; the usage profile moves them (section 1).
+1. **Pick.** State the batch, its category, work tier, items, reviews and Est. time. Move the items to In progress. Regroup first if the batches are stale. Team and Enterprise: create a branch named `batch/<id>-<slug>`.
+2. **Implement.** Brief **one** implementer of the batch's work tier with every item's row and proposal. It works through them as separate, isolated edits and runs the tests once at the end. **Never run two implementers on the same working tree**: they overwrite each other's uncommitted edits. Parallel work needs isolated working copies (Git worktrees, or separate checkouts; Appendix K). An item that turns out riskier than its category goes back to Ready.
+3. **Test.** The full tests pass, run once with screenshots so the user tester reads them rather than running the suite again. Put the test and bench results in every reviewer's brief. If `bench --compare` fails, run the set-aside A/B test to tell a real regression from machine noise.
+4. **Review.** Run the category's reviews once, briefing each reviewer with the whole item list. Always name the change review's level (Appendix I explains why on the reference platform): `low` for `ui` and `tooling`, `medium` for the other categories, `high` only for Deep items or when the user asks (it costs several times as much). These are the Balanced levels; the usage profile moves them (section 1).
 5. **Triage.**
-   - Blockers go back to **the same implementer via SendMessage**, so it keeps its context. If that agent has already finished, start a fresh one and give it the full context.
+   - Blockers go back to **the same implementer**, resumed with a message so it keeps its context. If that agent has already finished, start a fresh one and give it the full context.
    - Re-run steps 3–4 after the fix.
    - Drop an item from the batch rather than hold up the rest.
    - Everything else waits for the single `triage` call in step 7.
@@ -563,24 +566,24 @@ Standard and Full: create `.claude/skills/audit/SKILL.md`, `.claude/skills/itera
 7. **Finish.**
    - Give each item its own Done row in `BACKLOG_DONE.md`. Record the batch's actual time once, on its first item.
    - Commit per item when the diffs separate cleanly. Otherwise, make one commit that lists every ID.
-   - **Solo:** push (the hook gates the push), then deploy or republish if the product changed.
+   - **Solo:** publish (the hook gates it), then deploy or republish if the product changed. Without version control, run the publish gate's checks before deploying, and take a snapshot if the project uses them.
    - **Team and Enterprise:** open a PR with the batch table and test and bench results, let CI run, and hand it to the reviewers. Merge only if the profile allows it; Enterprise never self-merges.
    - Call `triage` **once**: it files the reviews' non-blocking findings and regroups the remaining items. Skip it if there's nothing to add and nothing was dropped.
    - **Report** to the user as a table (ID, Tier, Est. time, short description of the change), then actual against estimated time, the test and bench numbers, the PR link if any, and the next batch.
 
-**When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent with SendMessage. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
+**When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
 
-**Keep the orchestrating session lean** (in any skill). It re-reads its whole context on every turn, which makes it the biggest single cost in a long run: read parts of large files (`Grep`, or a read with an offset and limit) rather than whole ones, open images only when you need to see them, point agents at files rather than pasting them, and ask for short reports. Use typed agents rather than forks, since a fork starts with a copy of the whole session. After a compaction, rebuild state from the backlog's In progress rows, `git status` and the list of running agents. When the user runs `/iterate` by hand, suggest `/clear` between batches: the backlog and git hold the state. If an agent stops at its `maxTurns` cap, resume it with SendMessage rather than starting over.
+**Keep the orchestrating session lean** (in any skill). It re-reads its whole context on every turn, which makes it the biggest single cost in a long run: read parts of large files (a search, or a read of a line range) rather than whole ones, open images only when you need to see them, point agents at files rather than pasting them, and ask for short reports. Start agents fresh with a brief rather than as forks (copies of the session), since a fork starts with the whole session's context. After a compaction, rebuild state from the backlog's In progress rows, the working copy's status (`git status` in Git) and the list of running agents. When the user runs `/iterate` by hand, suggest clearing the session's context between batches: the backlog and version control hold the state. If an agent stops at its turn cap, resume it rather than starting over.
 
-**`/devmanual`**: the developers' guide on demand, so nobody has to read `docs/DEV_CYCLE.md` to remember how the project works. With no argument it prints a short version: the framework size and its life cycle; only the commands that exist in this project; the current state (Standard and Full: the batch in progress and the next one; Light: the open items in `docs/TODO.md`, or when the data was last refreshed); and the upgrade trigger. `/devmanual full` prints the whole of `DEV_CYCLE.md`. It reads that doc, the backlog or `docs/TODO.md`, and git, and changes nothing. It's part of the docs that move together (Phase 17): a workflow change updates it in the same change.
+**`/devmanual`**: the developers' guide on demand, so nobody has to read `docs/DEV_CYCLE.md` to remember how the project works. With no argument it prints a short version: the framework size and its life cycle; only the commands that exist in this project; the current state (Standard and Full: the batch in progress and the next one; Light: the open items in `docs/TODO.md`, or when the data was last refreshed); and the upgrade trigger. `/devmanual full` prints the whole of `DEV_CYCLE.md`. It reads that doc, the backlog or `docs/TODO.md`, and the version-control history, and changes nothing. It's part of the docs that move together (Phase 17): a workflow change updates it in the same change.
 
 **`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
-- **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and push or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or stashing the rest, never leaving half-finished edits. Under `/loop`, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
+- **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and publish or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or setting the rest aside, never leaving half-finished edits. When it runs under a loop or scheduler, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
 - **Stop only when** the Ready list is empty or wholly blocked on the user; a decision only the user can make blocks the next useful work (ask once, and keep working on batches that don't depend on it); something is broken that one fix round couldn't repair; the user says stop; or an argument limit is reached (`/autoiterate 3` for three batches, `/autoiterate until ID`). On stopping, report every batch shipped in the run.
 - **Under the Lean profile,** treat a Deep `solo` batch or an A/B experiment (under Balanced, only an A/B experiment) as needing the user's go-ahead unless they've already given it for that item (in the reference build, one A/B experiment used about a fifth of all usage to that point). Ask once, and carry on with other batches meanwhile.
 - **Never end a turn idle:** either an agent or command is in flight (its notification resumes the session), a wake-up is scheduled, or the loop has stopped for one of the reasons above.
-- **Session limits:** apply the limit rule above. Run as `/loop /autoiterate` for unattended work: when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups past the one-hour cap), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
-- **Team and Enterprise:** each batch ends in its PR per the git flow, and the loop carries on with batches that don't depend on an unmerged PR (branching from the main branch). It stops when the next useful batch depends on a PR still waiting for human review.
+- **Session limits:** apply the limit rule above. For unattended work, run it under the platform's loop or scheduler (Appendix I): when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups if the platform caps how far ahead one can be), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
+- **Team and Enterprise:** each batch ends in its PR per the version-control flow, and the loop carries on with batches that don't depend on an unmerged PR (branching from the main line). It stops when the next useful batch depends on a PR still waiting for human review.
 
 Commit.
 
@@ -597,48 +600,48 @@ By now the project type, the architecture (Phase 5), the dev cycle (Phases 10 to
    - How much does it read against what it writes, and how often does it run per batch?
    - Does it wait between turns (for benchmarks, or for reviews before a fix round)? That sets its cache lifetime.
 3. **Give each role a tier and an effort level** (low, medium or high), with a one-line reason, then apply the usage profile's changes (section 1). Start from the reference routing below, and move a role only when the profile of its work says so. For example, an analysis project's data reviewer does its hardest reasoning and belongs on the strong tier, while a static brochure site may need no strong-tier implementer at all.
-4. 🚦 Show the routing table with its reasons, and confirm it with the user. Record the table in `CLAUDE.md` and the reasons in the Decisions log.
+4. 🚦 Show the routing table with its reasons, and confirm it with the user. Record the table in the project instructions file and the reasons in the Decisions log. Pin each agent's model tier explicitly rather than letting it inherit the session's, so a strong-tier agent stays strong in a standard-tier session.
 
-**Reference routing** (the reference build: Balanced profile, Claude Code, 2026-09). A starting point, not a default:
+**Reference routing** (the reference build: Balanced profile, 2026-09; Appendix I shows it as Claude Code settings). A starting point, not a default:
 
 | Setting | Reference build |
 |---|---|
-| Session default | Standard tier (Sonnet) at **medium**, pinned in `.claude/settings.json` (`"model": "sonnet"`, `"effortLevel": "medium"`), compacting at 200K tokens (`"autoCompactWindow": "200k"`) so a long run doesn't grow its context without limit |
-| Raising effort (`/effort high`) | In the main session, only for hard reasoning, then back to medium. Avoid xhigh and max. |
-| Strong (Opus), medium | domain-correctness, perf, security and evaluation reviewers, and `implementer-opus`. Name `model: opus` explicitly (not `inherit`) so they stay on Opus in a Sonnet session. |
-| Strong (Opus), high | `implementer-deep` only |
-| Standard (Sonnet), medium | UX, product, code-quality, compliance, infra and data reviewers, `implementer`, `triage` |
-| Standard (Sonnet), low | efficiency auditor, user tester, accessibility reviewer |
-| Light (Haiku) | Only where it's proven good enough (for example mechanical formatting or lookups), after a trial |
-| Agent guards | `maxTurns` on every agent, set well above a normal run, as a runaway guard. `experimental: cacheTtl: 1h` on the implementers and on any agent that waits more than five minutes between turns (benchmarks, reviews before a fix round): each expiry of the default five-minute cache re-caches the agent's whole context. |
-| Change review (`/code-review`) | Always with a level: `low` for `ui` and `tooling`, `medium` otherwise, `high` for Deep items or on request |
+| Session default | Standard tier at **medium** effort, pinned in the project settings, compacting at 200K tokens so a long run doesn't grow its context without limit |
+| Raising effort | In the main session, only for hard reasoning, then back to medium. Avoid the top effort levels. |
+| Strong, medium | domain-correctness, perf, security and evaluation reviewers, and `implementer-hard` |
+| Strong, high | `implementer-deep` only |
+| Standard, medium | UX, product, code-quality, compliance, infra and data reviewers, `implementer`, `triage` |
+| Standard, low | efficiency auditor, user tester, accessibility reviewer |
+| Light | Only where it's proven good enough (for example mechanical formatting or lookups), after a trial |
+| Agent guards | A **turn cap** on every agent, set well above a normal run, as a runaway guard. A **one-hour cache lifetime** on the implementers and on any agent that waits more than five minutes between turns (benchmarks, reviews before a fix round), where the platform's default cache is shorter: each expiry re-caches the agent's whole context. |
+| Change review | Always with a level: `low` for `ui` and `tooling`, `medium` otherwise, `high` for Deep items or on request |
 
-- **Judge cost per finished task, not per token.** In an agentic session most of the cost is re-reading cached context, which at 2026-09 prices costs the same per token on Sonnet and Opus (Opus is dearer only for new input and output; check current prices). A stronger model that finishes in fewer turns and fix rounds can cost less. The big levers are context size, cache expiry, duplicated work and agent fan-out, before the model.
-- Change agent settings **one level at a time**, with a reason. Record the new setting in `CLAUDE.md`, and the date and reason in the Decisions log.
+- **Judge cost per finished task, not per token.** In an agentic session most of the cost is re-reading cached context, and on some platforms a cached re-read costs the same per token on the strong and standard tiers (Appendix I notes the reference platform's pricing; check current prices). A stronger model that finishes in fewer turns and fix rounds can cost less. The big levers are context size, cache expiry, duplicated work and agent fan-out, before the model.
+- Change agent settings **one level at a time**, with a reason. Record the new setting in the project instructions file, and the date and reason in the Decisions log.
 - **Keep the always-loaded context small** (Phase 6). The project instructions file, and everything else loaded at session start, is re-read on every turn of every session.
 - Switch models at the **start** of a session, because prompt caching is per model.
 - Let batching save the cost: one cycle per batch, not per item. Run `/audit` rarely.
 - Don't spawn agents for work that takes a couple of direct tool calls.
-- Durable project preferences go in the checked-in docs. Personal preferences go in memory.
+- Durable project preferences go in the checked-in docs. Personal preferences go in the platform's personal memory.
 
-**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It finds the project's Claude Code transcripts under `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` per session, and `<session>/subagents/*.jsonl`, each with a `.meta.json` naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their five-minute or one-hour lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then the size, in lines and bytes, of every instruction file loaded at session start; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, instruction files over their size budget (Phase 6), agents re-caching after idle gaps, `/code-review` runs above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to `.claude/usage-history.json`. It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. Take the first snapshot now, so the first retrospective has a baseline. Light projects skip the usage report until they grow to Standard.
+**Usage report.** Build `tools/usage_report.py` (a plain script, no model calls). It reads the project's session records from where the platform keeps them (Appendix I gives the reference platform's location and format): one record per main session and one per agent run, each naming the agent's type. It deduplicates each message's usage by message id, and prices input, cache writes (by their lifetime), cache reads and output by model. It prints, per main session and agent type: runs, share of the total, cost and turns per run, peak context, and the share spent re-caching after idle gaps; then the most expensive runs; then the size, in lines and bytes, of every instruction file loaded at session start; then findings in the audit format (`USAGE-###`, area `usage`) for a main session past the compaction window, instruction files over their size budget (Phase 6), agents re-caching after idle gaps, change reviews run above medium, forks started from a large context, and agent types whose runs grew much longer or costlier since the last report. `--since last` covers the period since the last `--save`, which appends a summary to a usage-history file (Appendix I gives its path). It uses list prices as a proxy for plan usage, and says so in its output. It only sees sessions run on that machine: Team and Enterprise members run it on their own machines, or use the organisation's usage reporting where it has one. If the platform keeps no readable session records, use its usage dashboard or API usage reports instead, and record the gap in the Decisions log. Take the first snapshot now, so the first retrospective has a baseline. Light projects skip the usage report until they grow to Standard.
 
-Commit `CLAUDE.md`, the agent frontmatter and the usage report.
+Commit the project instructions file, the agents' settings and the usage report.
 
 ---
 
 ## Phase 14: Hooks and CI: deterministic enforcement
 
-**Local hooks** (all profiles): scripts in `.claude/hooks/`, wired in `.claude/settings.json` (templates in Appendix G). A Light project uses `after_edit.py` and `protect_secrets.py`, and a push gate that runs the tests only, unless its dev plan adds benchmarks.
+**Local hooks** (all profiles): scripts kept in the repo, wired to the platform's hook events in the project settings (templates in Appendix G; Appendix I has the reference wiring). A Light project uses `after_edit.py` and `protect_secrets.py`, and a publish gate that runs the tests only, unless its dev plan adds benchmarks. Without version control (snapshots or none) there's no publish command to hook: the ship routine runs the gate's checks before deploying, or a hook gates the deploy command if there is one.
 
-| Hook | Event | What it does |
+| Hook | Runs | What it does |
 |---|---|---|
-| `after_edit.py` | PostToolUse on Edit/Write/MultiEdit | If a watched file changed (source, test harness, bench scenarios), runs the formatter and linter on it (if the project has them), then the **quick** check. Exits 2 with the output on failure. |
-| `before_push.py` | PreToolUse on Bash/PowerShell | On a real `git push` (matching `git [global options] push`, not `git stash push` or "push" inside a message) **of this repository**, runs the full tests and `bench --compare`. Exits 2 to block. It works out the push's target from any `cd`/`Set-Location` earlier in the command and from `git -C <dir>`, then asks git which repo that is. Pushes of other repos made from the same session pass through, and an undeterminable target is gated (fail safe). |
-| `protect_baseline.py` | PreToolUse on Edit/Write/MultiEdit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
-| `protect_secrets.py` (all profiles) | PreToolUse on Edit/Write/Bash/PowerShell | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
+| `after_edit.py` | After a file edit | If a watched file changed (source, test harness, bench scenarios), runs the formatter and linter on it (if the project has them), then the **quick** check. Reports the output as a failure the agent must fix. |
+| `before_publish.py` | Before a shell command | On a real publish command **of this repository** (`git push` in Git, matching `git [global options] push` but not `git stash push` or "push" inside a message; `svn commit` in Subversion; Appendix K), runs the full tests and `bench --compare`, and blocks the publish if either fails. It works out the target from any `cd`/`Set-Location` earlier in the command and from options such as `git -C <dir>`, then asks the version-control tool which repository that is. Publishes of other repositories made from the same session pass through, and an undeterminable target is gated (fail safe). |
+| `protect_baseline.py` | Before a file edit | Denies direct edits to `bench/baseline.json`. The baseline only changes through `--baseline`. |
+| `protect_secrets.py` (all profiles) | Before a file edit or a shell command | Denies writing likely secrets (key patterns, high-entropy tokens), and reading `.env` or credential files into context. |
 
-**CI** (Team and Enterprise) runs the same commands, so what's verified locally and what's verified in CI can't drift. Enterprise adds the security scans and required checks. Never bypass a gate (no `--no-verify`). When a gate blocks, find the root cause. Give gate hooks a generous timeout (at least 2× the time the tests and benchmarks take together): a PreToolUse hook that times out is a non-blocking error, so the push would go through unchecked.
+**CI** (Team and Enterprise) runs the same commands, so what's verified locally and what's verified in CI can't drift. Enterprise adds the security scans and required checks. Never bypass a gate (no `--no-verify`). When a gate blocks, find the root cause. Give gate hooks a generous timeout (at least 2× the time the tests and benchmarks take together): on some platforms, including the reference one, a hook that times out doesn't block, so the publish would go through unchecked.
 
 Commit.
 
@@ -647,7 +650,7 @@ Commit.
 ## Phase 15: Operations (Team and Enterprise, for hosted services)
 
 1. **Observability:** structured logging, error tracking, key metrics (the performance budgets and the business KPIs) and, for Enterprise, tracing.
-2. **SLOs and alerts** from the reliability targets in `CLAUDE.md`.
+2. **SLOs and alerts** from the reliability targets in the project instructions file.
 3. **Runbooks** (`docs/runbooks/`): deploy, roll back, rotate a secret, restore from backup, respond to an incident.
 4. **Cost:** a budget alert on the cloud account, and a cost-per-unit metric where it's meaningful.
 5. **Backups and restore**, tested once.
@@ -665,7 +668,7 @@ Standard and Full. **Light:** run the change review and the security reviewer on
    - scope creep in the implementer's diff
    - noise in the benchmark gate
    - findings that repeat known quirks (add these to the agents' quirk lists)
-4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report) against the usage profile, which agents found real problems and which produced noise, and whether the scale profile and the framework size still fit. Tune the model and effort settings and the batch caps **one level at a time**, and record each new setting in `CLAUDE.md` and its date and reason in the Decisions log.
+4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report) against the usage profile, which agents found real problems and which produced noise, and whether the scale profile and the framework size still fit. Tune the model and effort settings and the batch caps **one level at a time**, and record each new setting in the project instructions file and its date and reason in the Decisions log.
 5. Commit.
 
 ---
@@ -682,13 +685,13 @@ Standard and Full. **Light:** run the change review and the security reviewer on
      - the backlog columns (Tier, estimated and actual time)
      - the batch categories and why the caps exist
      - the steps of `/iterate`, `/autoiterate` and `/audit`, including intake and the limit rule
-     - the git and PR flow for this profile
+     - the version control and its PR flow for this profile
      - how to choose what to iterate on (by theme, cost, dependencies, fixes before features)
      - the A/B experiment convention
      - how to keep usage down
      - three worked examples using real batches from the backlog
      - the upgrade and downgrade triggers for the framework size
-2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills (including `/devmanual`), the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
+2. Make sure the project instructions file, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills (including `/devmanual`), the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
 3. Tick every phase in `docs/PROJECT_PROGRESS.md`. Once the development loop is live, mark it and this spec as archived history.
 4. Give the user a brief summary of the project's life cycle, with its commands (`/devmanual` repeats it at any time) and, for Standard and Full, the first batch to run.
 
@@ -701,22 +704,22 @@ Each item is marked with the smallest framework size it applies to: **[Light+]**
 - [ ] A working v1, shown to the user
 - [ ] User interfaces: the visual direction confirmed. [Light+] Design tokens and `docs/DESIGN.md` in place, and reviews check against them
 - [ ] None only: a one-off security pass over the deliverable, and a README that says what it is, how to run it, and how to work on it
-- [ ] [Light+] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection (T/E) and CODEOWNERS (E); environments as infrastructure-as-code (E)
-- [ ] [Light+] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
+- [ ] [Light+] Version control as chosen (or snapshots or none, with the reason logged for Light), with author identity and an ignore list; licence and header convention; remote, CI and deployment as agreed; main-line protection (T/E) and code owners (E); environments as infrastructure-as-code (E)
+- [ ] [Light+] Code conventions recorded in the project instructions file (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
 - [ ] [Light+] `docs/ARCHITECTURE.md` accurate (a few lines for a small project); the system is deterministic, steppable and inspectable from tests; threat model, and data classification (T/E)
-- [ ] [Light+] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
+- [ ] [Light+] The project instructions file with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
 - [ ] [Light+] Tests (full and quick; screens for user interfaces), invariant tests and accessibility checks all pass. [Standard+] The cross-platform matrix; security and dependency scans (T/E)
 - [ ] [Light+] The security reviewer and the change review in place. Light: one implementer, and `docs/TODO.md` for known issues and ideas
-- [ ] [Light+] Hooks: formatter, linter and quick check, the secrets guard, and a push gate that runs the tests. [Standard+] The benchmark comparison in the push gate, and the baseline guard; CI mirrors them (T/E)
+- [ ] [Light+] Hooks: formatter, linter and quick check, the secrets guard, and a publish gate that runs the tests. [Standard+] The benchmark comparison in the publish gate, and the baseline guard; CI mirrors them (T/E)
 - [ ] [Light+] Model routing chosen for the project, with reasons, and confirmed; the session's effort and compaction window pinned
 - [ ] [Light+] `/devmanual` working, and `docs/DEV_CYCLE.md` sized to the project
 - [ ] [Standard+] Benchmarks with a median-of-N baseline, a 5% compare gate and a budget report (Light: only if the dev plan adds them)
-- [ ] [Standard+] Environment helper; MCP with a fallback; allowed-tool list (E)
-- [ ] [Standard+] Read-only reviewers with evidence rules and quirk lists, **including the security reviewer**; the three implementer tiers; triage
+- [ ] [Standard+] Environment helper; browser tool with a fallback; allowed-tool list (E)
+- [ ] [Standard+] Read-only reviewers with evidence rules and quirk lists, **including the security reviewer**; the three implementers (Routine, Hard, Deep); triage
 - [ ] [Standard+] The first audit includes a security baseline; secret and dependency scans pass
 - [ ] [Standard+] `BACKLOG.md` with the Batches, Tier, estimated and actual time columns, plus a mechanical consistency check
-- [ ] [Standard+] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's git flow
-- [ ] [Standard+] The usage report, run by `/audit`, with a first snapshot saved; agent turn caps and cache lifetimes set
+- [ ] [Standard+] `/audit`, `/iterate` and `/autoiterate` working end to end, batch-first, following the profile's version-control flow
+- [ ] [Standard+] The usage report, run by `/audit`, with a first usage snapshot saved; agent turn caps and cache lifetimes set
 - [ ] [Full] The scale profile's extra reviewers; CI as the authority for the gates
 - [ ] [Full] Observability, SLOs, runbooks and cost alerts (hosted services)
 - [ ] [Standard+] First audit, first batch shipped, retrospective done, settings tuned. Light: v1 reviewed once, and a short retrospective on whether the size fits
@@ -756,7 +759,9 @@ Rename the categories and agents to fit the project. For example, the reference 
 
 ---
 
-## Appendix B: `CLAUDE.md` skeleton
+## Appendix B: Project instructions file skeleton
+
+Write it to the platform's instructions file (Appendix I).
 
 ```markdown
 # <Project name>
@@ -770,7 +775,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 - `tests/…`: one command; `--quick`, `--screens`.
 - `bench/…`: `bench/baseline.json` is committed; results are ignored.
 - `tools/…`: environment helper, hosted-copy build.
-- `.claude/agents/`, `.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`, `.mcp.json`, CI config
+- <the platform's agent, skill and hook folders, project settings and tool-server config (Appendix I)>, CI config
 - `BACKLOG.md`: batches and items, triaged. (Light: `docs/TODO.md`.)
 
 ## Read when
@@ -781,10 +786,10 @@ Rename the categories and agents to fit the project. For example, the reference 
 <!-- Light: steps 1 and 3, the security reviewer from step 5, then step 6. -->
 1. Tests: every check passes.
 2. Bench `--compare` when speed could change: no regression over 5%.
-3. `/code-review`, and fix what it finds.
+3. The change review (<the platform's command>), and fix what it finds.
 4. The user-tester agent checks the change.
 5. Domain-correctness reviewer if the core logic changed. **Security reviewer** if the change touches a sensitive area (authentication, input handling, secrets, dependencies, headers/CSP, CI/CD, infrastructure, data access, LLM prompts or tools).
-6. Solo: push (hook-gated) and deploy. Team/Enterprise: open a PR; CI and a person gate the merge.
+6. Solo: publish (hook-gated) and deploy. Team/Enterprise: open a PR; CI and a person gate the merge.
 
 ## Targets & design pillars
 ### Performance and reliability budgets
@@ -799,7 +804,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 ### Workflow
 - <Standard/Full:> Audit (rare) · Iterate by batch (see DEV_CYCLE.md) · Bench run / --compare / --baseline (only on genuine improvement)
 - <Light: ask for a change; implement, test, review, commit; chores via the project skill>
-- Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
+- Version control: <Git / other / snapshots / none>; flow: <profile's flow>. A/B experiments in two isolated working copies. Unattended runs: off unless opted in.
 ### Model & effort
 - Usage profile: <Lean / Balanced / Throughput>, chosen <date> because <reason>.
 - <Phase 13 routing table: one line per tier and effort, with the roles on it; the session's effort and compaction window; the change-review levels. Reasons and dates go in the Decisions log.>
@@ -809,27 +814,29 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line), then a line or two on what the file holds.
 - Code: <style guide>; <formatter and linter>, run by the after-edit hook. Names say what things are, with units. Tests: <layout>, names that state the behaviour, arrange/act/assert. Errors name what failed and the values.
 - Comment level: <Agents-first / Standard / Human-maintained>, chosen <date> because <reason>. Comments say why, not what; update them with the code.
-- Commits authored as <Name> <email> (repo git config). <Style, platform and input conventions.> Keep README in step. All randomness through `rand()`.
+- Commits authored as <Name> <email> (set for this repository only). <Style, platform and input conventions.> Keep README in step. All randomness through `rand()`.
 ```
 
 ---
 
 ## Appendix C: Agent templates
 
+Each template has two parts: its **settings**, which the platform writes in its own format (Appendix I shows the reference platform's), and its **instructions**, which go in the agent's file as they are. Tool names are neutral: *read*, *search*, *shell*, *edit* (editing and writing files) and the *browser tool*.
+
 **Reviewer (read-only):**
 
-```markdown
----
-name: <role>
-description: <what it reviews and when to use it (in /audit, after X changes)>. Read-only.
-model: sonnet            # opus for deep-reasoning roles; name it explicitly
-effort: medium           # low for observe-and-report roles
-maxTurns: 60             # runaway guard, well above a normal run
-tools: Bash, Read, Glob, Grep   # + mcp__playwright for UI roles; never Edit/Write
----
+| Setting | Value |
+|---|---|
+| Name | `<role>` |
+| Description | <what it reviews and when to use it (in /audit, after X changes)>. Read-only. |
+| Model tier | Standard; strong for deep-reasoning roles. Pin it explicitly. |
+| Effort | Medium; low for observe-and-report roles |
+| Turn cap | 60: a runaway guard, well above a normal run |
+| Tools | Read, search, shell; plus the browser tool for UI roles. Never edit. |
 
-You review <facet> of <Project>. Read `CLAUDE.md` (targets, pillars, security) and `docs/ARCHITECTURE.md` first.
-You never edit, commit, push or deploy, and you never use production credentials. Throwaway experiments go in a temp folder outside the repo.
+```markdown
+You review <facet> of <Project>. Read the project instructions file (targets, pillars, security) and `docs/ARCHITECTURE.md` first.
+You never edit, commit, publish or deploy, and you never use production credentials. Throwaway experiments go in a temp folder outside the repo.
 
 ## Measure first
 <commands that produce evidence: tests --screens, bench scenarios, scans, test hooks>
@@ -848,18 +855,18 @@ Findings only, most valuable first, in the AREA-### format. No evidence, no find
 
 **Docs writer** (edits docs only):
 
-```markdown
----
-name: docs-writer
-description: Writes and audits <Project>'s documentation - user guide, domain-logic reference, operations notes, threat model - and checks in /audit that every doc still matches the code. Edits documentation only.
-model: sonnet
-effort: medium
-maxTurns: 60             # runaway guard
-tools: Bash, Read, Edit, Write, Glob, Grep   # + mcp__playwright to use a UI
----
+| Setting | Value |
+|---|---|
+| Name | `docs-writer` |
+| Description | Writes and audits <Project>'s documentation - user guide, domain-logic reference, operations notes, threat model - and checks in /audit that every doc still matches the code. Edits documentation only. |
+| Model tier | Standard |
+| Effort | Medium |
+| Turn cap | 60 |
+| Tools | Read, search, shell, edit; plus the browser tool to use a UI |
 
-You write and maintain <Project>'s docs. Read `CLAUDE.md` and `docs/ARCHITECTURE.md` first.
-You edit only README and `docs/`; never code, tests, tools or agents; never commit, push or deploy.
+```markdown
+You write and maintain <Project>'s docs. Read the project instructions file and `docs/ARCHITECTURE.md` first.
+You edit only README and `docs/`; never code, tests, tools or agents; never commit, publish or deploy.
 
 ## Writing
 Confirm every claim in the code or the running product. Plain sentences for a reader who starts cold; tables for reference; one concern per doc, linking instead of duplicating. Domain docs need their expert's review before they ship.
@@ -868,25 +875,23 @@ Confirm every claim in the code or the running product. Plain sentences for a re
 Check every doc against the current code and product. Report each mismatch, and each feature that shipped without docs, as a DOC-### finding with evidence (doc line vs code or observation).
 ```
 
-**Implementer** (three copies: `implementer` sonnet/medium, `implementer-opus` opus/medium, `implementer-deep` opus/high):
+**Implementer** (three copies, one per work tier: `implementer` for Routine, `implementer-hard` for Hard, `implementer-deep` for Deep):
+
+| Setting | Value |
+|---|---|
+| Name | `implementer`, `implementer-hard` or `implementer-deep` |
+| Description | Implements a <Project> BACKLOG.md batch (or a single item) as the smallest reasonable changes, one isolated edit per item. <Work tier scope>. Use from /iterate. |
+| Model tier and effort | From Phase 13 (reference: standard and medium, strong and medium, strong and high) |
+| Turn cap | 100; 150 for `implementer-hard`, 200 for `implementer-deep` |
+| Tools | Read, search, shell, edit |
+| Cache lifetime | One hour: it waits through test runs and reviews before a fix round |
 
 ```markdown
----
-name: implementer
-description: Implements a <Project> BACKLOG.md batch (or a single item) as the smallest reasonable changes, one isolated edit per item. <Tier scope>. Use from /iterate.
-model: sonnet
-effort: medium
-maxTurns: 100            # 150 for implementer-opus, 200 for implementer-deep
-tools: Bash, Read, Edit, Write, Glob, Grep
-experimental:
-  cacheTtl: 1h           # it waits through test runs and reviews before a fix round
----
-
-You implement backlog items for <Project>. Read `CLAUDE.md` first.
-You implement and test. You never commit, push, merge or deploy.
+You implement backlog items for <Project>. Read the project instructions file first.
+You implement and test. You never commit, publish, merge or deploy.
 
 ## What to do
-1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules. Write to the code conventions and comment level in `CLAUDE.md`: clear names, the language's idioms, comments that say why, and doc comments at the chosen level. Update any comment your change makes wrong. For UI work, read `docs/DESIGN.md` first and use its tokens.
+1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules. Write to the code conventions and comment level in the project instructions file: clear names, the language's idioms, comments that say why, and doc comments at the chosen level. Update any comment your change makes wrong. For UI work, read `docs/DESIGN.md` first and use its tokens.
 2. Add or extend a test for new behaviour.
 3. Run the full tests once at the end. If something fails, fix it or report exactly what's blocking. Don't work around it. Don't run the full benchmark comparison: /iterate runs it right after you (the exception is one arm of an A/B experiment, which benchmarks itself once, near the end).
 4. Update README.md or the docs if behaviour or usage changed.
@@ -908,20 +913,20 @@ Work through the items one at a time as separate, isolated edits. If an item tur
 
 Every project sized Light or above gets this agent, whatever its scale; a deliverable sized None gets one pass with this checklist before it's delivered. Solo projects run the core checklist; Team and Enterprise add the CI scanners and compliance mapping.
 
-```markdown
----
-name: security-reviewer
-description: Dedicated security specialist for <Project>. Reviews the whole system in /audit, and any change that touches a sensitive area, against the threat model. Covers authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, browser security headers, CI/CD and infrastructure, data protection, and LLM-specific risks. Read-only.
-model: opus
-effort: medium
-maxTurns: 60             # runaway guard
-tools: Bash, Read, Glob, Grep   # + mcp__playwright for web apps; never Edit/Write
----
+| Setting | Value |
+|---|---|
+| Name | `security-reviewer` |
+| Description | Dedicated security specialist for <Project>. Reviews the whole system in /audit, and any change that touches a sensitive area, against the threat model. Covers authentication and authorisation, input handling and injection, secrets, dependencies and supply chain, browser security headers, CI/CD and infrastructure, data protection, and LLM-specific risks. Read-only. |
+| Model tier | Strong |
+| Effort | Medium |
+| Turn cap | 60 |
+| Tools | Read, search, shell; plus the browser tool for web apps. Never edit. |
 
-You are the security reviewer for <Project>. Read `CLAUDE.md` (the security & compliance section) and `docs/THREAT_MODEL.md` first. Your job is to find real, exploitable weaknesses and risky patterns, backed by evidence, and to keep the threat model current.
+```markdown
+You are the security reviewer for <Project>. Read the project instructions file (the security & compliance section) and `docs/THREAT_MODEL.md` first. Your job is to find real, exploitable weaknesses and risky patterns, backed by evidence, and to keep the threat model current.
 
 ## Rules of engagement
-- Read-only. You never edit, commit, push or deploy.
+- Read-only. You never edit, commit, publish or deploy.
 - Test only the local or test environments you were pointed at. Never production, never third-party systems, never real user data.
 - Prove each finding with the smallest safe demonstration: a failing test case, a crafted input against the local app, or `file:line` with a clear explanation of the data flow. Don't write weaponised exploits.
 - Never print, copy or pass on secrets you come across. Report where they are (`file:line` and the type of secret), not their value.
@@ -942,7 +947,7 @@ You are the security reviewer for <Project>. Read `CLAUDE.md` (the security & co
   - unsafe deserialisation, XXE, regex denial of service
   - parsing of URL or share-link state
 - **Browser security:** CSP, HSTS, frame-ancestors, CORS policy, third-party scripts and fonts (Subresource Integrity), clickjacking, postMessage handling.
-- **Secrets:** none in the repo, git history, logs, client bundles, error messages or agent context. Keys can be rotated and have least privilege.
+- **Secrets:** none in the repo, version-control history, logs, client bundles, error messages or agent context. Keys can be rotated and have least privilege.
 - **Dependencies and supply chain:**
   - known CVEs; abandoned or typosquatted packages
   - lockfiles committed
@@ -979,30 +984,30 @@ For a change review rather than an audit, the same agent reviews only the diff a
 
 ## Appendix D: `triage` rules
 
-```markdown
----
-name: triage
-description: Turns audit and review findings into BACKLOG.md. Discards findings without evidence, merges duplicates, scores priority, assigns Tier and Est. time, and groups Ready items into batches. Use at the end of /audit and /iterate.
-model: sonnet
-effort: medium
-maxTurns: 30
-tools: Read, Edit, Write, Grep, Glob
----
+| Setting | Value |
+|---|---|
+| Name | `triage` |
+| Description | Turns audit and review findings into BACKLOG.md. Discards findings without evidence, merges duplicates, scores priority, assigns Tier and Est. time, and groups Ready items into batches. Use at the end of /audit and /iterate. |
+| Model tier | Standard |
+| Effort | Medium |
+| Turn cap | 30 |
+| Tools | Read, search, edit |
 
+```markdown
 Rules:
 1. Discard findings with no concrete evidence. List them at the end of your reply, not in the backlog.
 2. Merge duplicates: keep the clearest title, combine the evidence.
 3. Priority = impact ÷ effort (two decimals). Break ties with broken or risky behaviour first, then smaller changes. **Critical and high security findings go to the top of Ready regardless of score, as a `security` batch (or `solo`), and are flagged to the user.**
-4. Check the pillars and the security rules in CLAUDE.md. A finding that breaks either goes to Rejected, with the reason.
+4. Check the pillars and the security rules in the project instructions file. A finding that breaks either goes to Rejected, with the reason.
 5. Preserve status. Never delete or reorder In progress, Done or Rejected. A finding that matches a Ready item updates its evidence. A finding that matches a Done item is a regression: add it as new, with a note. Done items are in BACKLOG_DONE.md: search it, don't read it whole.
 6. IDs are AREA-###, numbered after the highest existing number for that area.
 7. Sort Ready by priority. One line per row, with evidence as short pointers. Work in one pass: read BACKLOG.md once, then a few Edits or a single Write, without re-reading it to check.
 7a. Usage findings (USAGE-###, from the usage report) go in the tooling category. One that would change an agent's model or effort trades quality for usage: mark it as needing the user's decision and keep it out of every batch until they decide.
-8. Tier:
+8. Tier (the work tier):
    - Deep: <the project's hardest class of work>, A/B experiments, irreversible changes
-   - Opus: core, perf or security area, the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or effort 2 or more
-   - Light: everything else at effort 1
-   Est. time: Light effort 1, 10–20 min; Opus effort 1, 15–25; effort 2, 20–35; effort 3 or Deep, 35–90+.
+   - Hard: core, perf or security area, the logic of the safety gates (hooks, the build, the test runner's pass/fail logic), or effort 2 or more
+   - Routine: everything else at effort 1
+   Est. time: Routine effort 1, 10–20 min; Hard effort 1, 15–25; effort 2, 20–35; effort 3 or Deep, 35–90+.
 9. Batches. Regroup ALL Ready items on every run. B1 is the batch that holds the top item.
    - One category (ui / tooling / core / perf / security / infra / data / solo) and one tier per batch.
    - Items that edit the same function stay apart. Respect dependencies.
@@ -1062,77 +1067,46 @@ Shipped items live in BACKLOG_DONE.md.
 
 ## Appendix F: Skill skeletons
 
-```markdown
----
-name: iterate
-description: Take the next batch of Ready items from <Project>'s BACKLOG.md (or a batch, item or items the user names) through the full pipeline once: implement, test, benchmark, review, triage, then ship per the project's git flow. Use when the user says iterate, "do the next batch", or names a batch or item ID.
-argument-hint: "[batch ID, item ID, 'ID solo', or nothing]"
----
-```
+Each skill's settings, which the platform writes in its own format (Appendix I shows the reference platform's):
 
-```markdown
----
-name: autoiterate
-description: Keep running <Project>'s /iterate cycle batch after batch without waiting for the user - intake new requests between batches, ship each batch through the full pipeline, and pause and resume on its own around session limits - until the backlog is done or something needs the user's decision. Use when the user says autoiterate, "keep iterating" or "work through the backlog". For a single cycle, use /iterate.
-argument-hint: "[optional: 'stop', 'stop now', N batches, or 'until <ID>']"
----
-```
+| Skill | Description | Arguments |
+|---|---|---|
+| `iterate` | Take the next batch of Ready items from <Project>'s BACKLOG.md (or a batch, item or items the user names) through the full pipeline once: implement, test, benchmark, review, triage, then ship per the project's version-control flow. Use when the user says iterate, "do the next batch", or names a batch or item ID. | A batch ID, an item ID, "ID solo", or nothing |
+| `autoiterate` | Keep running <Project>'s /iterate cycle batch after batch without waiting for the user - intake new requests between batches, ship each batch through the full pipeline, and pause and resume on its own around session limits - until the backlog is done or something needs the user's decision. Use when the user says autoiterate, "keep iterating" or "work through the backlog". For a single cycle, use /iterate. | Optional: "stop", "stop now", N batches, or "until <ID>" |
+| `audit` | Audit the whole of <Project>: run the tests, benchmarks, scans and usage report, dispatch the specialist reviewers in parallel, triage their findings into BACKLOG.md, and summarise the top five items and the batches. Use when the user asks for an audit, a backlog refresh or "what should we improve next". | Optional: a focus, such as perf, security or usage |
+| `devmanual` | Print <Project>'s developers' guide, sized to the project - the framework size and its life cycle, the commands that apply, the current state and the upgrade trigger. 'full' prints the whole of docs/DEV_CYCLE.md. Use when the user asks how to work on the project, what the commands are, or what to do next. | Nothing for the short version, or "full" |
 
-```markdown
----
-name: audit
-description: Audit the whole of <Project>: run the tests, benchmarks, scans and usage report, dispatch the specialist reviewers in parallel, triage their findings into BACKLOG.md, and summarise the top five items and the batches. Use when the user asks for an audit, a backlog refresh or "what should we improve next".
----
-```
-
-```markdown
----
-name: devmanual
-description: Print <Project>'s developers' guide, sized to the project - the framework size and its life cycle, the commands that apply, the current state and the upgrade trigger. 'full' prints the whole of docs/DEV_CYCLE.md. Use when the user asks how to work on the project, what the commands are, or what to do next.
-argument-hint: "[nothing for the short version, or 'full']"
----
-```
-
-Standard and Full projects get all four; Light projects get only `/devmanual` (and at most one project skill). The bodies follow Phase 12 step by step, including intake, the reviews-by-category table (Phase 11), the git flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't set `effort` in any of these skills.
+Standard and Full projects get all four; Light projects get only `/devmanual` (and at most one project skill). The bodies follow Phase 12 step by step, including intake, the reviews-by-category table (Phase 11), the version-control flow for the profile, the limit rule and the report format. `/autoiterate` points at `/iterate`'s steps rather than copying them, so the two can't drift. Don't pin an effort level in any of these skills.
 
 ---
 
 ## Appendix G: Hook templates
 
-`.claude/settings.json` (merge with the existing keys):
+The hook scripts live in the repo, in the folder the platform expects (Appendix I), and are wired to its hook events in the project settings. Appendix I has the reference wiring, including the session's model, effort and compaction settings. Each script needs two things from the platform, marked *platform binding* in the code: how it receives the command or file path it's checking, and how it blocks the action or reports a failure.
 
-```json
-{
-  "model": "sonnet",
-  "effortLevel": "medium",
-  "autoCompactWindow": "200k",
-  "hooks": {
-    "PreToolUse": [
-      { "matcher": "Bash|PowerShell",
-        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/before_push.py\"", "timeout": 900 }] },
-      { "matcher": "Edit|Write|MultiEdit",
-        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_baseline.py\"", "timeout": 10 }] },
-      { "matcher": "Edit|Write|Bash|PowerShell",
-        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_secrets.py\"", "timeout": 10 }] }
-    ],
-    "PostToolUse": [
-      { "matcher": "Edit|Write|MultiEdit",
-        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/after_edit.py\"", "timeout": 60 }] }
-    ]
-  }
-}
-```
+| Script | Wire it to | Timeout |
+|---|---|---|
+| `before_publish.py` | Before a shell command | Generous: at least 2× the tests and benchmarks together (for example 900 s) |
+| `protect_baseline.py` | Before a file edit | About 10 s |
+| `protect_secrets.py` | Before a file edit or a shell command | About 10 s |
+| `after_edit.py` | After a file edit | About 60 s |
 
-`before_push.py` (the core; adapt the test and bench commands to the stack):
+`before_publish.py` (the core, written for Git; adapt the test and bench commands to the stack, and for another version-control tool, the publish pattern and the repository lookup as Appendix K says):
 
 ```python
 import json, os, re, subprocess, sys
 from pathlib import Path
-ROOT = Path(__file__).resolve().parents[2]
 # A real `git push`, allowing global options (git -C dir push), but not `git stash push` or "push" in a message
 PUSH = re.compile(r"\bgit(?:\s+(?:-C\s+\S+|-c\s+\S+|--?[\w-]+(?:=\S+)?))*\s+push\b")
 GIT_C = re.compile(r"\bgit\s+(?:-c\s+\S+\s+)*-C\s+(\"[^\"]+\"|'[^']+'|\S+)")
 CD = re.compile(r"^\s*(?:cd|pushd|Set-Location|sl)(?:\s+-(?:Path|LiteralPath))?\s+(\"[^\"]+\"|'[^']+'|\S+)\s*$", re.I)
+BLOCK = 2  # platform binding: the exit code that blocks the action (Appendix I)
+
+def read_hook_input():
+    """Platform binding (Appendix I): the shell command about to run, and its working directory."""
+    try: data = json.load(sys.stdin)
+    except ValueError: return "", os.getcwd()
+    return str((data.get("tool_input") or {}).get("command", "")), data.get("cwd") or os.getcwd()
 
 def to_native(path):  # Git Bash /e/dir -> E:/dir on Windows
     path = path.strip("\"'")
@@ -1145,6 +1119,8 @@ def repo_root(d):
     except (OSError, subprocess.SubprocessError): return None
     return Path(out.stdout.strip()).resolve() if out.returncode == 0 and out.stdout.strip() else None
 
+ROOT = repo_root(str(Path(__file__).resolve().parent))  # the repo this hook lives in
+
 def pushes_this_repo(command, cwd):
     """True if any push targets this repo, or its target can't be determined (fail safe)."""
     here = cwd
@@ -1154,7 +1130,7 @@ def pushes_this_repo(command, cwd):
             c = GIT_C.search(seg)
             target = str(Path(here, to_native(c.group(1)))) if c else here
             root = repo_root(target) if Path(target).is_dir() else None
-            if root is None or root == ROOT.resolve(): return True
+            if root is None or root == ROOT: return True
     return False
 
 def run(args):
@@ -1162,14 +1138,13 @@ def run(args):
     return p.returncode, p.stdout + p.stderr
 
 def main():
-    try: data = json.load(sys.stdin)
-    except ValueError: return 0
-    command = str((data.get("tool_input") or {}).get("command", ""))
-    if not PUSH.search(command) or not pushes_this_repo(command, data.get("cwd") or os.getcwd()): return 0
+    command, cwd = read_hook_input()
+    if not PUSH.search(command) or not pushes_this_repo(command, cwd): return 0
+    if ROOT is None: sys.stderr.write("Publish blocked: can't find this hook's repository.\n"); return BLOCK
     code, out = run([str(ROOT / "tests" / "run_tests.py")])
-    if code: sys.stderr.write("Push blocked: tests failed.\n" + out[-2000:]); return 2
+    if code: sys.stderr.write("Publish blocked: tests failed.\n" + out[-2000:]); return BLOCK
     code, out = run([str(ROOT / "bench" / "run_bench.py"), "--compare"])
-    if code: sys.stderr.write("Push blocked: benchmark regression or broken budget.\n" + out[-2500:]); return 2
+    if code: sys.stderr.write("Publish blocked: benchmark regression or broken budget.\n" + out[-2500:]); return BLOCK
     return 0
 
 sys.exit(main())
@@ -1177,18 +1152,13 @@ sys.exit(main())
 
 Test the targeting logic from a file, not from a command line that contains the push text itself (that would fire the gate). Cover: a plain push, `cd <this repo> &&`, `git -C <this repo>`, `cd <other repo> &&`, Windows and Git Bash paths, and an unknown directory, which must be gated.
 
-`protect_baseline.py` denies with:
+`protect_baseline.py`: deny an edit to `bench/baseline.json`, in the platform's deny format (Appendix I), with the reason "bench/baseline.json only changes through the --baseline command, and only when the numbers genuinely improved."
 
-```json
-{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
-  "permissionDecisionReason": "bench/baseline.json only changes through the --baseline command, and only when the numbers genuinely improved."}}
-```
+`after_edit.py`: if the edited file's path (from the hook's input) ends with a watched path, run the formatter and linter on that file (if the project has them), then the tests with `--quick`, and on failure report the tail of the output to the agent as an error it must fix (Appendix I).
 
-`after_edit.py`: if `tool_input.file_path` ends with a watched path, run the formatter and linter on that file (if the project has them), then the tests with `--quick`, and exit 2 with the tail of the output on failure.
+`protect_secrets.py`: deny, as `protect_baseline.py` does, an edit whose new content matches a key pattern or a high-entropy token, and a command that reads `.env` or a credential file.
 
-`protect_secrets.py`: deny (same JSON as `protect_baseline.py`) an Edit or Write whose new content matches a key pattern or a high-entropy token, and a command that reads `.env` or a credential file.
-
-For Team and Enterprise, add a CI workflow (for example GitHub Actions) that runs the same test and bench-compare commands on every PR, and make them required status checks.
+For Team and Enterprise, add a CI workflow (for example GitHub Actions, or a CI server watching the repository) that runs the same test and bench-compare commands on every PR, and make them required checks.
 
 ---
 
@@ -1221,26 +1191,134 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 
 ## Appendix I: Platform bindings
 
-The phases describe the method in platform-neutral terms. This appendix binds each term to a concrete platform. To launch on a platform with no binding here, map each term to its nearest equivalent, note anything with no equivalent and how you worked around it, and record the mapping in the Decisions log. When editing Coldstarter, platform-specific detail goes here, not in the phases.
+The phases and templates describe the method in platform-neutral terms. This appendix binds each term to a concrete platform. To launch on a platform with no binding here, map each term to its nearest equivalent, note anything with no equivalent and how you worked around it, and record the mapping in the Decisions log. When editing Coldstarter, platform-specific detail goes here, not in the phases.
 
-*Until 2.0.0:* Claude Code is the reference platform, and many of its specifics are still written inline in the phases and templates (settings keys, hook events, agent frontmatter, model names, `/code-review`, the usage report's transcript format). Treat them as its binding. Version 2.0.0 moves them here.
+### I.1 Claude Code (the reference binding, checked 2026-09)
 
-| Neutral term | What it is | Claude Code (reference binding, checked 2026-09) |
+Docs: code.claude.com/docs (subagents, skills, hooks, settings, MCP).
+
+| Neutral term | What it is | Claude Code |
 |---|---|---|
+| The agent | The AI coding agent running the launch | Claude Code, in the terminal, desktop app, web app or an IDE extension |
 | Project instructions file | Loaded into every session; kept as an index (Phase 6) | `CLAUDE.md` at the repo root (or `.claude/CLAUDE.md`). Claude Code's own guidance is under 200 lines; Coldstarter's budget (Phase 6) is tighter. It reads `AGENTS.md` instead when there's no `CLAUDE.md`. To share one file with other tools, keep the instructions in `AGENTS.md` and put `@AGENTS.md` at the top of `CLAUDE.md`. `@path` imports load at session start, so they don't shrink the context. Block-level HTML comments are stripped before loading, so notes for people cost nothing. |
 | Path-scoped instructions | Rules that load only when files in one area are read | `.claude/rules/*.md` with a `paths:` list of globs in the frontmatter, or a `CLAUDE.md` in a subdirectory, which loads when files there are read |
-| Skill | A procedure loaded only when invoked or relevant | `.claude/skills/<name>/SKILL.md` |
-| Subagent | A separately prompted agent with its own tools, model and effort | `.claude/agents/<name>.md` (frontmatter: `model`, `effort`, `tools`, `maxTurns`, and `experimental.cacheTtl`, `5m` or `1h`) |
-| Hook | A deterministic script run at a fixed point, such as before a command or after an edit | `hooks` in `.claude/settings.json`: `PreToolUse` and `PostToolUse`; exit code 2 blocks |
+| Skill | A procedure loaded only when invoked or relevant | `.claude/skills/<name>/SKILL.md`, invoked as `/<name>` (I.4) |
+| Subagent | A separately prompted agent with its own tools, model and effort | `.claude/agents/<name>.md`, settings in frontmatter (I.3) |
+| Hook | A deterministic script run at a fixed point, such as before a command or after an edit | Scripts in `.claude/hooks/`, wired under `hooks` in the project settings (I.2, I.5) |
+| Project settings | Checked-in settings for the session, permissions and hooks | `.claude/settings.json` (personal overrides in `.claude/settings.local.json`) |
 | Model tiers | Strong, standard, light | Opus, Sonnet, Haiku (check the current models and prices) |
-| Effort | How long the model reasons per turn | `effortLevel` in settings, `/effort` in a session, `effort` in agent frontmatter |
+| Effort | How long the model reasons per turn | `effortLevel` in settings, `/effort` in a session, `effort` in agent frontmatter. Levels: low, medium, high, xhigh, max; Coldstarter's "top effort levels" are xhigh and max. |
 | Context limit for the main session | Where a long session compacts | `autoCompactWindow` in settings |
-| Change review | An automated review of a diff, at a named depth | `/code-review <level>` |
-| Browser tool | Lets agents drive the running product | The Playwright MCP server, in `.mcp.json` |
-| Usage data | Per-session token records for the usage report | `~/.claude/projects/<project path>/*.jsonl` transcripts (Phase 13) |
+| Clearing the session's context | Starting fresh between batches | `/clear` |
+| Turn cap | A runaway guard on an agent | `maxTurns` in agent frontmatter |
+| Cache lifetime | How long an agent's prompt cache survives idle time | Five minutes by default; `experimental: cacheTtl: 1h` in agent frontmatter for one hour |
+| Resuming an agent | Continuing a finished or paused agent with its context | `SendMessage` to the agent's ID or name |
+| Fork | An agent started with a copy of the session's context | The Agent tool's `fork` type |
+| Change review | An automated review of a diff, at a named depth | `/code-review <level>`. Always name the level: with none, it reuses the level last typed. `high` and above fan out to several subagents. It reviews Git changes; with other version control, check whether it supports it, and if not, have a reviewer agent review the diff. |
+| Checkpoints | Undoing the agent's own edits within a session | Checkpointing: `/rewind` (or Esc twice) restores files and the conversation to an earlier prompt. It tracks the agent's file edits, not changes made by shell commands, and it's no substitute for version control. |
+| Isolated working copies | Separate copies for parallel agents | An agent's worktree isolation needs Git; with another tool, give each agent its own checkout. |
+| Loop or scheduler | Re-runs a skill unattended, with wake-ups | `/loop /autoiterate`. A scheduled wake-up is at most an hour ahead, so a longer wait chains wake-ups. |
+| Browser tool | Lets agents drive the running product | The Playwright MCP server (or Chrome DevTools MCP), in `.mcp.json`; its tools appear as `mcp__playwright__*` |
+| Tool names | Read, search, shell, edit | `Read`; `Glob` and `Grep`; `Bash` and `PowerShell`; `Edit`, `Write` and `MultiEdit` |
+| Usage plans | For the usage-profile suggestion (Phase 1) | Pro → Lean; Max or Team → Balanced; Enterprise, or API use where time matters more than tokens → Throughput |
+| Usage data | Per-session token records for the usage report | Transcripts under `~/.claude/projects/<project path>/` (I.6) |
 | Personal memory | Preferences that aren't project rules | Auto memory, in `~/.claude/projects/<project path>/memory/` |
 
-**Other platforms.** `AGENTS.md` is a cross-tool convention for the project instructions file that many coding agents read; prefer it where the platform supports it. Add a column, or a table, for each platform once a project has been launched on it, with the date its binding was checked.
+### I.2 Project settings
+
+The reference routing (Phase 13) and the hooks (Phase 14, Appendix G) in `.claude/settings.json`. Merge with the existing keys:
+
+```json
+{
+  "model": "sonnet",
+  "effortLevel": "medium",
+  "autoCompactWindow": "200k",
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash|PowerShell",
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/before_publish.py\"", "timeout": 900 }] },
+      { "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_baseline.py\"", "timeout": 10 }] },
+      { "matcher": "Edit|Write|MultiEdit|Bash|PowerShell",
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect_secrets.py\"", "timeout": 10 }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write|MultiEdit",
+        "hooks": [{ "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/after_edit.py\"", "timeout": 60 }] }
+    ]
+  }
+}
+```
+
+Enterprise (Phase 9): add `permissions` rules that allow only the approved tools and MCP servers.
+
+### I.3 Agent settings
+
+Each agent is a markdown file in `.claude/agents/`: the settings from its Appendix C template as YAML frontmatter, then the instructions. Name the model explicitly (`opus`, not `inherit`), so a strong-tier agent stays on Opus in a Sonnet session. A reviewer:
+
+```markdown
+---
+name: <role>
+description: <from the template>
+model: sonnet            # opus for strong-tier roles
+effort: medium
+maxTurns: 60
+tools: Bash, Read, Glob, Grep   # + mcp__playwright for UI roles; never Edit/Write
+---
+
+<the template's instructions>
+```
+
+An implementer adds the edit tools and the cache lifetime:
+
+```yaml
+name: implementer          # implementer-hard, implementer-deep
+model: sonnet              # opus for implementer-hard and implementer-deep
+effort: medium             # high for implementer-deep
+maxTurns: 100              # 150 for implementer-hard, 200 for implementer-deep
+tools: Bash, Read, Edit, Write, Glob, Grep
+experimental:
+  cacheTtl: 1h
+```
+
+If the project's agents aren't available as agent types in a session, run `general-purpose` agents told to follow the matching agent file (Phase 12).
+
+### I.4 Skill settings
+
+Each skill is `.claude/skills/<name>/SKILL.md`: frontmatter from its Appendix F row, then the body.
+
+```markdown
+---
+name: iterate
+description: <from Appendix F>
+argument-hint: "[batch ID, item ID, 'ID solo', or nothing]"
+---
+```
+
+Don't set `effort` in skill frontmatter, so the session's `/effort` still applies.
+
+### I.5 Hook input and output
+
+- **Input:** a hook receives JSON on stdin. `tool_input.command` holds a shell command, `tool_input.file_path` the file being edited, and `cwd` the working directory. `$CLAUDE_PROJECT_DIR` points at the project root.
+- **Blocking:** a `PreToolUse` hook that exits 2 blocks the tool call, and its stderr goes to Claude. A `PostToolUse` hook that exits 2 reports its stderr to Claude as an error to fix (the edit has already happened).
+- **Denying with a reason** (`protect_baseline.py`, `protect_secrets.py`): print this and exit 0:
+
+  ```json
+  {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+    "permissionDecisionReason": "<the reason>"}}
+  ```
+- **Timeouts:** a hook that times out is a non-blocking error, so the tool call goes ahead. Give gate hooks a generous `timeout` (Phase 14).
+
+### I.6 Usage records
+
+- **Where:** `~/.claude/projects/<the project path, with every non-alphanumeric character replaced by '-'>/`: one `.jsonl` transcript per main session, and `<session>/subagents/*.jsonl` per agent run, each with a `.meta.json` naming the agent's type.
+- **What:** each assistant message carries its model and a usage block (input, cache writes split by five-minute and one-hour lifetime, cache reads, output). A message can appear more than once, so deduplicate by message id.
+- **History:** `tools/usage_report.py --save` appends to `.claude/usage-history.json`.
+- **Pricing note:** at 2026-09 prices, a cached read costs the same per token on Sonnet and Opus; Opus is dearer only for new input and output. Check current prices.
+
+### Other platforms
+
+`AGENTS.md` is a cross-tool convention for the project instructions file that many coding agents read; prefer it where the platform supports it. Add a section like I.1 to I.6 for each platform once a project has been launched on it, with the date its binding was checked.
 
 ---
 
@@ -1259,7 +1337,7 @@ The look, feel and interaction rules for <Project>. Read before any UI work.
 - Like: <two or three references, and what to take from each>
 - Never looks like: <for example a generic SaaS landing page, a crypto dashboard>
 - Density: <compact and scannable / generous>, because <reason>
-- Serves the pillars: <from CLAUDE.md>
+- Serves the pillars: <from the project instructions file>
 
 ## Tokens: the only source of values
 - They live in <file>: colour, type scale, spacing scale, radii, shadows, motion durations and easing.
@@ -1307,3 +1385,36 @@ These are the most statistically likely choices, the ones that make an interface
 - UI changes are checked by screenshot, at the sizes the project supports, against this file.
 - <Automated where the stack allows: contrast and accessibility checks in the tests; a lint rule against raw colour values outside the tokens file.>
 ```
+
+---
+
+## Appendix K: Version control bindings
+
+The phases describe version control in neutral terms, and this appendix binds them. Phase 1 chooses one of four: **Git** (the default), another tool the organisation uses, **snapshots**, or **none**. Git is the reference binding. For a tool not listed here (Mercurial, Perforce, Fossil and others), map each term to its nearest equivalent, note anything with no equivalent and how you worked around it, and record the mapping in the Decisions log.
+
+- **Snapshots** keep a dated copy of the project folder, in a folder outside it, at each point where a tool would commit. No tool is needed, and a bad change can be undone by restoring a whole copy.
+- **None** keeps no history at all. Edits go straight into the project folder. The agent's own checkpoints may undo changes within a session (Appendix I), but once the session ends, a change can only be undone by hand.
+
+**When each fits.** Standard and Full projects need a version-control tool: the gates, rollback, isolated working copies and reviews all depend on it. A None-sized deliverable can use snapshots or nothing at all. A Light project can too, but only with the reason in the Decisions log, because it will keep changing and each change is a chance to break something that can't then be undone. Whatever the choice, secrets never go into the project folder or anything delivered.
+
+**Check before setting up.** A tool isn't always installed. Git, for example, isn't on Windows by default. Run the tool's version check first, and if it's missing, give the user the install command for their system and ask before installing anything.
+
+| Neutral term | What it means | Git (default) | Subversion | Snapshots | None |
+|---|---|---|---|---|---|
+| Install check | Is the tool there? | `git --version`. To install: Windows `winget install --id Git.Git -e`; macOS `xcode-select --install` (Apple's Command Line Tools); Linux the package manager (`sudo apt install git`) | `svn --version`. To install: Windows SlikSVN, or TortoiseSVN with its command-line tools; macOS `brew install subversion`; Linux `sudo apt install subversion` | — | — |
+| Repository | Where the history lives | `git init` in the project folder. A remote on a host (GitHub, GitLab, Bitbucket, Azure DevOps, an organisation server) is optional. | A central repository on a server, or a local one: `svnadmin create <path>`, then `svn mkdir` its `trunk`, `branches` and `tags` folders, then `svn checkout file:///<path>/trunk` into the project folder | A snapshot folder outside the project folder | — |
+| Author identity | Who the commits belong to | `git config user.name` and `user.email` in the repository's config only | The repository username (the server account, or `--username`). The name and email go in the file headers. | The file headers | The file headers |
+| Ignore list | Files that never enter history | `.gitignore` | The `svn:global-ignores` property on the working copy's root (`svn propset`) | Leave outputs, caches and secrets out of each copy | — |
+| Commit | Record a change in the history | `git commit` (local until published) | `svn commit` (goes straight to the repository, so it also publishes) | A dated copy of the project folder, named `<date>-<phase or item>` | Nothing; the phase ends when its work is saved |
+| Publish | Share commits with the repository everyone uses | `git push` | Part of `svn commit` | Deploying or delivering | Deploying or delivering |
+| Publish gate | The hook that runs the tests and benchmarks first (Phase 14) | Hooks `git push` (Appendix G's script) | Hooks `svn commit` and `svn ci`: match `\bsvn\s+(?:commit\|ci)\b` instead of the push pattern, and find the target's root with `svn info --show-item wc-root`. Team and Enterprise add a server-side pre-commit hook. | The ship routine runs the checks before deploying; a hook gates the deploy command if there is one | As snapshots |
+| Main line | The shared line of work | `main` | `trunk` (`^/trunk`) | — | — |
+| Branch | A line of work kept apart until it's ready | `git switch -c batch/<id>-<slug>` | `svn copy ^/trunk ^/branches/batch-<id>-<slug>`, then `svn switch` to it | — | — |
+| PR | A review request: a change proposed for review before it joins the main line | A pull request (GitHub, Bitbucket, Azure DevOps) or merge request (GitLab) | A review in the team's review tool, from a branch or a patch; merged with `svn merge` | — | — |
+| Protected main line | Nothing joins it without CI and review | Branch protection rules and `CODEOWNERS` on the host | Path-based authorisation on the server, and a pre-commit hook | — | — |
+| Signed commits | Cryptographic proof of the author | Supported (GPG or SSH signing) | Not supported: if policy requires them, choose Git | — | — |
+| Set a change aside | Put a change away and bring it back (the benchmark A/B test, Phase 8) | `git stash`, then `git stash pop` | `svn diff > ../change.patch` and `svn revert -R .`, then `svn patch ../change.patch` | Copy the changed files out of the folder, and copy them back | As snapshots |
+| Isolated working copies | Separate copies for parallel implementers and A/B arms | `git worktree add` | A second `svn checkout` | A copy of the folder; run one implementer at a time | Run one implementer at a time; no A/B experiments |
+| Working copy status | What's changed and not yet committed | `git status` | `svn status` | The progress file and the latest snapshot | The progress file |
+| Undo a shipped change | Reverse it in the history | `git revert <commit>` | `svn merge -c -<revision> .`, then commit | Restore a snapshot | The agent's checkpoints within the session; otherwise by hand |
+| Commit reference | How the Done table and reports cite a change | The short hash | The revision number (`r123`) | The snapshot's name | The date |

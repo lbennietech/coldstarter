@@ -20,16 +20,16 @@ Claude Code already has the features to fix all of this: subagents with their ow
 - In the reference build, an implementer added a feature and silently changed unrelated behaviour. Only an independent review caught it.
 - In the reference build, a claimed speed-up from 64 ms to 37 ms didn't reproduce when it was measured again.
 - In the reference build, one hand edit to the backlog silently dropped 12 items.
-- A push gate with too short a timeout doesn't block anything. Claude Code treats a hook that times out as a non-blocking error, so the push goes through unchecked.
+- A publish gate with too short a timeout doesn't block anything. Claude Code treats a hook that times out as a non-blocking error, so the push goes through unchecked.
 
-Coldstarter packages the working answers into one document. Reviewers are read-only and have to cite evidence. Only implementers edit, and they're tiered by how hard the work is. Each role runs on the cheapest model and effort that does it well. A backlog scores and batches the work, so reviews and tests run once per batch, not once per item. Hooks block a push that fails the tests or the benchmarks. Decisions, targets and lessons are written into the project so the next session starts where the last one stopped. You get the process without having to learn it the hard way.
+Coldstarter packages the working answers into one document. Reviewers are read-only and have to cite evidence. Only implementers edit, and they're tiered by how hard the work is. Each role runs on the cheapest model and effort that does it well. A backlog scores and batches the work, so reviews and tests run once per batch, not once per item. Hooks block a publish that fails the tests or the benchmarks. Decisions, targets and lessons are written into the project so the next session starts where the last one stopped. You get the process without having to learn it the hard way.
 
 ## What it does
 
 Coldstarter is a specification you give to an AI coding agent; the reference platform is [Claude Code](https://claude.com/claude-code). It takes an idea, a business problem, a question or a product concept and turns it into three things:
 
-1. **A confirmed problem and solution.** Claude interviews you, analyses the problem, and proposes a stack, design pillars, and the profiles that shape everything after: a scale profile, a usage profile (how much Claude usage the project should spend), a comment level (who will read the code), a visual direction for anything with a user interface, and a framework size. It stops for your decisions.
-2. **A working first version**, in a git repository with the CI/CD flow your scale needs.
+1. **A confirmed problem and solution.** The agent interviews you, analyses the problem, and proposes a stack, design pillars, and the profiles that shape everything after: a scale profile, a usage profile (how much AI usage the project should spend), a comment level (who will read the code), a visual direction for anything with a user interface, and a framework size. It stops for your decisions.
+2. **A working first version**, under version control (Git by default; Subversion or another tool if you use one; dated snapshots, or nothing at all, for a one-off), with the CI/CD flow your scale needs.
 3. **A development framework that keeps improving the project:**
    - readable, conventional code a person can debug, commented to a level you choose (agents-first, standard or human-maintained)
    - a short project instructions file that works as an index, so each session loads only what it needs
@@ -68,39 +68,41 @@ Each size has its own life cycle and a trigger for moving up (for example, when 
 ## How to use it
 
 1. Create an empty folder for your project (or open an existing codebase), and copy `COLDSTARTER.md` into it.
-2. Open Claude Code in that folder and say:
+2. Open Claude Code (or another AI coding agent) in that folder and say:
 
    > Read COLDSTARTER.md and launch a project for: *your idea, problem or question*
 
-3. Answer the intake questions. By default they come in one round, and most have sensible defaults. For high-stakes or vague projects, Claude suggests **grill mode** instead: one question at a time, each with a recommended answer, until every decision the plan depends on is settled. You can switch modes at any time. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
-4. When the launch finishes, `/devmanual` (Light and up) or the README's "Working on this" section (None) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (as `/loop /autoiterate`, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
+3. Answer the intake questions. By default they come in one round, and most have sensible defaults. For high-stakes or vague projects, the agent suggests **grill mode** instead: one question at a time, each with a recommended answer, until every decision the plan depends on is settled. You can switch modes at any time. Then confirm the problem analysis, the solution and the targets at each 🚦 gate.
+4. When the launch finishes, `/devmanual` (Light and up) or the README's "Working on this" section (None) shows how the project works from here. For a Standard or Full project, run `/iterate` to ship the first batch of improvements, or `/autoiterate` to let it keep working through the backlog on its own (run under a loop or scheduler, such as `/loop /autoiterate` in Claude Code, it also resumes by itself after session limits). Run `/audit` occasionally to refill the backlog.
 
-If a session ends partway through, open Claude Code in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
+If a session ends partway through, open the agent in the same folder and say "continue the project launch". Progress and decisions are kept in `docs/PROJECT_PROGRESS.md`.
 
-Claude Code is the reference platform, but the method is written to be platform-neutral: its phases talk about a project instructions file, subagents, skills, hooks and strong, standard and light model tiers, and the spec's **Appendix I (Platform bindings)** maps those terms to a platform. Some Claude Code specifics are still written inline in the phases; version 2.0.0 moves them all into that appendix.
+Claude Code is the reference platform, but the method is platform-neutral. Since version 2.0.0, the phases and templates talk only in neutral terms: the agent, a project instructions file, subagents, skills, hooks, project settings, a change review, a browser tool, and strong, standard and light model tiers. The agent and skill templates give their settings as neutral tables. All the Claude Code detail (file paths, settings, frontmatter, hook input and output, commands, the transcript format the usage report reads) is in the spec's **Appendix I (Platform bindings)**. To use another platform, map the terms there, and record the mapping in the project's Decisions log.
+
+Version control is a choice too. Intake asks for Git (the default), another tool such as Subversion, dated snapshots of the folder, or none at all, and checks any tool is installed. Git doesn't come with Windows, for example. Git isn't the same as GitHub: it runs on your own machine, and a hosted copy is optional. The spec's **Appendix K (Version control bindings)** maps committing, publishing, branches, reviews and the rest to Git, to Subversion, to snapshots, and to working with no version control at all (for one-offs).
 
 ## The project team: agents, models and effort
 
-Coldstarter sets up a team of agents (in Claude Code, in `.claude/agents/`), split into two kinds:
+Coldstarter sets up a team of agents (subagents; in Claude Code, in `.claude/agents/`), split into two kinds:
 
-- **Reviewers and auditors** are read-only — they never get Edit or Write tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
-- **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, push, merge or deploy themselves. There are three tiers: a **Light** implementer for effort-1 work outside the core logic, a strong-tier implementer (**Opus** in the reference build) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
+- **Reviewers and auditors** are read-only — they never get edit tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, docs, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
+- **Implementers** are the only agents that edit code (the docs writer edits documentation only), and they never commit, push, merge or deploy themselves. There are three, one for each **work tier** of the backlog: a **Routine** implementer for effort-1 work outside the core logic, a **Hard** implementer (strong model tier) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
-Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, Claude sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
+Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, the agent sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
 
 | Tier and effort | Used for in the reference build (Claude Code: strong = Opus, standard = Sonnet, light = Haiku) |
 |---|---|
-| Standard, medium (the session default) | UX, product, code-quality, compliance, infra and data reviewers; the Light implementer; the triage engine |
-| Strong, medium | Domain-correctness, performance, security and evaluation reviewers; the strong-tier implementer |
+| Standard, medium (the session default) | UX, product, code-quality, compliance, infra and data reviewers; the Routine implementer; the triage engine |
+| Strong, medium | Domain-correctness, performance, security and evaluation reviewers; the Hard implementer |
 | Strong, high | The Deep implementer only |
 | Standard, low | Efficiency auditor, user tester, accessibility reviewer — checklist-style work that doesn't need deep reasoning |
 | Light | Only for mechanical, proven-safe work, adopted after a trial |
 
-The rule behind it: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* An analysis project might move its data reviewer to the strong tier; a static brochure site might need no strong-tier implementer at all. Settings change one level at a time, with the setting in `CLAUDE.md` and the date and reason in the project's Decisions log, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
+The rule behind it: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* An analysis project might move its data reviewer to the strong tier; a static brochure site might need no strong-tier implementer at all. Settings change one level at a time, with the setting in the project instructions file and the date and reason in the project's Decisions log, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
 
 How much the project should optimise for usage is asked up front. Phase 1 sets a **usage profile** next to the scale profile: **Lean** for a usage-limited plan (cost first), **Balanced**, or **Throughput** (speed and depth first). It shapes the agents' review depth, how broad audits are, whether Deep work and A/B experiments need a go-ahead, and how strictly the code is kept small and easy for agents to read.
 
-Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's Claude Code sessions and agent runs from their local transcripts, without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
+Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's sessions and agent runs from their local records (Claude Code's transcripts in the reference binding), without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
 
 ## Code, instructions and design that hold up
 
@@ -114,9 +116,9 @@ Three rules keep a project easy to work on, for people and for agents:
 
 For Standard and Full projects, once the first version ships, work doesn't flow item-by-item — it flows through an evidence-based backlog and a batching engine, because reviewing and testing forty single-item changes costs far more than reviewing and testing eight batches of five:
 
-1. **`/audit`** (rare, expensive) runs every relevant reviewer in parallel in the background against the current build, always including the security reviewer. Their findings — each with evidence — go to `triage`, which discards anything unsupported, merges duplicates, scores everything by impact ÷ effort, and assigns a tier and a time estimate.
-2. **Triage groups the backlog into batches.** Every batch has exactly one category and one tier, so its reviews only need to run once for the whole batch instead of once per item. Categories are capped by size and by how much they can interact with each other: `ui` and `tooling` batches can hold up to 15 items because polish rarely conflicts; `core`, `perf`, `security`, `infra` cap at 5 because those changes do interact; `data` caps at 3; anything Deep-tier, an effort-3 item, an A/B experiment, or an irreversible change runs `solo`, one item at a time through its own full pipeline.
-3. **`/iterate`** runs one batch: pick it, brief a single implementer with every item in it (never two implementers on one working tree — they'd overwrite each other), run the tests once at the end, run that category's reviews once, triage any blockers back to the same implementer, then commit, push (or open a PR, depending on scale profile) and report actual time against the estimate. New requests you send mid-run are consolidated into the queue first.
+1. **`/audit`** (rare, expensive) runs every relevant reviewer in parallel in the background against the current build, always including the security reviewer. Their findings — each with evidence — go to `triage`, which discards anything unsupported, merges duplicates, scores everything by impact ÷ effort, and assigns a work tier and a time estimate.
+2. **Triage groups the backlog into batches.** Every batch has exactly one category and one work tier, so its reviews only need to run once for the whole batch instead of once per item. Categories are capped by size and by how much they can interact with each other: `ui` and `tooling` batches can hold up to 15 items because polish rarely conflicts; `core`, `perf`, `security`, `infra` cap at 5 because those changes do interact; `data` caps at 3; any Deep work, an effort-3 item, an A/B experiment, or an irreversible change runs `solo`, one item at a time through its own full pipeline.
+3. **`/iterate`** runs one batch: pick it, brief a single implementer with every item in it (never two implementers on one working tree — they'd overwrite each other), run the tests once at the end, run that category's reviews once, triage any blockers back to the same implementer, then commit, publish (or open a PR, depending on scale profile) and report actual time against the estimate. New requests you send mid-run are consolidated into the queue first.
 4. **`/autoiterate`** loops step 3 batch after batch without waiting for you, stopping only when the backlog is done, something needs your decision, or something is broken.
 
 The payoff is measured, not assumed: in the reference build, 14 small `ui` and `tooling` fixes shipped in about 35 minutes as batches, against an estimated 175–245 minutes if they'd been done one at a time. Every batch's actual time gets recorded next to its estimate, so the estimates get more accurate the more the project runs `/iterate`.
@@ -125,10 +127,11 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 
 | File | What it is |
 |---|---|
-| `COLDSTARTER.md` | The specification itself: 17 launch phases, scale and usage profiles, framework sizing, project-type adaptations (including data views and dashboards), a design-guide template, platform bindings, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
+| `COLDSTARTER.md` | The specification itself: 17 launch phases, scale and usage profiles, framework sizing, project-type adaptations (including data views and dashboards), a design-guide template, platform and version-control bindings, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
 | `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
 | `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays platform-neutral. |
 | `CLAUDE.md` | Imports `AGENTS.md`, so Claude Code reads the same instructions. |
+| `ROADMAP.md` | Ideas and planned changes for future versions, before they go into the spec. |
 
 ## Where it came from
 
@@ -155,4 +158,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.8.1 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 2.0.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
