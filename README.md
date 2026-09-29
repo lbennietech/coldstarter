@@ -65,7 +65,9 @@ Not every project needs all of that. At the end of solution design, Coldstarter 
 
 Each size has its own life cycle and a trigger for moving up (for example, when change requests keep coming, a Light tool gains a backlog and `/iterate`). The handoff teaches only the project's own life cycle: a Standard or Full project's `/devmanual` prints it on demand, and a None or Light project's README has a "Working on this" section instead.
 
-**Process has to earn its place.** The biggest practical risk with a framework like this is that the process becomes the product: an agent spends the budget of a small tool writing architecture docs, threat models and agent rosters instead of building the tool. So every document, agent, skill and gate needs a reason that holds for *this* project, and the process stays in proportion to what the project is worth. Intake asks what it's worth, and the dev plan checks the framework work against the effort of building v1; for a None or Light project it has to come in well under. You can also cut anything directly, for example *"We're building a $100 internal utility. Don't write architecture documentation unless the complexity warrants it."* Each cut is logged with the trigger that would bring it back, and every retrospective prunes process nobody uses.
+**Process has to earn its place.** The biggest practical risk with a framework like this is that the process becomes the product: an agent spends the budget of a small tool writing architecture docs, threat models and agent rosters instead of building the tool. So every document, agent, skill and gate needs a reason that holds for *this* project, and the process stays in proportion to what the project is worth. Intake asks what it's worth, and the dev plan checks the framework work against the effort of building v1; for a None or Light project it has to come in well under. You can also cut anything directly, for example *"We're building a $100 internal utility. Don't write architecture documentation unless the complexity warrants it."* Each cut is logged with the trigger that would bring it back.
+
+**The framework isn't sacred.** Preventing product bloat isn't enough if the process slowly bloats instead. At every retrospective, any process step, document, reviewer, skill or hook that keeps producing nothing useful is removed or downgraded (made conditional, moved to a cheaper model, or run less often), however much the spec recommends it. The security minimum stays, and a safety gate isn't removed just because it rarely fires: a quiet gate may simply be doing its job.
 
 ## How to use it
 
@@ -164,4 +166,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 2.1.0 (2026-09-30). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 2.2.0 (2026-09-30). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
