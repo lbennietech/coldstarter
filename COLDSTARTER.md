@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.3.0 (2026-09-29) |
+| **Version** | 1.4.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.4.0 | 2026-09-29 | **Usage profiles.** Phase 1 now asks how much the project should optimise for Claude usage, and records a **usage profile** (Lean, Balanced or Throughput) next to the scale profile. The savings that cost no quality stay in every profile; the profile sets the real trade-offs: review depth, audit breadth, asking before Deep or A/B work, reviewer effort, the user tester's scope, the compaction window, and how strictly code is kept agent-readable. Phase 5 gains **agent-readable code** (small files split by concern, searchable names, quiet tool output), because every agent turn re-reads what it has read. Lesson 21 added. |
 | 1.3.0 | 2026-09-29 | **Usage review and token-efficiency defaults**, from the reference build's first measurement of where its Claude usage went. A **usage report** (`tools/usage_report.py`, specified in Phase 13) prices the project's Claude Code usage from the local session transcripts, per main session and agent type, and prints findings in the audit format without spending model tokens. Every `/audit` runs it, and `/audit usage` runs it alone. New defaults: the main session pins its effort and compacts at 200K tokens; implementers keep a one-hour prompt cache; every agent gets a `maxTurns` guard; `/iterate` runs the tests once and briefs reviewers with the results, always names the `/code-review` level, and calls `triage` once per batch; forks are avoided in large sessions; on a usage-limited plan `/autoiterate` asks before Deep or A/B batches; changes to the safety gates' logic go to the Opus tier; shipped items move to `BACKLOG_DONE.md`. Lessons 19 and 20 added. |
 | 1.2.1 | 2026-09-29 | `/autoiterate` gets an explicit off switch as an argument rather than a second command: `/autoiterate stop` finishes the batch in flight and stops; `/autoiterate stop now` stops at the next safe point without leaving half-finished edits; under `/loop`, both cancel the scheduled wake-up. |
 | 1.2.0 | 2026-09-29 | Documentation for every profile, not just developer docs: a **user guide** (`docs/USER_GUIDE.md`), a **domain-logic reference** (the rules the system follows, reviewed by the domain-correctness reviewer) and **operations notes** (`docs/OPERATIONS.md`: build, deploy, verify, roll back) join README, ARCHITECTURE, DEV_CYCLE and the threat model. A new core agent, the **docs writer** (Sonnet, medium; edits docs only), writes them and checks every doc against the code in each `/audit`. `CLAUDE.md` gains a Documentation rule: every behaviour change updates its doc in the same change. Lesson 18 added. |
@@ -74,7 +75,7 @@ You are launching a project for the user: from problem to working first version 
 6. **Check the current docs** before writing config: Claude Code (agents, skills, hooks, settings, MCP) at code.claude.com/docs, and the chosen platforms' CI and hosting. The templates here reflect formats as of 2026-09. Verify them rather than assume.
 7. **Adapt, don't transplant.** Every role has a domain equivalent (Appendix A). Rename and reshape it, but keep its *function*.
 8. **Security by default, at every scale.** Never put secrets in the repo, in prompts or in agent context. Agents get the minimum tools they need. No agent gets production credentials. Respect any organisation policy or managed settings you find. Every project gets a dedicated **security reviewer** agent (Phase 10, Appendix C2), from the smallest hobby project up. Only the depth of its checks scales with the profile.
-9. **Respect the token budget.** Ask about it in Phase 1, including the user's plan (a usage-limited subscription changes the defaults), default to the cheapest setup that does the job well (Phase 13), and measure where the usage actually goes (the usage report) rather than guess.
+9. **Respect the token budget.** Ask about it in Phase 1 and set a **usage profile** (Lean, Balanced or Throughput; section 1) from the answer. It shapes the agent specs, the workflow and the code layout, not just the models. Measure where the usage actually goes (the usage report) rather than guess.
 10. **Write docs for a person who starts cold.** Plain, direct sentences, tables for reference material, no filler.
 
 ---
@@ -100,11 +101,31 @@ Pick one in Phase 1. It decides how heavy every later phase is. Anything not mar
 
 Mixed cases are normal. For example, a solo developer building something that handles payments uses Solo git flow but Enterprise-grade secrets handling and security review depth. Record every deviation in the Decisions log.
 
+### Usage profiles
+
+The scale profile sets how heavy the process is. The **usage profile** sets how much of the user's Claude usage the project spends to get its work done, and it's chosen separately: a solo hobbyist on a Pro plan and a funded team on an API budget can run the same scale profile under very different limits. Pick one in Phase 1.
+
+Some savings cost nothing in quality, so every profile gets them: the usage report in every audit, a compaction window for the main session, a one-hour cache for agents that wait, turn caps, tests run once with the results passed to reviewers, one triage call per batch, and named `/code-review` levels (Phase 13). The profile only moves the real trade-offs:
+
+| Dimension | **Lean** (usage-limited plan; cost first) | **Balanced** (the default) | **Throughput** (usage isn't a concern; speed and depth first) |
+|---|---|---|---|
+| Suggested for | Pro, or any plan where the user hits limits | Max, Team, or an API budget with headroom | Enterprise or API use where time matters more than tokens |
+| Agent models and effort | Phase 13 routing; observe-and-report roles (efficiency, code quality, user tester, accessibility) at low | Phase 13 routing | Phase 13 routing, with Opus also for the UX and product reviewers, and the Light implementer tier used only for copy and styling |
+| `/code-review` level | `low` for `ui`, `tooling` and docs; `medium` otherwise; `high` only when the user asks | `low` for `ui` and `tooling`; `medium` otherwise; `high` for Deep items | `medium` by default; `high` for Deep, security and data items |
+| Deep items and A/B experiments | Ask before each one; prefer one well-argued approach over an A/B | Ask before A/B experiments | Run them as the backlog says |
+| `/audit` | Focused audits by default (`/audit <focus>`); a full audit only when the Ready list runs thin, and the user tester's personas folded into the UX reviewer | Full audits rarely, focused ones in between | Full audits at each milestone |
+| User tester in `/iterate` | Plays only the batch's changes, at the sizes they affect | Plays the batch's changes at desktop and phone sizes | Plays the batch's changes, plus a short newcomer pass every batch |
+| Main session | Compacts at 200K; `/clear` between hand-run batches | Compacts at 200K | Compacts at 400K, for more continuity |
+| Batch caps | As Phase 11 (bigger batches mean fewer review cycles, but don't raise the caps: failures get harder to isolate) | As Phase 11 | As Phase 11 |
+| Code layout (see "Agent-readable code" in Phase 5) | A rule: files split by concern and kept small, tool output quiet by default, checked in code review | Strong guidance | Guidance |
+
+Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effort"). Revisit it at each retrospective with the usage report's numbers: a Lean project whose reviews keep missing real bugs should move a dimension up, and a Balanced project whose user keeps hitting limits should move one down, one dimension at a time.
+
 ---
 
 ## Phase 1: Intake and problem analysis 🚦
 
-**Goal:** an agreed problem statement, project type and scale profile, before any solutioning.
+**Goal:** an agreed problem statement, project type, scale profile and usage profile, before any solutioning.
 
 1. Read the user's input. If the folder already has code, survey it first (stack, entry points, tests, CI, deployment) and say what you found.
 2. **Classify the input:**
@@ -129,7 +150,7 @@ Mixed cases are normal. For example, a solo developer building something that ha
    - **Distribution:** public or private repo, open source or proprietary, the organisation or GitHub account, and where it deploys.
    - **Identity:** project name, author or organisation for commits and copyright headers, and licence.
    - **Working style:** how autonomous Claude should be, and how often the user wants to review.
-   - **Usage plan:** the Claude plan (Pro, Max, Team, Enterprise) and whether token usage is a concern.
+   - **Usage plan and ethos:** the Claude plan (Pro, Max, Team, Enterprise, or API), whether the user hits usage limits, and how much the project should optimise for usage in its agent specs, workflow and coding style: cost first (Lean), balanced, or speed and depth first (Throughput). Suggest the profile from the plan (Pro → Lean, Max or Team → Balanced), and say in a line what each would change.
    - **Reporting:** how the user wants progress reported (tables, summaries, which columns).
    - **v1 scope:** the smallest version that would be worth having.
 4. Write back a **problem analysis** of about one page:
@@ -139,10 +160,10 @@ Mixed cases are normal. For example, a solo developer building something that ha
    - constraints
    - risks and unknowns
    - what's out of scope for v1
-   - the **recommended scale profile** and **project type**, with reasons
+   - the **recommended scale profile**, **usage profile** and **project type**, with reasons
 
    If a non-software answer is better, say so here (ground rule 2).
-5. 🚦 **Gate:** the user confirms or corrects the problem analysis, the scale profile and the project type.
+5. 🚦 **Gate:** the user confirms or corrects the problem analysis, the scale profile, the usage profile and the project type.
 
 ---
 
@@ -223,7 +244,12 @@ Mixed cases are normal. For example, a solo developer building something that ha
 3. Write the **domain-logic reference** (`docs/<DOMAIN>.md`, for example `SIMULATION.md`, `BUSINESS_RULES.md` or `PIPELINE.md`): the rules the system follows and why, with their constants, edge cases and invariants, citing functions rather than line numbers. The domain-correctness reviewer checks it. ARCHITECTURE says where code lives; this says what it does.
 4. Write **operations notes** in `docs/OPERATIONS.md`: how to build, deploy, verify what's live (a version or build stamp), and roll back. For Solo, a few lines. Team and Enterprise extend it into runbooks (Phase 15).
 5. Write a **threat model** in `docs/THREAT_MODEL.md`: assets, actors, trust boundaries, entry points, top threats, mitigations. For Solo, half a page is enough, since even a static site has third-party scripts, user input and a deploy pipeline. For Team and Enterprise, add a **data classification** for every data store. The security reviewer keeps it current.
-6. Commit.
+6. Set up **agent-readable code.** Every agent turn re-reads what the agent has read so far, so the size of what it must read to make a change is a running cost, in every usage profile. Under a Lean usage profile these are rules, checked in code review; otherwise they're strong guidance.
+   - Split code by concern into files an agent can read whole (a few hundred lines, not thousands), and keep `docs/ARCHITECTURE.md` saying what lives where, so an agent reads only the files a change touches.
+   - Use distinctive, searchable names, and cite code by file and function name, so agents find things with one search instead of paging.
+   - Make tools quiet by default: tests, builds and benchmarks print a one-line summary on success and the details only on failure (with a `--verbose` flag for more).
+   - Keep generated or bundled output out of agents' way: mark it as generated, and point agents at the source.
+7. Commit.
 
 ---
 
@@ -486,7 +512,7 @@ Commit.
 
 ## Phase 13: Model routing and token efficiency 🚦 (confirm with the user)
 
-Apply this policy unless the user says otherwise: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.*
+Apply this policy unless the user says otherwise: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* The table below is the Balanced profile; apply the usage profile's changes from section 1 on top of it, and record the result in `CLAUDE.md`.
 
 | Setting | Default |
 |---|---|
@@ -549,7 +575,7 @@ Commit.
    - scope creep in the implementer's diff
    - noise in the benchmark gate
    - findings that repeat known quirks (add these to the agents' quirk lists)
-4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report), which agents found real problems and which produced noise, and whether the scale profile still fits. Tune the model and effort settings and the batch caps **one level at a time**, and record every change and its reason in `CLAUDE.md`.
+4. **Retrospective with the user.** Look at actual against estimated time, token spend (from the usage report) against the usage profile, which agents found real problems and which produced noise, and whether the scale profile still fits. Tune the model and effort settings and the batch caps **one level at a time**, and record every change and its reason in `CLAUDE.md`.
 5. Commit.
 
 ---
@@ -574,7 +600,7 @@ Commit.
 
 Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both.
 
-- [ ] Problem analysis, project type, scale profile, stack, non-functional requirements and pillars confirmed (in the Decisions log)
+- [ ] Problem analysis, project type, scale profile, usage profile, stack, non-functional requirements and pillars confirmed (in the Decisions log)
 - [ ] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
 - [ ] A working v1, shown to the user
 - [ ] `docs/ARCHITECTURE.md` accurate; the system is deterministic, steppable and inspectable from tests; threat model (all profiles) and data classification (T/E)
@@ -651,7 +677,8 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Audit (rare) · Iterate by batch (see DEV_CYCLE.md) · Bench run / --compare / --baseline (only on genuine improvement)
 - Git flow: <profile's flow>. A/B experiments in two worktrees. Unattended runs: off unless opted in.
 ### Model & effort
-- <Phase 13 routing table, with dates and reasons; the session's effort and compaction window; the /code-review levels; the latest usage report's headline>
+- Usage profile: <Lean / Balanced / Throughput>, chosen <date> because <reason>.
+- <Phase 13 routing table with the profile's changes, with dates and reasons; the session's effort and compaction window; the /code-review levels; the latest usage report's headline>
 ### Documentation
 - Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
@@ -1045,3 +1072,4 @@ For Team and Enterprise, add a CI workflow (for example GitHub Actions) that run
 18. **Documentation is more than developer docs.** The reference build had a strong README, architecture guide and dev-cycle guide, but no user guide and no reference for the rules the simulation follows. Those rules were scattered across code comments and backlog entries, so every reviewer re-derived them. The owner noticed only after dozens of batches. Plan the user guide, the domain-logic reference and the operations notes from launch, give one agent the job of keeping them true, and audit docs like code.
 19. **Measure where the usage goes, and fix the shape before the model.** The reference user, on a usage-limited plan, was hitting the session limit a couple of hours into each session. Pricing every transcript by model showed where it went: the orchestrating main session was 47% of all usage (one session ran for a day and a half without compacting and reached about 740K tokens, all of it re-read on every turn); the one A/B experiment was 21%, most of it spent re-caching the implementers' whole context after idle gaps longer than the five-minute cache; two `/code-review high` runs were 7%; and reviewers re-ran the test suite the orchestrator had just run. The model mix wasn't the problem: cached re-reads cost the same on Opus and Sonnet, and the Opus reviews took 6-15 turns where the Sonnet ones took 24-71. The fixes were a compaction window, a one-hour cache for implementers, named review levels, briefing reviewers with the results, one triage call per batch, and a script that repeats the analysis in every audit without spending model tokens.
 20. **A weaker first pass can cost more than it saves.** A Sonnet-tier fix to the reference project's push gate needed two review rounds, which found 5 and then 10 real bugs, each round meaning more implementation and another review. Output tokens, which effort mostly changes, were under a tenth of usage; the cost is in turns and context. Judge settings by cost per finished task, and send the logic of safety gates to the stronger tier.
+21. **Decide the usage ethos at the start.** The reference project was launched without asking how much its owner could spend, so it was tuned for thoroughness: Opus reviewers, full audits, high-level code reviews, A/B experiments. Its owner was on a usage-limited plan, hit the session limit a couple of hours into each session, and the retuning came only after two days of work. Asking in Phase 1, and setting a usage profile that shapes the agents, the workflow and the code layout from the first commit, would have avoided that.

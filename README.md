@@ -82,6 +82,8 @@ Every agent's model and effort are set deliberately, not left on defaults, becau
 
 The rule behind the table: *use the strongest model only where it's clearly better, and send routine or checklist work to cheaper models or lower effort.* Settings change one level at a time, with the date and reason recorded in `CLAUDE.md`, and get retuned at the first retrospective once real usage shows which agents earn their cost. Sessions switch models at the start, not mid-session, because prompt caching is per model.
 
+How much the project should optimise for usage is asked up front. Phase 1 sets a **usage profile** next to the scale profile: **Lean** for a usage-limited plan (cost first), **Balanced**, or **Throughput** (speed and depth first). It shapes the agents' review depth, how broad audits are, whether Deep work and A/B experiments need a go-ahead, and how strictly the code is kept small and easy for agents to read.
+
 Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's Claude Code sessions and agent runs from their local transcripts, without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
 
 ## The development cycle: batching for speed
@@ -127,4 +129,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.3.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.4.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
