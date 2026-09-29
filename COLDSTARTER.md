@@ -7,13 +7,14 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.2.0 (2026-09-29) |
+| **Version** | 1.2.1 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 ### Version history
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.2.1 | 2026-09-29 | `/autoiterate` gets an explicit off switch as an argument rather than a second command: `/autoiterate stop` finishes the batch in flight and stops; `/autoiterate stop now` stops at the next safe point without leaving half-finished edits; under `/loop`, both cancel the scheduled wake-up. |
 | 1.2.0 | 2026-09-29 | Documentation for every profile, not just developer docs: a **user guide** (`docs/USER_GUIDE.md`), a **domain-logic reference** (the rules the system follows, reviewed by the domain-correctness reviewer) and **operations notes** (`docs/OPERATIONS.md`: build, deploy, verify, roll back) join README, ARCHITECTURE, DEV_CYCLE and the threat model. A new core agent, the **docs writer** (Sonnet, medium; edits docs only), writes them and checks every doc against the code in each `/audit`. `CLAUDE.md` gains a Documentation rule: every behaviour change updates its doc in the same change. Lesson 18 added. |
 | 1.1.0 | 2026-09-29 | New `/autoiterate` skill: it loops the `/iterate` cycle batch after batch without waiting for the user, stops only when the backlog is done, a decision needs the user, or something is broken, and pauses and resumes on its own around session limits (run as `/loop /autoiterate` for unattended runs). `/iterate` stays a single cycle and gains step 0, Intake: requests the user sends mid-run are consolidated with queued items, then triage regroups and refreshes priorities, keeping the user's pins. A limit rule for both: on a usage or rate-limit error, check the real clock before pausing; if the reset has passed, resume. Lessons 16 and 17 added. |
 | 1.0.7 | 2026-09-28 | The reference project's single-file layout is no longer presented as the default or as a lesson to copy: it was a starting choice that hardened into a rule the owner never set, and it has been dropped. Lesson 1 records what that cost. Phase 2 now asks for the stack to be recorded as a decision with a revisit trigger. The web-app and game stack suggestions no longer lead with "single file". |
@@ -469,6 +470,7 @@ Create `.claude/skills/audit/SKILL.md`, `.claude/skills/iterate/SKILL.md` and `.
 **When an agent hits a usage or rate limit** (in any skill): check the real clock first (`date`); task notifications can arrive late, and there's no other reliable clock. If the reset time has passed, check for half-finished edits and resume the same agent with SendMessage. If it's still in the future, tell the user the real reset time and how long that is from now, and carry on with work that doesn't need that agent. Retry a 429 that gives no reset time once before treating it as real. Quote the error as given; don't call a limit model-specific unless it says so.
 
 **`/autoiterate`**: the same cycle, looped. `/iterate` runs one batch and stops; `/autoiterate` repeats Intake → Pick → the full `/iterate` pipeline → a two-line report, batch after batch, without waiting for the user. Every quality gate still applies to every batch.
+- **Turning it off:** `/autoiterate stop` finishes the batch in flight (through its commit and push or PR) and stops; `/autoiterate stop now` stops at the next safe point, committing what passes the gates or stashing the rest, never leaving half-finished edits. Under `/loop`, both also cancel the scheduled wake-up so it can't restart. No separate off command is needed.
 - **Stop only when** the Ready list is empty or wholly blocked on the user; a decision only the user can make blocks the next useful work (ask once, and keep working on batches that don't depend on it); something is broken that one fix round couldn't repair; the user says stop; or an argument limit is reached (`/autoiterate 3` for three batches, `/autoiterate until ID`). On stopping, report every batch shipped in the run.
 - **Never end a turn idle:** either an agent or command is in flight (its notification resumes the session), a wake-up is scheduled, or the loop has stopped for one of the reasons above.
 - **Session limits:** apply the limit rule above. Run as `/loop /autoiterate` for unattended work: when the reset is in the future, it schedules its own wake-up for the reset time plus a couple of minutes (chaining wake-ups past the one-hour cap), re-checks the clock on waking and resumes. Plain `/autoiterate` loops just as well but needs a nudge after a limit.
@@ -891,7 +893,7 @@ argument-hint: "[batch ID, item ID, 'ID solo', or nothing]"
 ---
 name: autoiterate
 description: Keep running <Project>'s /iterate cycle batch after batch without waiting for the user - intake new requests between batches, ship each batch through the full pipeline, and pause and resume on its own around session limits - until the backlog is done or something needs the user's decision. Use when the user says autoiterate, "keep iterating" or "work through the backlog". For a single cycle, use /iterate.
-argument-hint: "[optional: stop after N batches, or 'until <ID>']"
+argument-hint: "[optional: 'stop', 'stop now', N batches, or 'until <ID>']"
 ---
 ```
 

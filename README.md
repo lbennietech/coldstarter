@@ -125,4 +125,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.2.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.2.1 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
