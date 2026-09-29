@@ -7,7 +7,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 | | |
 |---|---|
 | **Author** | Luke Bennie ([lukebennie@gmail.com](mailto:lukebennie@gmail.com)) |
-| **Version** | 1.6.0 (2026-09-29) |
+| **Version** | 1.7.0 (2026-09-29) |
 | **Origin** | Designed by Luke Bennie while building Pocket Universe, a browser gravity sandbox, from idea to self-improving dev loop over 2026-09-27/28, with Claude Code (Anthropic's Claude Opus 5.5 and Sonnet 5) as the implementing collaborator. The development method it encodes came from Luke's direction: the audit and iterate loops, tiered model routing for token efficiency, batch streamlining, time-tracked reporting, the dedicated security reviewer, and generalising it for any project at any scale. |
 
 > **Keep this file platform-neutral: a rule for any AI or person using or editing it.** Coldstarter works with any AI coding platform. The phases describe the method in neutral terms: the *project instructions file*, *path-scoped instructions*, *skills* (procedures loaded on demand), *subagents*, *hooks*, and *strong, standard and light model tiers*. **Appendix I (Platform bindings)** maps each term to a concrete platform. When launching a project, use your platform's binding; if it has none, map the terms yourself and record the mapping in the Decisions log. When editing this file, write every rule in neutral terms, and put platform-specific detail (file paths, settings keys, event names, model names, commands) only in Appendix I. *Until 2.0.0:* the Claude Code specifics still written inline in the phases and templates are the reference binding and will move to Appendix I; don't add new ones.
@@ -16,6 +16,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 
 | Version | Date | Changes |
 |---|---|---|
+| 1.7.0 | 2026-09-29 | **A design guide against generic defaults.** Anything with a user interface gets a **visual direction** in Phase 2 (who it's for, how it should feel, references, and what it must never look like), confirmed at the gate, and a **design guide**, `docs/DESIGN.md`, written with the design tokens before the first screen is built (Phase 4; template in the new **Appendix J**). The guide makes the tokens the only source of values, gives colour a job, sets type, density, states, motion and copy rules, and lists the statistically likely defaults that make an interface look machine-made (purple gradients, the three-card landing page, cards around everything, buzzword copy), each allowed only when the direction calls for it, with the reason written down. An organisation's own design system beats it. The UX reviewer and the implementers work from it, and the docs, the `CLAUDE.md` skeleton and the definition of done carry it. It's platform-neutral: it doesn't depend on any one tool's design skill. |
 | 1.6.0 | 2026-09-29 | **Instructions as an index, routing chosen per project, and a platform-neutral rule.** Phase 6: the project instructions file is loaded and re-read on every turn, so it becomes an **index**: a size budget in bytes as well as lines, rules and numbers in it with their reasons in the Decisions log, a "Read when" list of the docs, and detail moved to skills, agents' own files, path-scoped instructions and docs; the usage report measures it. Phase 13: model and effort are no longer a fixed table. Once the project type, architecture and dev cycle are known, each role gets a **model tier** (strong, standard or light) and an effort level from how hard its work is, what a miss costs, how often it runs and the usage profile, with a reason, confirmed with the user; the old table becomes the reference build's routing, a starting point. Phase 10 lists starting tiers. A directive at the top and a new **Appendix I, Platform bindings**: the method is platform-neutral, and platform specifics belong in that appendix (Claude Code is the reference binding; its inline specifics move there in 2.0.0). Lesson 22 added. |
 | 1.5.0 | 2026-09-29 | **Readable code for people, not just agents.** A new ground rule (11): code must be easy for a person to read and debug. Phase 5's "agent-readable code" becomes **readable code**, which always applies: the language's standard style guide and idioms, a formatter and linter where the stack allows them (run by the after-edit hook), names that say what things are (with units), file headers that say what the file holds, tests that read as specifications, and errors that name what failed and with which values. Phase 1 asks who will read and debug the code and sets a **comment level** (Agents-first, Standard or Human-maintained), chosen separately from the usage profile because it follows the code's readers, not the budget. Comments explain why, not what. Readability gives way only on measured hot paths and in generated output, with the reason recorded. Phases 3, 4, 6 and 14, the code-quality reviewer, the implementer template, the `CLAUDE.md` skeleton and the definition of done carry it. |
 | 1.4.0 | 2026-09-29 | **Usage profiles.** Phase 1 now asks how much the project should optimise for Claude usage, and records a **usage profile** (Lean, Balanced or Throughput) next to the scale profile. The savings that cost no quality stay in every profile; the profile sets the real trade-offs: review depth, audit breadth, asking before Deep or A/B work, reviewer effort, the user tester's scope, the compaction window, and how strictly code is kept agent-readable. Phase 5 gains **agent-readable code** (small files split by concern, searchable names, quiet tool output), because every agent turn re-reads what it has read. Lesson 21 added. |
@@ -36,6 +37,7 @@ Copyright (c) 2026 Luke Bennie <lukebennie@gmail.com>. Licensed under CC BY-NC 4
 >
 > - a repository with a CI/CD flow to match
 > - readable, conventional code that a person can debug, commented to the level you choose
+> - for anything with a user interface, a design guide that steers it away from generic, machine-made defaults
 > - tests and quality gates
 > - performance and correctness measurement
 > - specialist reviewer agents
@@ -99,7 +101,7 @@ Pick one in Phase 1. It decides how heavy every later phase is. Anything not mar
 | Secrets | A git-ignored `.env` | The hosting platform's secret store | Vault or KMS, with rotation and least-privilege access. Never in agent context. |
 | Security review depth | A dedicated security reviewer on every audit and on sensitive changes: OWASP-style checklist, secrets and dependency hygiene | Plus a threat model kept current, security regression tests, and dependency and secret scanning in CI | Plus a formal threat model, SAST/DAST/SCA/IaC scanning as required checks, findings ready for a pen test, and a compliance mapping |
 | Extra reviewers | None | A compliance reviewer if the domain is regulated | Compliance, infrastructure/SRE, accessibility, data governance, architecture |
-| Docs | README, a user guide, ARCHITECTURE, a domain-logic reference, operations notes, DEV_CYCLE and a threat model | Plus decision records in `docs/adr/`, CONTRIBUTING and a changelog | Plus runbooks, SLOs, a data classification and onboarding docs |
+| Docs | README, a user guide, ARCHITECTURE, a domain-logic reference, operations notes, DEV_CYCLE, a threat model, and a design guide for anything with a user interface | Plus decision records in `docs/adr/`, CONTRIBUTING and a changelog | Plus runbooks, SLOs, a data classification and onboarding docs |
 | Operations | None, or console logging | Error tracking and basic metrics | Logging, metrics, tracing, SLOs, alerting, and incident and rollback runbooks |
 | Compliance | None | Privacy basics (GDPR/CCPA if personal data) | Whatever applies: SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS, accessibility law. Plus an audit trail. |
 | Agent autonomy | High: implements, commits and pushes | Medium: implements and opens PRs; people merge | Low to medium: implements and opens PRs; people approve. No production access. Tools restricted. |
@@ -191,9 +193,17 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
    - reference project: *Toys over goals*, *One click to chaos*, *Readable at a glance*, *Works everywhere*
    - business app: *Correct before clever*, *Two clicks to any answer*, *Never lose data*
    - internal tool: *Faster than the spreadsheet it replaces*
-5. Propose a **v1 feature list** that can be built in one or two sessions, plus an architecture sketch (components, data flow, hot paths, trust boundaries).
-6. **Team and Enterprise:** write the key choices as decision records (`docs/adr/0001-<title>.md`: context, decision, alternatives, consequences).
-7. 🚦 **Gate:** the user confirms the stack, the non-functional requirements, the pillars and the v1 scope.
+5. For anything with a user interface, propose a **visual direction**, so the design comes from this product rather than from the most likely defaults:
+   - who it's for and where they'll use it (device, setting, how much time they have)
+   - three words for how it should feel (for example *calm, exact, warm*)
+   - two or three references, and what to take from each
+   - what it must never look like (for example "a generic SaaS landing page")
+   - how dense it should be: a tool or dashboard is compact and scannable, a reading or marketing page is generous
+
+   If the organisation has a design system or brand guidelines, the direction starts from them. The direction becomes the top of `docs/DESIGN.md` (Phase 4, Appendix J).
+6. Propose a **v1 feature list** that can be built in one or two sessions, plus an architecture sketch (components, data flow, hot paths, trust boundaries).
+7. **Team and Enterprise:** write the key choices as decision records (`docs/adr/0001-<title>.md`: context, decision, alternatives, consequences).
+8. 🚦 **Gate:** the user confirms the stack, the non-functional requirements, the pillars, the visual direction (if there's a user interface) and the v1 scope.
 
 ---
 
@@ -226,6 +236,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 **Goal:** something real that runs end to end, not scaffolding.
 
 1. Build the v1 features in the chosen stack. Keep the structure as simple as the stack allows, and write to the code conventions from the first line ("Readable code" in Phase 5): clear code costs no more to write than unclear code, and far less than cleaning it up later.
+   For anything with a user interface, set up the **design tokens** (colour, type scale, spacing, radii, shadows, motion) and write `docs/DESIGN.md` from the template in Appendix J *before* building the first screen, then build every screen from them.
 2. Design for the development loop from day one:
    - **Deterministic by construction:** all randomness that shapes behaviour goes through one seedable function (for example `rand()`). Time and external inputs can be injected or faked in tests.
    - **Steppable:** the core loop or workflow can run without real time or real services (fixed steps, fake clock, recorded fixtures).
@@ -296,7 +307,7 @@ Record the chosen profile in the Decisions log and in `CLAUDE.md` ("Model & effo
 - **Workflow:** audit, iterate, batches, bench, A/B experiments, git flow for this profile, unattended runs (off unless the user opts in).
 - **Model and effort:** the routing table from Phase 13. The reasons and dates go in the Decisions log.
 - **Conventions:** commit authorship, header, the code conventions (style guide, formatter and linter, naming, test layout) and the comment level, platform and input conventions, "keep README in step", "all randomness through `rand()`".
-- **Read when:** an index of the docs, one line each, saying when to read which (for example "changing the core logic → `docs/<DOMAIN>.md`", "shipping → `docs/DEV_CYCLE.md`", "why a setting is what it is → the Decisions log").
+- **Read when:** an index of the docs, one line each, saying when to read which (for example "changing the core logic → `docs/<DOMAIN>.md`", "UI work → `docs/DESIGN.md`", "shipping → `docs/DEV_CYCLE.md`", "why a setting is what it is → the Decisions log").
 
 **Keep it an index.** Every line is paid for on every turn of every session, so:
 
@@ -392,7 +403,7 @@ Each reviewer reads `CLAUDE.md` first. **Every finding needs evidence**: a metri
 |---|---|---|
 | **domain-correctness reviewer** | Reviews changes to the core logic for correctness, edge cases, stability and the invariants. Measures rather than guesses. | Strong / medium |
 | **perf profiler** | Runs the benchmarks, reads the hot paths, proposes measured improvements tied to a budget. | Strong / medium |
-| **UX reviewer** (user-facing) | Screenshots and live use at several viewport sizes: discoverability, feedback, hierarchy, touch, keyboard, contrast, reduced motion, accessibility. | Standard / medium |
+| **UX reviewer** (user-facing) | Screenshots and live use at several viewport sizes: discoverability, feedback, hierarchy, touch, keyboard, contrast, reduced motion, accessibility. Checks the work against `docs/DESIGN.md`: values come from the tokens, every state is designed, and the generic defaults it lists are avoided unless the direction calls for them. | Standard / medium |
 | **product / experience designer** | Is it valuable and pleasant? First-minute experience, "aha" moments, missing capabilities, sharing. Small shippable ideas that serve the pillars. For business tools, "time to answer" and workflow fit. | Standard / medium |
 | **efficiency auditor** | Bytes, dependencies, network, dead code, memory growth, running cost, what ships in each artefact. | Standard / low |
 | **code-quality reviewer** | The whole codebase, not a diff: coupling, duplication, error handling, gaps in test coverage, and readability (the code conventions, names, file headers, test structure, comments at the chosen level, stale comments). Respects the stack decision. | Standard / medium |
@@ -639,7 +650,7 @@ Commit.
    - the A/B experiment convention
    - how to keep usage down
    - three worked examples using real batches from the backlog
-2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the skills, the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
+2. Make sure `CLAUDE.md`, `DEV_CYCLE.md`, `ARCHITECTURE.md`, the user guide, the domain-logic reference, the operations notes, the design guide, the skills, the agents, CI, the runbooks and `README.md` all agree. **Every workflow change updates all of them in the same commit or PR.**
 3. Tick every phase in `docs/PROJECT_PROGRESS.md`. Once the development loop is live, mark it and this spec as archived history.
 4. Give the user a brief summary of the dev loop, with its commands and the first batch to run.
 
@@ -650,6 +661,7 @@ Items marked (T) apply to the Team profile, (E) to Enterprise, and (T/E) to both
 - [ ] Problem analysis, project type, scale profile, usage profile, comment level, stack, non-functional requirements and pillars confirmed (in the Decisions log)
 - [ ] Repository with author identity, `.gitignore`, licence and header convention; remote, CI and deployment as agreed; branch protection and CODEOWNERS (T/E); environments as infrastructure-as-code (E)
 - [ ] A working v1, shown to the user
+- [ ] User interfaces: the visual direction confirmed; design tokens and `docs/DESIGN.md` in place, and the UX reviewer checks against them
 - [ ] Code conventions recorded in `CLAUDE.md` (style guide, formatter and linter where the stack allows, naming, test layout, comment level), and the code follows them
 - [ ] `docs/ARCHITECTURE.md` accurate; the system is deterministic, steppable and inspectable from tests; threat model (all profiles) and data classification (T/E)
 - [ ] `CLAUDE.md` with files, the ship routine, numeric targets, invariants, security and compliance, pillars, workflow, model and effort, conventions and a "Read when" index, within its size budget
@@ -706,7 +718,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 - `BACKLOG.md`: batches and items, triaged.
 
 ## Read when
-- Changing <the core logic> → `docs/<DOMAIN>.md` · How the code is laid out → `docs/ARCHITECTURE.md` · Shipping, batches, commands → `docs/DEV_CYCLE.md`
+- Changing <the core logic> → `docs/<DOMAIN>.md` · UI work → `docs/DESIGN.md` · How the code is laid out → `docs/ARCHITECTURE.md` · Shipping, batches, commands → `docs/DEV_CYCLE.md`
 - Deploying or rolling back → `docs/OPERATIONS.md` · A security-sensitive change → `docs/THREAT_MODEL.md` · Why a setting is what it is → the Decisions log in `docs/PROJECT_PROGRESS.md`
 
 ## Before every change ships
@@ -734,7 +746,7 @@ Rename the categories and agents to fit the project. For example, the reference 
 - Usage profile: <Lean / Balanced / Throughput>, chosen <date> because <reason>.
 - <Phase 13 routing table: one line per tier and effort, with the roles on it; the session's effort and compaction window; the change-review levels. Reasons and dates go in the Decisions log.>
 ### Documentation
-- Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
+- Every change that alters behaviour updates the doc that describes it in the same change: USER_GUIDE (users), <DOMAIN>.md (the rules), ARCHITECTURE (code), DESIGN (the look and feel, for user interfaces), OPERATIONS (deploy and rollback), THREAT_MODEL (entry points), README (the short version). The docs writer checks them all in /audit.
 ## Conventions
 - Header: `Copyright (c) <year> <Owner>. All rights reserved.` (or the licence line), then a line or two on what the file holds.
 - Code: <style guide>; <formatter and linter>, run by the after-edit hook. Names say what things are, with units. Tests: <layout>, names that state the behaviour, arrange/act/assert. Errors name what failed and the values.
@@ -815,7 +827,7 @@ You implement backlog items for <Project>. Read `CLAUDE.md` first.
 You implement and test. You never commit, push, merge or deploy.
 
 ## What to do
-1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules. Write to the code conventions and comment level in `CLAUDE.md`: clear names, the language's idioms, comments that say why, and doc comments at the chosen level. Update any comment your change makes wrong.
+1. Make the smallest reasonable change that delivers each item, following the project's conventions and security rules. Write to the code conventions and comment level in `CLAUDE.md`: clear names, the language's idioms, comments that say why, and doc comments at the chosen level. Update any comment your change makes wrong. For UI work, read `docs/DESIGN.md` first and use its tokens.
 2. Add or extend a test for new behaviour.
 3. Run the full tests once at the end. If something fails, fix it or report exactly what's blocking. Don't work around it. Don't run the full benchmark comparison: /iterate runs it right after you (the exception is one arm of an A/B experiment, which benchmarks itself once, near the end).
 4. Update README.md or the docs if behaviour or usage changed.
@@ -1155,3 +1167,69 @@ The phases describe the method in platform-neutral terms. This appendix binds ea
 | Personal memory | Preferences that aren't project rules | Auto memory, in `~/.claude/projects/<project path>/memory/` |
 
 **Other platforms.** `AGENTS.md` is a cross-tool convention for the project instructions file that many coding agents read; prefer it where the platform supports it. Add a column, or a table, for each platform once a project has been launched on it, with the date its binding was checked.
+
+---
+
+## Appendix J: `docs/DESIGN.md` template
+
+For anything with a user interface. Write it in Phase 4 from the visual direction agreed in Phase 2, before the first screen is built. Implementers read it before UI work, and the UX reviewer checks against it. If the organisation has a design system, this file points to it and records only the project's additions.
+
+```markdown
+# Design
+
+The look, feel and interaction rules for <Project>. Read before any UI work.
+
+## Direction
+- For: <who, where, on what device, with how much time>
+- Feels: <three words>
+- Like: <two or three references, and what to take from each>
+- Never looks like: <for example a generic SaaS landing page, a crypto dashboard>
+- Density: <compact and scannable / generous>, because <reason>
+- Serves the pillars: <from CLAUDE.md>
+
+## Tokens: the only source of values
+- They live in <file>: colour, type scale, spacing scale, radii, shadows, motion durations and easing.
+- No raw values in components. A new value becomes a token first, with a reason.
+- Before adding anything, reuse what the tokens and existing components already provide.
+
+## Colour
+- Colour has a job: state (success, warning, error, information), hierarchy, selection, or data. Filling space isn't a job.
+- A neutral base with real contrast, one accent used sparingly, and state colours that don't clash with the accent.
+- Text meets WCAG 2.2 AA contrast (4.5:1 for body text, 3:1 for large text and controls) in every theme. Nothing relies on colour alone.
+- A dark theme is designed, not inverted: dark greys rather than pure black, and softened accents.
+
+## Type
+- One or two families, chosen for this product with a reason, not the platform default by habit.
+- One type scale. Hierarchy comes from size and weight, not colour alone; headings and body text differ clearly.
+- Reading text runs about 45 to 75 characters a line. Numbers that line up use tabular figures.
+
+## Layout
+- Structure comes from alignment, spacing and dividing rules before boxes. A card is for something the user acts on as a unit.
+- The layout follows the content, not a template. Asymmetric layouts, split screens and type-led pages are all fair game.
+- It works at the smallest supported width without sideways scrolling. Touch targets are at least 24 by 24 px (WCAG 2.2 AA), and 44 by 44 px for primary controls.
+
+## States
+Every view designs its empty, loading, error, partial and overflowing states (long names, huge numbers, zero items, a thousand items).
+
+## Motion
+Motion explains a change: where something came from or went. It's short (about 100 to 300 ms), never makes the user wait, and follows the reduced-motion setting.
+
+## Copy
+Plain, specific words in the users' own language. Say what a control does ("Export as CSV"), not how it should feel. No filler, and no placeholder text in anything that ships.
+
+## Generic defaults to avoid
+These are the most statistically likely choices, the ones that make an interface look machine-made. Each is allowed only when the direction above calls for it, with the reason written here.
+- purple, violet or blue-to-purple gradients; neon glows on dark navy
+- the stock landing page: a centred hero, three icon cards, a call to action, repeat
+- every piece of content in its own rounded, shadowed card
+- emoji or stock icons as decoration, such as an icon beside every heading
+- glassmorphism, blurred blobs, gradient text and animated gradients for their own sake
+- one corner radius, one shadow and one grey applied to everything
+- everything centred
+- buzzword copy: "seamless", "revolutionise", "empower", "unlock", "supercharge", "next-level"
+- invented data that looks real in shipped screens: metrics, testimonials, customer logos
+
+## Checks
+- UI changes are checked by screenshot, at the sizes the project supports, against this file.
+- <Automated where the stack allows: contrast and accessibility checks in the tests; a lint rule against raw colour values outside the tokens file.>
+```

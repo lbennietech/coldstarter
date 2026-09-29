@@ -33,6 +33,7 @@ Coldstarter is a specification you give to [Claude Code](https://claude.com/clau
 3. **A development framework that keeps improving the project:**
    - readable, conventional code a person can debug, commented to a level you choose (agents-first, standard or human-maintained)
    - a short project instructions file that works as an index, so each session loads only what it needs
+   - for anything with a user interface, a visual direction and a design guide that steer it away from generic, machine-made defaults
    - tests and correctness invariants
    - benchmarks with a regression gate
    - read-only specialist reviewer agents, including a dedicated security reviewer
@@ -134,4 +135,4 @@ Coldstarter is licensed under [Creative Commons Attribution-NonCommercial 4.0](L
 
 ## Status
 
-Version 1.6.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
+Version 1.7.0 (2026-09-29). Previously named Launchframe. The version history is at the top of `COLDSTARTER.md`.
