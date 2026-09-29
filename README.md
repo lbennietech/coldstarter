@@ -28,7 +28,7 @@ Coldstarter packages the working answers into one document. Reviewers are read-o
 
 Coldstarter is a specification you give to [Claude Code](https://claude.com/claude-code). It takes an idea, a business problem, a question or a product concept and turns it into three things:
 
-1. **A confirmed problem and solution.** Claude interviews you, analyses the problem, and proposes a stack, a scale profile and design pillars, stopping for your decisions.
+1. **A confirmed problem and solution.** Claude interviews you, analyses the problem, and proposes a stack, design pillars, and the profiles that shape everything after: a scale profile, a usage profile (how much Claude usage the project should spend), a comment level (who will read the code), a visual direction for anything with a user interface, and a framework size. It stops for your decisions.
 2. **A working first version**, in a git repository with the CI/CD flow your scale needs.
 3. **A development framework that keeps improving the project:**
    - readable, conventional code a person can debug, commented to a level you choose (agents-first, standard or human-maintained)
@@ -83,7 +83,7 @@ Claude Code is the reference platform, but the method is written to be platform-
 
 Coldstarter sets up a team of agents (in Claude Code, in `.claude/agents/`), split into two kinds:
 
-- **Reviewers and auditors** are read-only — they never get Edit or Write tools, so they can only report findings, not change code. The core roster (every profile gets these) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
+- **Reviewers and auditors** are read-only — they never get Edit or Write tools, so they can only report findings, not change code. The core roster (every Standard or Full project gets these; a Light project gets one implementer and the security reviewer) covers domain correctness, performance, UX, product/experience, efficiency, code quality, security, and a "three personas" user tester (newcomer, power user, breaker). Scale or domain adds more: compliance, infra/SRE, data, accessibility, evaluation reviewers. Every finding has to cite evidence — a metric, a screenshot path or a `file:line` — or triage throws it away.
 - **Implementers** are the only agents that edit, and they never commit, push, merge or deploy themselves. There are three tiers: a **Light** implementer for effort-1 work outside the core logic, a strong-tier implementer (**Opus** in the reference build) for core-logic, performance or security items, and a **Deep** implementer (strong tier at high effort) for the project's hardest work — concurrency, numerical cores, cryptography, data migrations, architecture changes, A/B experiments.
 
 Every agent's model and effort are chosen for the project, not copied from a default, because agent work is the main cost once a project has an active backlog. Once the project type, architecture and dev cycle are known, Claude sorts the platform's models into **strong**, **standard** and **light** tiers, and gives each role a tier and an effort level from how hard its work is in this project, what a miss would cost, how often it runs, and the usage profile. Each choice comes with a reason, and you confirm the table. The reference build's routing is the starting point:
@@ -102,6 +102,14 @@ How much the project should optimise for usage is asked up front. Phase 1 sets a
 
 Usage is measured, not guessed: every `/audit` runs a small usage report that prices the project's Claude Code sessions and agent runs from their local transcripts, without spending model tokens, and turns what it finds into backlog items. In the reference build the first such review found that the main session's ever-growing context, agents re-caching after idle gaps, and high-level code reviews cost far more than the choice of model. The defaults that came out of it (a compaction window, a one-hour cache for implementers, named review levels, no duplicated test runs) are built in.
 
+## Code, instructions and design that hold up
+
+Three rules keep a project easy to work on, for people and for agents:
+
+- **Readable code.** From the first line of v1, the code follows its language's standard style and idioms (with a formatter and linter where the stack allows), uses names that say what things are, puts a header on every file, writes tests that read as specifications, and fails with errors that say what went wrong. How much it's commented is a choice made at intake, by who will read and debug it: **agents-first** (only where the reason isn't obvious), **standard** (plus doc comments on everything public), or **human-maintained** (plus comments on every non-obvious block and a "how to debug this" note per module). Comments explain why, not what.
+- **Instructions as an index.** The project instructions file (`CLAUDE.md` in Claude Code) is read on every turn of every session, so it stays short: rules and numbers, with a "Read when" list pointing to the docs, and the reasons behind decisions kept in the Decisions log. In the reference build it had grown to 18 KB in just 101 lines, most of it history that no task needed.
+- **Considered design.** Anything with a user interface starts from a visual direction (who it's for, how it should feel, what it must never look like) and a design guide with tokens, written before the first screen. The guide lists the statistically likely defaults that make interfaces look machine-made, such as purple gradients, the three-card landing page and buzzword copy, and allows each only when the direction calls for it.
+
 ## The development cycle: batching for speed
 
 For Standard and Full projects, once the first version ships, work doesn't flow item-by-item — it flows through an evidence-based backlog and a batching engine, because reviewing and testing forty single-item changes costs far more than reviewing and testing eight batches of five:
@@ -117,7 +125,7 @@ The payoff is measured, not assumed: in the reference build, 14 small `ui` and `
 
 | File | What it is |
 |---|---|
-| `COLDSTARTER.md` | The specification itself: 17 launch phases, scale profiles, project-type adaptations, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
+| `COLDSTARTER.md` | The specification itself: 17 launch phases, scale and usage profiles, framework sizing, project-type adaptations (including data views and dashboards), a design-guide template, platform bindings, agent templates (including the full security reviewer), triage and batching rules, hook templates, and lessons from the reference build. |
 | `LICENSE` | CC BY-NC 4.0: the licence summary and full legal code. |
 | `AGENTS.md` | Instructions for any AI agent maintaining the spec itself, including the rule that it stays platform-neutral. |
 | `CLAUDE.md` | Imports `AGENTS.md`, so Claude Code reads the same instructions. |
@@ -133,6 +141,7 @@ Along the way, the method gained:
 - batched iterations (14 fixes shipped in about 35 minutes, against an estimated 3–4 hours one at a time)
 - time-tracked reporting
 - a dedicated security reviewer
+- a usage review that retuned it for a usage-limited plan, which became the usage profiles and the instructions-as-an-index rule
 
 It was then generalised so it can launch other kinds of project at other scales.
 
